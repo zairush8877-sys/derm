@@ -1,0 +1,18 @@
+{
+  "name": "derm — AI-анализ кожи",
+  "short_name": "derm",
+  "description": "Дерматологически обоснованный AI-анализ кожи и персональный уход.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f6f7fb",
+  "theme_color": "#2563eb",
+  "lang": "ru",
+  "icons": [
+    {
+      "src": "/static/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

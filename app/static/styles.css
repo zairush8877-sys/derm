@@ -1,0 +1,116 @@
+:root {
+  --brand: #2563eb;
+  --brand-dark: #1e40af;
+  --bg: #f6f7fb;
+  --card: #ffffff;
+  --text: #1f2430;
+  --muted: #6e6e78;
+  --green: #16a34a;
+  --orange: #d97706;
+  --red: #dc2626;
+  --radius: 14px;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+}
+
+header.top {
+  background: linear-gradient(135deg, var(--brand), var(--brand-dark));
+  color: #fff;
+  padding: 22px 20px;
+}
+
+header.top .wrap { max-width: 880px; margin: 0 auto; }
+header.top h1 { margin: 0 0 4px; font-size: 24px; }
+header.top p { margin: 0; opacity: 0.9; font-size: 14px; }
+
+nav.tabs { max-width: 880px; margin: 14px auto 0; display: flex; gap: 8px; }
+nav.tabs a {
+  text-decoration: none;
+  color: #fff;
+  background: rgba(255,255,255,0.15);
+  padding: 7px 14px;
+  border-radius: 999px;
+  font-size: 13px;
+}
+nav.tabs a.active { background: #fff; color: var(--brand-dark); font-weight: 600; }
+
+main { max-width: 880px; margin: 0 auto; padding: 22px 20px 60px; }
+
+.card {
+  background: var(--card);
+  border-radius: var(--radius);
+  padding: 20px;
+  box-shadow: 0 2px 10px rgba(20,30,60,0.06);
+  margin-bottom: 18px;
+}
+
+.card h2 { margin: 0 0 12px; font-size: 18px; }
+
+.drop {
+  border: 2px dashed #c8cede;
+  border-radius: var(--radius);
+  padding: 34px 16px;
+  text-align: center;
+  color: var(--muted);
+  cursor: pointer;
+  transition: border-color .15s, background .15s;
+}
+.drop.drag { border-color: var(--brand); background: #eef3ff; }
+.drop strong { color: var(--brand); }
+
+.preview { max-width: 180px; border-radius: 10px; margin-top: 12px; }
+
+.quiz { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px; }
+.quiz label { font-size: 13px; color: var(--muted); display: block; margin-bottom: 4px; }
+.quiz input, .quiz select {
+  width: 100%; padding: 8px 10px; border: 1px solid #d7dbe6; border-radius: 8px; font-size: 14px;
+}
+.quiz .full { grid-column: 1 / -1; }
+
+button.primary {
+  background: var(--brand); color: #fff; border: none; border-radius: 10px;
+  padding: 12px 18px; font-size: 15px; font-weight: 600; cursor: pointer; margin-top: 14px;
+}
+button.primary:disabled { opacity: .5; cursor: default; }
+button.ghost {
+  background: #eef1f8; color: var(--brand-dark); border: none; border-radius: 10px;
+  padding: 11px 16px; font-size: 14px; font-weight: 600; cursor: pointer; margin: 6px 8px 0 0;
+}
+
+.skin-type { display: inline-block; background: #eef3ff; color: var(--brand-dark);
+  padding: 5px 12px; border-radius: 999px; font-weight: 600; font-size: 14px; margin-bottom: 10px; }
+.summary { color: var(--muted); line-height: 1.5; }
+
+.concern { margin: 10px 0; }
+.concern .row { display: flex; justify-content: space-between; font-size: 14px; margin-bottom: 4px; }
+.concern .score { font-weight: 600; }
+.bar { height: 8px; border-radius: 999px; background: #e9ecf4; overflow: hidden; }
+.bar > span { display: block; height: 100%; border-radius: 999px; }
+
+.steps { list-style: none; padding: 0; margin: 6px 0; }
+.steps li { padding: 8px 0; border-bottom: 1px solid #eef0f6; }
+.steps .cat { color: var(--brand); font-size: 12px; font-weight: 600; }
+.steps .why { color: var(--muted); font-size: 13px; }
+
+.disclaimer { font-size: 12px; color: var(--muted); border-top: 1px solid #eef0f6;
+  margin-top: 16px; padding-top: 12px; }
+
+.hidden { display: none; }
+.spinner { text-align: center; color: var(--muted); padding: 20px; }
+
+.trend { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 1px solid #eef0f6; }
+.trend .name { flex: 1; }
+.pill { font-size: 12px; padding: 3px 9px; border-radius: 999px; font-weight: 600; }
+.pill.up { background: #dcfce7; color: var(--green); }     /* улучшение */
+.pill.down { background: #fee2e2; color: var(--red); }     /* ухудшение */
+.pill.flat { background: #eef1f8; color: var(--muted); }
+.pill.new { background: #e0e7ff; color: var(--brand-dark); }
+
+.mode-badge { font-size: 12px; opacity: .85; margin-top: 6px; }
