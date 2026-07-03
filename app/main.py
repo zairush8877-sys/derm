@@ -217,6 +217,21 @@ def auth_page() -> FileResponse:
     return FileResponse(_STATIC / "auth.html")
 
 
+@app.get("/legal", include_in_schema=False)
+def legal_page() -> FileResponse:
+    return FileResponse(_STATIC / "legal.html")
+
+
+@app.get("/robots.txt", include_in_schema=False)
+def robots() -> FileResponse:
+    return FileResponse(_STATIC / "robots.txt", media_type="text/plain")
+
+
+@app.get("/sitemap.xml", include_in_schema=False)
+def sitemap() -> FileResponse:
+    return FileResponse(_STATIC / "sitemap.xml", media_type="application/xml")
+
+
 @app.get("/tracker", include_in_schema=False)
 def tracker_page() -> FileResponse:
     return FileResponse(_STATIC / "tracker.html")

@@ -121,3 +121,67 @@ def get_user(user_id: str) -> dict | None:
             "SELECT id, phone, name FROM users WHERE id = ?", (user_id,)
         ).fetchone()
     return dict(row) if row else None
+
+
+# --- Вход по SMS-коду (OTP) ---
+
+OTP_TTL_SECONDS = 300  # код живёт 5 минут
+
+
+def request_otp(phone: str) -> dict:
+    """Сгенерировать код входа. В демо-режиме код возвращается в ответе
+    (SMS не отправляется и не стоит денег); с SMS-провайдером — отправляется."""
+    import secrets
+    from datetime import timedelta
+
+    phone = _normalize_phone(phone)
+    code = f"{secrets.randbelow(10000):04d}"
+    expires = (datetime.now(timezone.utc) + timedelta(seconds=OTP_TTL_SECONDS)).isoformat()
+    with store.connect() as conn:
+        conn.execute(
+            "INSERT INTO otp_codes (phone, code, expires) VALUES (?, ?, ?) "
+            "ON CONFLICT(phone) DO UPDATE SET code=excluded.code, expires=excluded.expires",
+            (phone, code, expires),
+        )
+
+    sms_api_key = os.getenv("SMS_API_KEY", "").strip()
+    if sms_api_key:
+        # TODO: подключить SMS-провайдера (SMS.ru / SMSC): POST с phone и текстом
+        # f"Aura: код входа {code}". До подключения работает демо-режим ниже.
+        pass
+
+    result = {"sent": True, "phone": phone}
+    if not sms_api_key:
+        result["demo_code"] = code  # демо: показываем код прямо в интерфейсе
+    return result
+
+
+def verify_otp(phone: str, code: str) -> dict:
+    """Проверить код. Создаёт аккаунт при первом входе. Возвращает {user, token}."""
+    phone = _normalize_phone(phone)
+    with store.connect() as conn:
+        row = conn.execute(
+            "SELECT code, expires FROM otp_codes WHERE phone = ?", (phone,)
+        ).fetchone()
+        if row is None or not hmac.compare_digest(
+            row["code"].encode(), code.strip().encode()
+        ):
+            raise AuthError("Неверный код")
+        if datetime.fromisoformat(row["expires"]) < datetime.now(timezone.utc):
+            raise AuthError("Код истёк — запросите новый")
+        conn.execute("DELETE FROM otp_codes WHERE phone = ?", (phone,))
+
+        user = conn.execute(
+            "SELECT id, phone, name FROM users WHERE phone = ?", (phone,)
+        ).fetchone()
+        if user is None:
+            user_id = "u-" + uuid.uuid4().hex[:16]
+            conn.execute(
+                "INSERT INTO users (id, phone, name, password_hash, created_at) VALUES (?, ?, '', ?, ?)",
+                (user_id, phone, hash_password(uuid.uuid4().hex),
+                 datetime.now(timezone.utc).isoformat()),
+            )
+            user_dict = {"id": user_id, "phone": phone, "name": ""}
+        else:
+            user_dict = dict(user)
+    return {"user": user_dict, "token": create_token(user_dict["id"])}

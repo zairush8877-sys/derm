@@ -97,6 +97,13 @@ CREATE TABLE IF NOT EXISTS loyalty (
     lifetime_spent_rub INTEGER NOT NULL DEFAULT 0
 );
 
+-- Одноразовые коды входа по SMS.
+CREATE TABLE IF NOT EXISTS otp_codes (
+    phone TEXT PRIMARY KEY,
+    code TEXT NOT NULL,
+    expires TEXT NOT NULL
+);
+
 -- Пользователи (аккаунты сайта/приложения).
 CREATE TABLE IF NOT EXISTS users (
     id TEXT PRIMARY KEY,

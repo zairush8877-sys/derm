@@ -9,33 +9,54 @@ from app.config import get_settings
 from app.db import store
 from app.shop import loyalty, service
 
-FREE_DELIVERY_FROM_RUB = 5000
-DELIVERY_FEE_RUB = 390
+# Способы доставки. Тарифы демо; точка под API СДЭК/Почты — рассчитывать
+# fee/eta по адресу через их API вместо фиксированных значений.
+DELIVERY_METHODS: dict[str, dict] = {
+    "courier": {"title": "Курьер до двери", "fee_rub": 390, "free_from_rub": 5000, "eta_days": 2},
+    "pvz": {"title": "Пункт выдачи (ПВЗ)", "fee_rub": 250, "free_from_rub": 3500, "eta_days": 3},
+    "post": {"title": "Почта России", "fee_rub": 350, "free_from_rub": 5000, "eta_days": 6},
+}
+DEFAULT_METHOD = "courier"
+
+# Обратная совместимость со старым квотированием.
+FREE_DELIVERY_FROM_RUB = DELIVERY_METHODS[DEFAULT_METHOD]["free_from_rub"]
+DELIVERY_FEE_RUB = DELIVERY_METHODS[DEFAULT_METHOD]["fee_rub"]
 
 
 def _now() -> str:
     return datetime.now(timezone.utc).isoformat()
 
 
-def delivery_quote(subtotal_rub: int) -> dict:
-    fee = 0 if subtotal_rub >= FREE_DELIVERY_FROM_RUB else DELIVERY_FEE_RUB
-    return {"fee_rub": fee, "free_from_rub": FREE_DELIVERY_FROM_RUB}
+def delivery_quote(subtotal_rub: int, method: str = DEFAULT_METHOD) -> dict:
+    m = DELIVERY_METHODS.get(method, DELIVERY_METHODS[DEFAULT_METHOD])
+    fee = 0 if subtotal_rub >= m["free_from_rub"] else m["fee_rub"]
+    return {
+        "method": method if method in DELIVERY_METHODS else DEFAULT_METHOD,
+        "title": m["title"], "fee_rub": fee,
+        "free_from_rub": m["free_from_rub"], "eta_days": m["eta_days"],
+    }
 
 
-def checkout(user_id: str, address: str, name: str = "", phone: str = "") -> dict:
+def delivery_options(subtotal_rub: int) -> list[dict]:
+    return [delivery_quote(subtotal_rub, key) for key in DELIVERY_METHODS]
+
+
+def checkout(user_id: str, address: str, name: str = "", phone: str = "",
+             method: str = DEFAULT_METHOD) -> dict:
     """Оформить заказ из корзины: создать заказ, начислить баллы, очистить корзину."""
     cart = service.get_cart(user_id)
     if not cart["items"]:
         raise ValueError("Корзина пуста")
 
     subtotal = cart["total_rub"]
-    delivery = delivery_quote(subtotal)
+    delivery = delivery_quote(subtotal, method)
     total = subtotal + delivery["fee_rub"]
 
     order_id = uuid.uuid4().hex[:12]
     delivery_info = {
         "name": name, "phone": phone, "address": address,
-        "fee_rub": delivery["fee_rub"], "eta_days": 2,
+        "method": delivery["method"], "method_title": delivery["title"],
+        "fee_rub": delivery["fee_rub"], "eta_days": delivery["eta_days"],
     }
     points = loyalty.accrue(user_id, total)
 

@@ -4,7 +4,7 @@
 const el = (id) => document.getElementById(id);
 const USER = "demo-user";
 let activeCat = null;
-let query = "";
+let query = new URLSearchParams(location.search).get("q") || "";
 
 const catIcon = {
   "уходовая косметика": "🧴", "декоративная косметика": "💄", "гаджеты": "📱",
@@ -35,17 +35,33 @@ function renderCats(categories) {
     b.addEventListener("click", () => { activeCat = b.dataset.cat || null; loadProducts(); }));
 }
 
+function ratingFor(p) {
+  // Детерминированный демо-рейтинг по id (пока нет реальных отзывов).
+  let h = 0;
+  for (const ch of p.id) h = (h * 31 + ch.charCodeAt(0)) % 997;
+  const rating = 4.5 + (h % 5) / 10;           // 4.5–4.9
+  const reviews = 3 + (h % 40);                 // 3–42
+  return { rating, reviews };
+}
+
 function renderGrid(products) {
   if (!products.length) { el("grid").innerHTML = `<p class="summary">Ничего не найдено.</p>`; return; }
-  el("grid").innerHTML = products.map((p) => `
+  el("grid").innerHTML = products.map((p) => {
+    const { rating, reviews } = ratingFor(p);
+    const stars = "★".repeat(Math.round(rating)) + "☆".repeat(5 - Math.round(rating));
+    const freeShip = p.price_rub >= 3500 ? `<span class="badge-free">Бесплатная доставка</span>` : "";
+    return `
     <div class="pcard">
-      <span class="cat">${catIcon[p.category] || ""} ${p.category}${p.is_service ? " · услуга" : ""}</span>
-      <h3 style="margin:6px 0">${p.name}</h3>
-      <p class="summary" style="flex:1;margin:0 0 8px;font-size:13px">${p.brand} · ${p.description}</p>
+      <div class="ptile">${freeShip}${catIcon[p.category] || "🌿"}
+        <button class="addbtn" data-add="${p.id}" title="${p.is_service ? "Записаться" : "В корзину"}">+</button>
+      </div>
+      <span class="cat">${p.brand}</span>
+      <h3>${p.name}</h3>
       <div class="price">${p.price_rub.toLocaleString("ru-RU")} ₽</div>
-      <button class="ghost" data-add="${p.id}">${p.is_service ? "Записаться" : "В корзину"}</button>
-    </div>`).join("");
-  el("grid").querySelectorAll("button[data-add]").forEach((b) =>
+      <div class="stars">${stars}<span class="cnt">(${reviews})</span></div>
+    </div>`;
+  }).join("");
+  el("grid").querySelectorAll("[data-add]").forEach((b) =>
     b.addEventListener("click", () => addToCart(b.dataset.add)));
 }
 
@@ -79,11 +95,20 @@ function renderCart(cart) {
       </div>`).join("") +
     `<p style="text-align:right;font-weight:700;font-size:18px;margin-top:10px">
        Итого: ${cart.total_rub.toLocaleString("ru-RU")} ₽</p>
-     <p class="summary" style="text-align:right;font-size:12px">Бесплатная доставка от 5 000 ₽</p>
+     <p class="summary" style="text-align:right;font-size:12px">Бесплатная доставка от 3 500 ₽ (ПВЗ)</p>
      <button class="primary" id="openCheckout" style="width:100%">Оформить заказ</button>`;
   el("cart").querySelectorAll("button[data-rm]").forEach((b) =>
     b.addEventListener("click", () => removeFromCart(b.dataset.rm)));
-  el("openCheckout").addEventListener("click", () => el("checkoutModal").classList.remove("hidden"));
+  el("openCheckout").addEventListener("click", openCheckoutModal);
+}
+
+async function openCheckoutModal() {
+  el("checkoutModal").classList.remove("hidden");
+  const res = await fetch("/api/shop/delivery?user_id=" + USER);
+  const data = await res.json();
+  el("co-method").innerHTML = data.options.map((o) =>
+    `<option value="${o.method}">${o.title} — ${o.fee_rub ? o.fee_rub + " ₽" : "бесплатно"} · ~${o.eta_days} дн.</option>`
+  ).join("");
 }
 
 async function submitCheckout() {
@@ -92,6 +117,7 @@ async function submitCheckout() {
   const fd = new FormData();
   fd.append("user_id", USER); fd.append("address", addr);
   fd.append("name", el("co-name").value); fd.append("phone", el("co-phone").value);
+  fd.append("delivery_method", el("co-method").value);
   const res = await fetch("/api/shop/checkout", { method: "POST", body: fd });
   if (!res.ok) { alert("Не удалось оформить заказ"); return; }
   const o = await res.json();
@@ -119,6 +145,7 @@ async function loadOrders() {
 }
 
 let searchTimer = null;
+el("q").value = query;
 el("q").addEventListener("input", (e) => {
   clearTimeout(searchTimer);
   query = e.target.value;

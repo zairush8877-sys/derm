@@ -8,10 +8,13 @@
   <link rel="stylesheet" href="/static/styles.css" />
   <link rel="manifest" href="/static/manifest.webmanifest" />
   <link rel="icon" href="/static/icon.svg" type="image/svg+xml" />
-  <meta name="theme-color" content="#1f6f5c" />
+  <meta name="theme-color" content="#101010" />
+  <meta property="og:title" content="Aura — premium wellness пространство" />
+  <meta property="og:description" content="AI-анализ кожи, трекер питания, персональный уход и магазин wellness-товаров." />
+  <meta property="og:type" content="website" />
   <style>
-    .hero { text-align: center; padding: 64px 20px 56px; }
-    .hero h1 { font-size: 52px; margin: 0 0 14px; letter-spacing: 1px; }
+    .hero { text-align: center; padding: 44px 20px 46px; }
+    .hero h1 { font-size: 46px; margin: 0 0 14px; letter-spacing: -1px; font-weight: 800; }
     .hero p.lead { font-size: 19px; max-width: 560px; margin: 0 auto 28px; }
     .hero .cta { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
     .hero .cta a { text-decoration: none; }
@@ -21,13 +24,15 @@
     .fcard a { color: var(--brand); font-weight: 600; text-decoration: none; font-size: 14px; }
     .price-line { display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid var(--line); }
     footer { text-align: center; color: var(--muted); font-size: 12px; padding: 30px 20px 50px; line-height: 1.6; }
+    @media (max-width: 640px) {
+      .hero h1 { font-size: 30px; }
+      .hero p.lead { font-size: 16px; }
+    }
   </style>
 </head>
 <body>
   <header class="top">
     <div class="wrap">
-      <h1>Aura</h1>
-      <p>Premium wellness-пространство нового поколения.</p>
       <nav class="tabs">
         <a href="/" class="active">Главная</a>
         <a href="/shop">Магазин</a>
@@ -50,7 +55,12 @@
         <a href="/shop"><button class="ghost" style="margin:0">🛍 Перейти в магазин</button></a>
         <button class="ghost hidden" id="installBtn" style="margin:0">📲 Установить приложение</button>
       </div>
-      <p class="mode-badge" style="margin-top:14px"><a href="/auth" style="color:var(--brand)" id="authLink">Войти или создать аккаунт →</a></p>
+      <p class="mode-badge" style="margin-top:14px"><a href="/auth" style="color:var(--ink);font-weight:600" id="authLink">Войти или создать аккаунт →</a></p>
+    </div>
+
+    <div class="card search-row" style="padding:14px 16px">
+      <input type="search" id="homeSearch" placeholder="Поиск по товарам: протеин, витамин D, матча…" />
+      <a class="ai-pill" href="/assistant">✦ Спросить Aura</a>
     </div>
 
     <div class="pgrid features">
@@ -111,7 +121,7 @@
   <footer>
     Aura Wellness Space · Косметический анализ кожи и ориентировочная оценка питания —
     не медицинский диагноз и не заменяют консультацию врача.<br/>
-    <a href="/docs" style="color:var(--muted)">B2B API для брендов</a>
+    <a href="/legal" style="color:var(--muted)">Оферта и политика конфиденциальности</a> · <a href="/docs" style="color:var(--muted)">B2B API для брендов</a>
   </footer>
 
   <script src="/static/auth-helper.js"></script>
@@ -128,6 +138,10 @@
       deferredPrompt.prompt();
       deferredPrompt = null;
       document.getElementById("installBtn").classList.add("hidden");
+    });
+    document.getElementById("homeSearch").addEventListener("keydown", (e) => {
+      if (e.key === "Enter" && e.target.value.trim())
+        window.location = "/shop?q=" + encodeURIComponent(e.target.value.trim());
     });
     if ("serviceWorker" in navigator) {
       window.addEventListener("load", () => navigator.serviceWorker.register("/static/sw.js"));

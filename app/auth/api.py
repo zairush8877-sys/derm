@@ -30,6 +30,22 @@ def login(phone: str = Form(...), password: str = Form(...)) -> dict:
         raise HTTPException(status_code=401, detail=str(exc))
 
 
+@router.post("/otp/request")
+def otp_request(phone: str = Form(...)) -> dict:
+    try:
+        return service.request_otp(phone)
+    except service.AuthError as exc:
+        raise HTTPException(status_code=400, detail=str(exc))
+
+
+@router.post("/otp/verify")
+def otp_verify(phone: str = Form(...), code: str = Form(...)) -> dict:
+    try:
+        return service.verify_otp(phone, code)
+    except service.AuthError as exc:
+        raise HTTPException(status_code=401, detail=str(exc))
+
+
 @router.get("/me")
 def me(auth_id: str | None = Depends(token_user_id)) -> dict:
     if auth_id is None:

@@ -6,7 +6,7 @@
   <title>Aura — вход</title>
   <link rel="stylesheet" href="/static/styles.css" />
   <link rel="icon" href="/static/icon.svg" type="image/svg+xml" />
-  <meta name="theme-color" content="#1f6f5c" />
+  <meta name="theme-color" content="#101010" />
 </head>
 <body>
   <header class="top">
@@ -23,7 +23,7 @@
     </div>
   </header>
 
-  <main style="max-width:460px">
+  <main style="max-width:480px">
     <div class="card" id="profileCard" style="display:none">
       <h2>Вы вошли</h2>
       <p class="summary" id="profileInfo"></p>
@@ -32,46 +32,100 @@
     </div>
 
     <div class="card" id="formCard">
-      <div style="display:flex;gap:8px;margin-bottom:14px">
+      <div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap">
         <button class="ghost" id="tabLogin" style="flex:1;margin:0">Вход</button>
         <button class="ghost" id="tabRegister" style="flex:1;margin:0">Регистрация</button>
+        <button class="ghost" id="tabOtp" style="flex:1;margin:0">Код из SMS</button>
       </div>
+
       <div class="quiz" style="grid-template-columns:1fr">
         <div><label>Телефон</label><input id="phone" placeholder="+7 900 000-00-00" autocomplete="tel" /></div>
         <div id="nameRow" class="hidden"><label>Имя</label><input id="name" placeholder="Как к вам обращаться" /></div>
-        <div><label>Пароль</label><input id="password" type="password" placeholder="минимум 6 символов" /></div>
+        <div id="passRow"><label>Пароль</label><input id="password" type="password" placeholder="минимум 6 символов" /></div>
+        <div id="codeRow" class="hidden"><label>Код из SMS</label><input id="code" inputmode="numeric" placeholder="4 цифры" /></div>
       </div>
+
+      <p id="demoCode" class="summary hidden" style="background:var(--soft);border-radius:12px;padding:10px 14px;margin:12px 0 0"></p>
+
+      <label id="consentRow" class="hidden" style="display:flex;gap:8px;align-items:flex-start;margin-top:14px;font-size:13px;color:var(--muted)">
+        <input type="checkbox" id="consent" style="margin-top:2px" />
+        <span>Соглашаюсь с <a href="/legal#offer" target="_blank" style="color:var(--ink)">офертой</a> и
+          <a href="/legal#privacy" target="_blank" style="color:var(--ink)">политикой конфиденциальности</a>,
+          даю <a href="/legal#consent" target="_blank" style="color:var(--ink)">согласие</a> на обработку персональных данных</span>
+      </label>
+
       <button class="primary" id="submit" style="width:100%">Войти</button>
       <p class="disclaimer" id="error" style="color:var(--red);border:none"></p>
     </div>
   </main>
 
+  <script src="/static/auth-helper.js"></script>
   <script>
     const el = (id) => document.getElementById(id);
-    let mode = "login";
+    let mode = "login";     // login | register | otp
+    let otpSent = false;
+
+    function paintTabs() {
+      for (const [id, m] of [["tabLogin","login"],["tabRegister","register"],["tabOtp","otp"]]) {
+        el(id).style.background = mode === m ? "var(--ink)" : "";
+        el(id).style.color = mode === m ? "#fff" : "";
+      }
+    }
 
     function setMode(m) {
-      mode = m;
-      el("nameRow").classList.toggle("hidden", m === "login");
-      el("submit").textContent = m === "login" ? "Войти" : "Создать аккаунт";
-      el("tabLogin").style.background = m === "login" ? "var(--brand)" : "";
-      el("tabLogin").style.color = m === "login" ? "#fff" : "";
-      el("tabRegister").style.background = m === "register" ? "var(--brand)" : "";
-      el("tabRegister").style.color = m === "register" ? "#fff" : "";
+      mode = m; otpSent = false;
+      el("nameRow").classList.toggle("hidden", m !== "register");
+      el("passRow").classList.toggle("hidden", m === "otp");
+      el("codeRow").classList.add("hidden");
+      el("demoCode").classList.add("hidden");
+      el("consentRow").classList.toggle("hidden", m === "login");
+      el("submit").textContent = m === "login" ? "Войти" : m === "register" ? "Создать аккаунт" : "Получить код";
+      el("error").textContent = "";
+      paintTabs();
+    }
+
+    function finish(data) {
+      localStorage.setItem("aura_token", data.token);
+      localStorage.setItem("aura_name", data.user.name || data.user.phone);
+      window.location = "/";
     }
 
     async function submit() {
       el("error").textContent = "";
+      if (mode !== "login" && !el("consent").checked) {
+        el("error").textContent = "Отметьте согласие с документами"; return;
+      }
       const fd = new FormData();
       fd.append("phone", el("phone").value);
+
+      if (mode === "otp") {
+        if (!otpSent) {
+          const res = await fetch("/api/auth/otp/request", { method: "POST", body: fd });
+          const data = await res.json();
+          if (!res.ok) { el("error").textContent = data.detail || "Ошибка"; return; }
+          otpSent = true;
+          el("codeRow").classList.remove("hidden");
+          el("submit").textContent = "Войти по коду";
+          if (data.demo_code) {
+            el("demoCode").textContent = "Демо-режим (SMS ещё не подключены): ваш код — " + data.demo_code;
+            el("demoCode").classList.remove("hidden");
+          }
+          return;
+        }
+        fd.append("code", el("code").value);
+        const res = await fetch("/api/auth/otp/verify", { method: "POST", body: fd });
+        const data = await res.json();
+        if (!res.ok) { el("error").textContent = data.detail || "Неверный код"; return; }
+        finish(data);
+        return;
+      }
+
       fd.append("password", el("password").value);
       if (mode === "register") fd.append("name", el("name").value);
       const res = await fetch("/api/auth/" + mode, { method: "POST", body: fd });
       const data = await res.json();
       if (!res.ok) { el("error").textContent = data.detail || "Ошибка"; return; }
-      localStorage.setItem("aura_token", data.token);
-      localStorage.setItem("aura_name", data.user.name || data.user.phone);
-      window.location = "/";
+      finish(data);
     }
 
     function showProfile() {
@@ -89,6 +143,7 @@
 
     el("tabLogin").addEventListener("click", () => setMode("login"));
     el("tabRegister").addEventListener("click", () => setMode("register"));
+    el("tabOtp").addEventListener("click", () => setMode("otp"));
     el("submit").addEventListener("click", submit);
     el("logout").addEventListener("click", () => {
       localStorage.removeItem("aura_token");

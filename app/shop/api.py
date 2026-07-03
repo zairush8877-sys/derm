@@ -89,7 +89,7 @@ def cart_clear(user_id: str = Form("demo-user"), auth_id: str | None = Depends(t
 @router.get("/delivery")
 def delivery(user_id: str = "demo-user", auth_id: str | None = Depends(token_user_id)) -> JSONResponse:
     cart = service.get_cart(auth_id or user_id)
-    return JSONResponse(orders.delivery_quote(cart["total_rub"]))
+    return JSONResponse({"options": orders.delivery_options(cart["total_rub"])})
 
 
 @router.post("/checkout")
@@ -98,10 +98,12 @@ def checkout(
     address: str = Form(...),
     name: str = Form(""),
     phone: str = Form(""),
+    delivery_method: str = Form("courier"),
     auth_id: str | None = Depends(token_user_id),
 ) -> JSONResponse:
     try:
-        result = orders.checkout(auth_id or user_id, address=address, name=name, phone=phone)
+        result = orders.checkout(auth_id or user_id, address=address, name=name,
+                                 phone=phone, method=delivery_method)
     except ValueError as exc:
         raise HTTPException(status_code=400, detail=str(exc))
     return JSONResponse(result)
