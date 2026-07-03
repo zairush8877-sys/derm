@@ -12,13 +12,15 @@
 <body>
   <header class="top">
     <div class="wrap">
-      <h1>Магазин</h1>
-      <p>Уходовая косметика, гаджеты и спортпит. Цены в рублях.</p>
+      <h1>Aura — магазин</h1>
+      <p>Косметика, БАДы, спортпит, biohacking, healthy food и диагностика. Цены в рублях.</p>
       <nav class="tabs">
+        <a href="/shop" class="active">Магазин</a>
         <a href="/">Кожа</a>
         <a href="/food">Еда</a>
+        <a href="/assistant">Ассистент</a>
         <a href="/tracker">Трекер</a>
-        <a href="/shop" class="active">Магазин</a>
+        <a href="/subscription">Подписка</a>
         <a href="/docs">B2B API</a>
       </nav>
     </div>
@@ -26,16 +28,38 @@
 
   <main>
     <div class="card">
+      <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:12px">
+        <input type="search" id="q" placeholder="Поиск: протеин, витамин D, матча…"
+               style="flex:1;min-width:200px;padding:11px 14px;border:1px solid var(--line);border-radius:10px" />
+        <span class="badge" id="loyalty">Лояльность…</span>
+      </div>
       <div id="cats"></div>
     </div>
 
-    <div id="grid"></div>
+    <div class="pgrid" id="grid"></div>
 
     <div class="card" id="cartCard">
       <h2>Корзина 🛒</h2>
       <div id="cart"></div>
     </div>
+
+    <div class="card">
+      <h2>История заказов</h2>
+      <div id="orders"></div>
+    </div>
   </main>
+
+  <!-- Модалка оформления -->
+  <div id="checkoutModal" class="card hidden" style="position:fixed;inset:auto 20px 20px;max-width:420px;z-index:10">
+    <h2>Оформление заказа</h2>
+    <div class="quiz">
+      <div class="full"><label>Имя</label><input id="co-name" /></div>
+      <div class="full"><label>Телефон</label><input id="co-phone" /></div>
+      <div class="full"><label>Адрес доставки</label><input id="co-address" placeholder="Город, улица, дом" /></div>
+    </div>
+    <button class="primary" id="co-submit">Оплатить и оформить</button>
+    <button class="ghost" id="co-cancel">Отмена</button>
+  </div>
 
   <script src="/static/shop.js"></script>
 </body>

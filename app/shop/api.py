@@ -5,27 +5,38 @@ from __future__ import annotations
 from fastapi import APIRouter, Form, HTTPException
 from fastapi.responses import JSONResponse
 
-from app.shop import catalog, service
+from app.shop import catalog, loyalty, orders, service
 from app.shop.catalog import Category
 
 router = APIRouter(prefix="/api/shop", tags=["Магазин"])
 
 
+def _parse_category(category: str | None) -> Category | None:
+    if not category:
+        return None
+    try:
+        return Category(category)
+    except ValueError:
+        raise HTTPException(status_code=400, detail="Неизвестная категория")
+
+
 @router.get("/products")
-def products(category: str | None = None) -> JSONResponse:
-    cat = None
-    if category:
-        try:
-            cat = Category(category)
-        except ValueError:
-            raise HTTPException(status_code=400, detail="Неизвестная категория")
-    items = catalog.all_products(cat)
+def products(category: str | None = None, q: str | None = None) -> JSONResponse:
+    cat = _parse_category(category)
+    items = catalog.search(q, cat) if q else catalog.all_products(cat)
     return JSONResponse(
         {
-            "categories": [c.value for c in Category],
+            "categories": catalog.categories(),
             "products": [p.model_dump(mode="json") for p in items],
         }
     )
+
+
+@router.get("/search")
+def search(q: str, category: str | None = None) -> JSONResponse:
+    cat = _parse_category(category)
+    items = catalog.search(q, cat)
+    return JSONResponse({"query": q, "products": [p.model_dump(mode="json") for p in items]})
 
 
 @router.get("/product/{product_id}")
@@ -64,3 +75,33 @@ def cart_remove(user_id: str = Form("demo-user"), product_id: str = Form(...)) -
 def cart_clear(user_id: str = Form("demo-user")) -> JSONResponse:
     service.clear_cart(user_id)
     return JSONResponse(service.get_cart(user_id))
+
+
+@router.get("/delivery")
+def delivery(user_id: str = "demo-user") -> JSONResponse:
+    cart = service.get_cart(user_id)
+    return JSONResponse(orders.delivery_quote(cart["total_rub"]))
+
+
+@router.post("/checkout")
+def checkout(
+    user_id: str = Form("demo-user"),
+    address: str = Form(...),
+    name: str = Form(""),
+    phone: str = Form(""),
+) -> JSONResponse:
+    try:
+        result = orders.checkout(user_id, address=address, name=name, phone=phone)
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc))
+    return JSONResponse(result)
+
+
+@router.get("/orders")
+def order_history(user_id: str = "demo-user") -> JSONResponse:
+    return JSONResponse(orders.list_orders(user_id))
+
+
+@router.get("/loyalty")
+def loyalty_status(user_id: str = "demo-user") -> JSONResponse:
+    return JSONResponse(loyalty.status(user_id))

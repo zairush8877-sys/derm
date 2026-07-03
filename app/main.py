@@ -16,29 +16,39 @@ import io
 from pathlib import Path
 
 from fastapi import FastAPI, File, Form, UploadFile
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, JSONResponse, StreamingResponse
 from fastapi.staticfiles import StaticFiles
 
 from app import __version__
+from app.admin.api import router as admin_router
 from app.analysis.engine import analyze_image
+from app.api.auth import seed_demo_client
 from app.api.v1 import router as api_v1
+from app.assistant.api import router as assistant_router
 from app.billing import service as credits
 from app.billing.api import router as billing_router
 from app.config import get_settings
 from app.db import store
 from app.food.api import router as food_router
+from app.notifications.api import router as notifications_router
 from app.protocol.engine import build_protocol
 from app.protocol.quiz import QUIZ_QUESTIONS, QuizAnswers
 from app.report.pdf import render_report
 from app.shop import catalog
 from app.shop.api import router as shop_router
+from app.subscription.api import router as subscription_router
 from app.tracker import service as tracker
 
 _STATIC = Path(__file__).parent / "static"
 
 app = FastAPI(
-    title="derm — AI-анализ кожи",
-    description="Дерматологически обоснованный AI-анализ кожи: B2B API, веб-демо и AI-трекер.",
+    title="Aura — wellness ecosystem",
+    description=(
+        "Premium wellness-экосистема: магазин (косметика, БАДы, спортпит, biohacking, "
+        "healthy food), AI-анализ кожи, трекер еды, wellness-ассистент, лояльность, "
+        "подписки и B2B API анализа кожи для брендов."
+    ),
     version=__version__,
 )
 
@@ -46,12 +56,27 @@ app = FastAPI(
 @app.on_event("startup")
 def _startup() -> None:
     store.init_db()
+    seed_demo_client()
+
+
+# CORS: виджет анализа встраивается на сайты брендов и обращается к API
+# с их домена. В проде ограничьте origins списком доменов клиентов.
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_methods=["GET", "POST", "OPTIONS"],
+    allow_headers=["*"],
+)
 
 
 app.include_router(api_v1)
 app.include_router(billing_router)
 app.include_router(shop_router)
 app.include_router(food_router)
+app.include_router(subscription_router)
+app.include_router(assistant_router)
+app.include_router(notifications_router)
+app.include_router(admin_router)
 
 
 @app.get("/health", tags=["служебное"])
@@ -190,6 +215,21 @@ def shop_page() -> FileResponse:
 @app.get("/food", include_in_schema=False)
 def food_page() -> FileResponse:
     return FileResponse(_STATIC / "food.html")
+
+
+@app.get("/assistant", include_in_schema=False)
+def assistant_page() -> FileResponse:
+    return FileResponse(_STATIC / "assistant.html")
+
+
+@app.get("/subscription", include_in_schema=False)
+def subscription_page() -> FileResponse:
+    return FileResponse(_STATIC / "subscription.html")
+
+
+@app.get("/admin", include_in_schema=False)
+def admin_page() -> FileResponse:
+    return FileResponse(_STATIC / "admin.html")
 
 
 # Статика (css/js) монтируется последней, чтобы не перехватывать маршруты выше.

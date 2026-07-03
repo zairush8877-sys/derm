@@ -1,11 +1,11 @@
 {
-  "name": "derm — AI-анализ кожи",
-  "short_name": "derm",
-  "description": "Дерматологически обоснованный AI-анализ кожи и персональный уход.",
+  "name": "Aura — wellness ecosystem",
+  "short_name": "Aura",
+  "description": "Premium wellness: анализ кожи, питание, biohacking, магазин и ассистент.",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#f6f7fb",
-  "theme_color": "#2563eb",
+  "background_color": "#f6f4ef",
+  "theme_color": "#1f6f5c",
   "lang": "ru",
   "icons": [
     {

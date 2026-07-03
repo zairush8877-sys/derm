@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Пример интеграции derm на сайт бренда</title>
+  <style>
+    body { font-family: -apple-system, Segoe UI, Roboto, sans-serif; background: #faf7f5; color: #222; margin: 0; }
+    .hero { background: #1f2430; color: #fff; padding: 40px 20px; text-align: center; }
+    .wrap { max-width: 900px; margin: 0 auto; padding: 30px 20px; display: grid; grid-template-columns: 1fr 1fr; gap: 30px; }
+    .pitch h2 { margin-top: 0; }
+    code { background: #eee; padding: 2px 6px; border-radius: 4px; }
+    @media (max-width: 720px) { .wrap { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+  <div class="hero">
+    <h1>BeautyBrand™</h1>
+    <p>Персональный уход, подтверждённый дерматологической логикой</p>
+  </div>
+
+  <div class="wrap">
+    <div class="pitch">
+      <h2>Анализ кожи прямо на сайте</h2>
+      <p>Это демонстрация того, как бренд встраивает виджет derm одной строкой:</p>
+      <pre><code>&lt;div id="derm-widget"&gt;&lt;/div&gt;
+&lt;script src="https://ВАШ-ХОСТ/static/derm-widget.js"
+  data-api-base="https://ВАШ-ХОСТ"
+  data-api-key="ВАШ-КЛЮЧ"
+  data-target="#derm-widget"&gt;&lt;/script&gt;</code></pre>
+      <p>Клиент загружает фото → получает разбор кожи. Бренд платит за скан или по подписке.</p>
+    </div>
+
+    <!-- Точка вставки виджета -->
+    <div id="derm-widget"></div>
+  </div>
+
+  <!-- Для локального теста укажите свой хост и демо-ключ -->
+  <script src="http://localhost:8000/static/derm-widget.js"
+          data-api-base="http://localhost:8000"
+          data-api-key="demo-key-derm-2026"
+          data-target="#derm-widget"
+          data-accent="#b8735a"></script>
+</body>
+</html>

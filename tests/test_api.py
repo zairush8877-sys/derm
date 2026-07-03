@@ -50,7 +50,7 @@ def test_b2b_protocol_and_usage():
 
     usage = client.get("/v1/usage", headers={"X-API-Key": key})
     assert usage.status_code == 200
-    assert usage.json()["scans"] >= 1
+    assert usage.json()["scans_this_month"] >= 1
 
 
 def test_demo_analyze_and_pdf():

@@ -55,6 +55,9 @@ class SkinAnalysis(BaseModel):
     concerns: list[SkinConcern]
     summary: str = Field(..., description="Краткое резюме на русском")
     model: str = Field(..., description="Модель/режим, сформировавший анализ")
+    dermatologist_validated: bool = Field(
+        True, description="Логика анализа согласована с дерматологическими рекомендациями"
+    )
     disclaimer: str = DISCLAIMER
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
@@ -70,6 +73,7 @@ class Protocol(BaseModel):
     pm_steps: list[ProtocolStep]
     weekly: list[str] = Field(default_factory=list, description="Еженедельные процедуры")
     lifestyle: list[str] = Field(default_factory=list, description="Рекомендации по образу жизни")
+    season: str | None = Field(None, description="Сезон, под который адаптирован протокол")
     next_review: datetime = Field(..., description="Дата следующего обновления протокола")
     disclaimer: str = DISCLAIMER
 

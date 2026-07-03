@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Aura — Wellness-ассистент</title>
+  <link rel="stylesheet" href="/static/styles.css" />
+  <link rel="manifest" href="/static/manifest.webmanifest" />
+  <link rel="icon" href="/static/icon.svg" type="image/svg+xml" />
+  <meta name="theme-color" content="#1f6f5c" />
+</head>
+<body>
+  <header class="top">
+    <div class="wrap">
+      <h1>Wellness-ассистент</h1>
+      <p>Спросите про уход, питание, добавки, сон и восстановление — получите практичные шаги.</p>
+      <nav class="tabs">
+        <a href="/shop">Магазин</a>
+        <a href="/">Кожа</a>
+        <a href="/food">Еда</a>
+        <a href="/assistant" class="active">Ассистент</a>
+        <a href="/tracker">Трекер</a>
+        <a href="/subscription">Подписка</a>
+        <a href="/docs">B2B API</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <div class="card">
+      <div class="chat" id="chat"></div>
+      <div class="chat-input">
+        <input id="msg" placeholder="Например: как улучшить сон?" />
+        <button class="primary" id="send" style="margin-top:0">Спросить</button>
+      </div>
+      <p class="disclaimer">Образовательные рекомендации, не медицинский диагноз.</p>
+      <div style="margin-top:8px" id="chips"></div>
+    </div>
+  </main>
+
+  <script src="/static/assistant.js"></script>
+</body>
+</html>

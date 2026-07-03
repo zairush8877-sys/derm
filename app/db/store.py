@@ -58,6 +58,55 @@ CREATE TABLE IF NOT EXISTS food_log (
     created_at TEXT NOT NULL
 );
 CREATE INDEX IF NOT EXISTS idx_food_user_day ON food_log(user_id, day);
+
+-- B2B-клиенты (бренды): API-ключ + тариф.
+CREATE TABLE IF NOT EXISTS clients (
+    api_key TEXT PRIMARY KEY,
+    brand_name TEXT NOT NULL,
+    plan TEXT NOT NULL DEFAULT 'payg',
+    created_at TEXT NOT NULL
+);
+
+-- DTC-подписки на «живой» протокол ухода (#2).
+CREATE TABLE IF NOT EXISTS protocol_subscriptions (
+    user_id TEXT PRIMARY KEY,
+    active INTEGER NOT NULL DEFAULT 1,
+    quiz_json TEXT NOT NULL,
+    protocol_json TEXT NOT NULL,
+    updated_at TEXT NOT NULL,
+    next_update TEXT NOT NULL
+);
+
+-- Заказы магазина.
+CREATE TABLE IF NOT EXISTS orders (
+    id TEXT PRIMARY KEY,
+    user_id TEXT NOT NULL,
+    items_json TEXT NOT NULL,
+    total_rub INTEGER NOT NULL,
+    points_earned INTEGER NOT NULL DEFAULT 0,
+    status TEXT NOT NULL,
+    delivery_json TEXT NOT NULL,
+    created_at TEXT NOT NULL
+);
+CREATE INDEX IF NOT EXISTS idx_orders_user ON orders(user_id, created_at);
+
+-- Программа лояльности: баллы пользователя.
+CREATE TABLE IF NOT EXISTS loyalty (
+    user_id TEXT PRIMARY KEY,
+    points INTEGER NOT NULL DEFAULT 0,
+    lifetime_spent_rub INTEGER NOT NULL DEFAULT 0
+);
+
+-- In-app уведомления (push-лента приложения).
+CREATE TABLE IF NOT EXISTS notifications (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id TEXT NOT NULL,
+    title TEXT NOT NULL,
+    body TEXT NOT NULL,
+    read INTEGER NOT NULL DEFAULT 0,
+    created_at TEXT NOT NULL
+);
+CREATE INDEX IF NOT EXISTS idx_notif_user ON notifications(user_id, created_at);
 """
 
 
@@ -133,3 +182,33 @@ def usage_count(api_key: str) -> int:
             "SELECT COUNT(*) AS n FROM api_usage WHERE api_key = ?", (api_key,)
         ).fetchone()
     return int(row["n"]) if row else 0
+
+
+def usage_count_month(api_key: str, month_prefix: str) -> int:
+    """Число сканов клиента за месяц (month_prefix = 'YYYY-MM')."""
+    with _connect() as conn:
+        row = conn.execute(
+            "SELECT COUNT(*) AS n FROM api_usage WHERE api_key = ? AND created_at LIKE ?",
+            (api_key, f"{month_prefix}%"),
+        ).fetchone()
+    return int(row["n"]) if row else 0
+
+
+# --- B2B-клиенты (бренды) ---
+
+def upsert_client(api_key: str, brand_name: str, plan: str) -> None:
+    from datetime import datetime, timezone
+    with _connect() as conn:
+        conn.execute(
+            "INSERT INTO clients (api_key, brand_name, plan, created_at) VALUES (?, ?, ?, ?) "
+            "ON CONFLICT(api_key) DO UPDATE SET brand_name=excluded.brand_name, plan=excluded.plan",
+            (api_key, brand_name, plan, datetime.now(timezone.utc).isoformat()),
+        )
+
+
+def get_client(api_key: str) -> Optional[dict]:
+    with _connect() as conn:
+        row = conn.execute(
+            "SELECT api_key, brand_name, plan FROM clients WHERE api_key = ?", (api_key,)
+        ).fetchone()
+    return dict(row) if row else None

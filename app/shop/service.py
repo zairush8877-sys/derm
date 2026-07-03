@@ -2,8 +2,18 @@
 
 from __future__ import annotations
 
+import json
+
 from app.db import store
 from app.shop import catalog
+
+
+def _dump(obj) -> str:
+    return json.dumps(obj, ensure_ascii=False)
+
+
+def _load(text: str):
+    return json.loads(text)
 
 
 def add_to_cart(user_id: str, product_id: str, qty: int = 1) -> None:

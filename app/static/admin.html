@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Aura — Админ-панель</title>
+  <link rel="stylesheet" href="/static/styles.css" />
+  <meta name="theme-color" content="#1f6f5c" />
+</head>
+<body>
+  <header class="top">
+    <div class="wrap">
+      <h1>Админ-панель</h1>
+      <p>Сводка по заказам, подпискам, B2B и AI-использованию.</p>
+      <nav class="tabs">
+        <a href="/shop">Магазин</a>
+        <a href="/">Кожа</a>
+        <a href="/food">Еда</a>
+        <a href="/assistant">Ассистент</a>
+        <a href="/subscription">Подписка</a>
+        <a href="/docs">B2B API</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <div class="card">
+      <div class="quiz">
+        <div class="full"><label>Админ-токен</label>
+          <input id="token" value="admin-derm-2026" /></div>
+      </div>
+      <button class="primary" id="load">Загрузить сводку</button>
+    </div>
+
+    <div id="kpis" class="pgrid"></div>
+
+    <div id="recentCard" class="card hidden">
+      <h2>Последние заказы</h2>
+      <div id="recent"></div>
+    </div>
+  </main>
+
+  <script src="/static/admin.js"></script>
+</body>
+</html>
