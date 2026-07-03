@@ -2,9 +2,10 @@
 
 from __future__ import annotations
 
-from fastapi import APIRouter, Form
+from fastapi import APIRouter, Depends, Form
 from fastapi.responses import HTMLResponse, JSONResponse
 
+from app.auth.deps import token_user_id
 from app.billing import payments
 from app.billing import service as credits
 from app.config import get_settings
@@ -13,7 +14,8 @@ router = APIRouter(prefix="/api/billing", tags=["Биллинг"])
 
 
 @router.get("/balance")
-def get_balance(user_id: str = "demo-user") -> JSONResponse:
+def get_balance(user_id: str = "demo-user", auth_id: str | None = Depends(token_user_id)) -> JSONResponse:
+    user_id = auth_id or user_id
     s = get_settings()
     return JSONResponse(
         {
@@ -26,9 +28,13 @@ def get_balance(user_id: str = "demo-user") -> JSONResponse:
 
 
 @router.post("/checkout")
-def checkout(user_id: str = Form("demo-user"), pack: str = Form("1")) -> JSONResponse:
+def checkout(
+    user_id: str = Form("demo-user"),
+    pack: str = Form("1"),
+    auth_id: str | None = Depends(token_user_id),
+) -> JSONResponse:
     """Создать платёж за пакет сканов. Возвращает confirmation_url."""
-    payment = payments.create_payment(user_id, pack)
+    payment = payments.create_payment(auth_id or user_id, pack)
     return JSONResponse(
         {
             "payment_id": payment.id,

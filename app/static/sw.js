@@ -1,10 +1,11 @@
 // Service worker для PWA: офлайн-кэш статики (app shell).
-const CACHE = "aura-v3";
+const CACHE = "aura-v4";
 const ASSETS = [
-  "/", "/tracker", "/food", "/shop", "/assistant", "/subscription",
+  "/", "/skin", "/tracker", "/food", "/shop", "/assistant", "/subscription", "/auth",
   "/static/styles.css", "/static/app.js", "/static/tracker.js",
   "/static/food.js", "/static/shop.js", "/static/assistant.js",
-  "/static/subscription.js", "/static/icon.svg", "/static/manifest.webmanifest",
+  "/static/subscription.js", "/static/auth-helper.js",
+  "/static/icon.svg", "/static/manifest.webmanifest",
 ];
 
 self.addEventListener("install", (event) => {

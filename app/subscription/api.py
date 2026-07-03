@@ -2,9 +2,10 @@
 
 from __future__ import annotations
 
-from fastapi import APIRouter, Form
+from fastapi import APIRouter, Depends, Form
 from fastapi.responses import JSONResponse
 
+from app.auth.deps import token_user_id
 from app.protocol.quiz import QuizAnswers
 from app.subscription import service
 
@@ -14,6 +15,7 @@ router = APIRouter(prefix="/api/subscription", tags=["Подписка (прот
 @router.post("/subscribe")
 def subscribe(
     user_id: str = Form("demo-user"),
+    auth_id: str | None = Depends(token_user_id),
     age: int | None = Form(default=None),
     sensitivity: bool = Form(default=False),
     pregnant: bool = Form(default=False),
@@ -27,19 +29,23 @@ def subscribe(
         sun_exposure=sun_exposure, budget=budget,
         hormonal_phase=hormonal_phase or None,
     )
-    protocol = service.subscribe(user_id, quiz)
+    protocol = service.subscribe(auth_id or user_id, quiz)
     return JSONResponse({"active": True, "protocol": protocol.model_dump(mode="json")})
 
 
 @router.get("/current")
-def current(user_id: str = "demo-user", force: bool = False) -> JSONResponse:
-    data = service.current_protocol(user_id, force=force)
+def current(
+    user_id: str = "demo-user",
+    force: bool = False,
+    auth_id: str | None = Depends(token_user_id),
+) -> JSONResponse:
+    data = service.current_protocol(auth_id or user_id, force=force)
     if data is None:
         return JSONResponse(status_code=404, content={"active": False, "error": "Нет активной подписки"})
     return JSONResponse(data)
 
 
 @router.post("/cancel")
-def cancel(user_id: str = Form("demo-user")) -> JSONResponse:
-    service.cancel(user_id)
+def cancel(user_id: str = Form("demo-user"), auth_id: str | None = Depends(token_user_id)) -> JSONResponse:
+    service.cancel(auth_id or user_id)
     return JSONResponse({"active": False})

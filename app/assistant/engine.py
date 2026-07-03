@@ -73,11 +73,13 @@ def ask(message: str, history: list[dict] | None = None) -> dict:
             messages.append({"role": role, "content": str(turn.get("content", ""))})
         messages.append({"role": "user", "content": message})
 
+        # Чат работает на быстрой модели (Haiku) — стоимость ответа ~в 10 раз ниже,
+        # чем на vision-модели анализа. Настраивается через DERM_CHAT_MODEL.
         resp = client.messages.create(
-            model=settings.model, max_tokens=600, system=SYSTEM_PROMPT, messages=messages
+            model=settings.chat_model, max_tokens=600, system=SYSTEM_PROMPT, messages=messages
         )
         reply = "".join(b.text for b in resp.content if b.type == "text").strip()
-        return {"reply": reply or _mock_reply(message), "model": settings.model, "disclaimer": DISCLAIMER}
+        return {"reply": reply or _mock_reply(message), "model": settings.chat_model, "disclaimer": DISCLAIMER}
     except Exception as exc:  # pragma: no cover
         logger.warning("Сбой ассистента, fallback на демо: %s", exc)
         return {"reply": _mock_reply(message), "model": "mock (fallback)", "disclaimer": DISCLAIMER}

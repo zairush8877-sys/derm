@@ -15,8 +15,9 @@
       <h1>AI-трекер кожи</h1>
       <p>Динамика состояния кожи во времени: что улучшилось, а что требует внимания.</p>
       <nav class="tabs">
+        <a href="/">Главная</a>
         <a href="/shop">Магазин</a>
-        <a href="/">Кожа</a>
+        <a href="/skin">Кожа</a>
         <a href="/food">Еда</a>
         <a href="/assistant">Ассистент</a>
         <a href="/tracker" class="active">Трекер</a>
@@ -58,10 +59,11 @@
     </div>
 
     <div id="empty" class="card hidden">
-      <p class="summary">Сканов пока нет. Сделайте анализ на <a href="/">главной странице</a> — и здесь появится динамика.</p>
+      <p class="summary">Сканов пока нет. Сделайте <a href="/skin">анализ кожи</a> — и здесь появится динамика.</p>
     </div>
   </main>
 
+  <script src="/static/auth-helper.js"></script>
   <script src="/static/tracker.js"></script>
   <script>
     if ("serviceWorker" in navigator) {

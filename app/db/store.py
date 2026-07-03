@@ -97,6 +97,15 @@ CREATE TABLE IF NOT EXISTS loyalty (
     lifetime_spent_rub INTEGER NOT NULL DEFAULT 0
 );
 
+-- Пользователи (аккаунты сайта/приложения).
+CREATE TABLE IF NOT EXISTS users (
+    id TEXT PRIMARY KEY,
+    phone TEXT NOT NULL UNIQUE,
+    name TEXT NOT NULL DEFAULT '',
+    password_hash TEXT NOT NULL,
+    created_at TEXT NOT NULL
+);
+
 -- In-app уведомления (push-лента приложения).
 CREATE TABLE IF NOT EXISTS notifications (
     id INTEGER PRIMARY KEY AUTOINCREMENT,

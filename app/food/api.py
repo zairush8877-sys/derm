@@ -2,9 +2,10 @@
 
 from __future__ import annotations
 
-from fastapi import APIRouter, File, Form, UploadFile
+from fastapi import APIRouter, Depends, File, Form, UploadFile
 from fastapi.responses import JSONResponse
 
+from app.auth.deps import token_user_id
 from app.billing import service as credits
 from app.food import service
 from app.food.engine import analyze_food
@@ -16,8 +17,10 @@ router = APIRouter(prefix="/api/food", tags=["Питание"])
 async def analyze(
     image: UploadFile = File(...),
     user_id: str = Form("demo-user"),
+    auth_id: str | None = Depends(token_user_id),
 ) -> JSONResponse:
     """Платный фото-анализ еды: списывает 1 кредит, затем анализирует и логирует."""
+    user_id = auth_id or user_id
     try:
         credits.charge(user_id, 1)
     except credits.InsufficientCredits as exc:
@@ -32,5 +35,9 @@ async def analyze(
 
 
 @router.get("/day")
-def day(user_id: str = "demo-user", day: str | None = None) -> JSONResponse:
-    return JSONResponse(service.day_nutrition(user_id, day).model_dump(mode="json"))
+def day(
+    user_id: str = "demo-user",
+    day: str | None = None,
+    auth_id: str | None = Depends(token_user_id),
+) -> JSONResponse:
+    return JSONResponse(service.day_nutrition(auth_id or user_id, day).model_dump(mode="json"))

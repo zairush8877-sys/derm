@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Aura — вход</title>
+  <link rel="stylesheet" href="/static/styles.css" />
+  <link rel="icon" href="/static/icon.svg" type="image/svg+xml" />
+  <meta name="theme-color" content="#1f6f5c" />
+</head>
+<body>
+  <header class="top">
+    <div class="wrap">
+      <h1>Аккаунт</h1>
+      <p>Сканы, дневник питания, заказы и баллы будут привязаны к вашему аккаунту.</p>
+      <nav class="tabs">
+        <a href="/">Главная</a>
+        <a href="/shop">Магазин</a>
+        <a href="/skin">Кожа</a>
+        <a href="/food">Еда</a>
+        <a href="/auth" class="active">Вход</a>
+      </nav>
+    </div>
+  </header>
+
+  <main style="max-width:460px">
+    <div class="card" id="profileCard" style="display:none">
+      <h2>Вы вошли</h2>
+      <p class="summary" id="profileInfo"></p>
+      <button class="ghost" id="logout">Выйти</button>
+      <a href="/skin"><button class="primary" style="width:100%">К анализу кожи</button></a>
+    </div>
+
+    <div class="card" id="formCard">
+      <div style="display:flex;gap:8px;margin-bottom:14px">
+        <button class="ghost" id="tabLogin" style="flex:1;margin:0">Вход</button>
+        <button class="ghost" id="tabRegister" style="flex:1;margin:0">Регистрация</button>
+      </div>
+      <div class="quiz" style="grid-template-columns:1fr">
+        <div><label>Телефон</label><input id="phone" placeholder="+7 900 000-00-00" autocomplete="tel" /></div>
+        <div id="nameRow" class="hidden"><label>Имя</label><input id="name" placeholder="Как к вам обращаться" /></div>
+        <div><label>Пароль</label><input id="password" type="password" placeholder="минимум 6 символов" /></div>
+      </div>
+      <button class="primary" id="submit" style="width:100%">Войти</button>
+      <p class="disclaimer" id="error" style="color:var(--red);border:none"></p>
+    </div>
+  </main>
+
+  <script>
+    const el = (id) => document.getElementById(id);
+    let mode = "login";
+
+    function setMode(m) {
+      mode = m;
+      el("nameRow").classList.toggle("hidden", m === "login");
+      el("submit").textContent = m === "login" ? "Войти" : "Создать аккаунт";
+      el("tabLogin").style.background = m === "login" ? "var(--brand)" : "";
+      el("tabLogin").style.color = m === "login" ? "#fff" : "";
+      el("tabRegister").style.background = m === "register" ? "var(--brand)" : "";
+      el("tabRegister").style.color = m === "register" ? "#fff" : "";
+    }
+
+    async function submit() {
+      el("error").textContent = "";
+      const fd = new FormData();
+      fd.append("phone", el("phone").value);
+      fd.append("password", el("password").value);
+      if (mode === "register") fd.append("name", el("name").value);
+      const res = await fetch("/api/auth/" + mode, { method: "POST", body: fd });
+      const data = await res.json();
+      if (!res.ok) { el("error").textContent = data.detail || "Ошибка"; return; }
+      localStorage.setItem("aura_token", data.token);
+      localStorage.setItem("aura_name", data.user.name || data.user.phone);
+      window.location = "/";
+    }
+
+    function showProfile() {
+      const token = localStorage.getItem("aura_token");
+      if (!token) return;
+      fetch("/api/auth/me", { headers: { Authorization: "Bearer " + token } })
+        .then((r) => { if (!r.ok) throw new Error(); return r.json(); })
+        .then((u) => {
+          el("profileInfo").textContent = (u.name ? u.name + " · " : "") + u.phone;
+          el("profileCard").style.display = "";
+          el("formCard").style.display = "none";
+        })
+        .catch(() => { localStorage.removeItem("aura_token"); localStorage.removeItem("aura_name"); });
+    }
+
+    el("tabLogin").addEventListener("click", () => setMode("login"));
+    el("tabRegister").addEventListener("click", () => setMode("register"));
+    el("submit").addEventListener("click", submit);
+    el("logout").addEventListener("click", () => {
+      localStorage.removeItem("aura_token");
+      localStorage.removeItem("aura_name");
+      window.location.reload();
+    });
+    setMode("login");
+    showProfile();
+  </script>
+</body>
+</html>

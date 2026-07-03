@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>derm — AI-анализ кожи</title>
+  <link rel="stylesheet" href="/static/styles.css" />
+  <link rel="manifest" href="/static/manifest.webmanifest" />
+  <link rel="icon" href="/static/icon.svg" type="image/svg+xml" />
+  <meta name="theme-color" content="#2563eb" />
+</head>
+<body>
+  <header class="top">
+    <div class="wrap">
+      <h1>Aura</h1>
+      <p>Premium wellness-пространство: анализ кожи, питание, biohacking и магазин — в одном месте.</p>
+      <nav class="tabs">
+        <a href="/">Главная</a>
+        <a href="/shop">Магазин</a>
+        <a href="/skin" class="active">Кожа</a>
+        <a href="/food">Еда</a>
+        <a href="/assistant">Ассистент</a>
+        <a href="/tracker">Трекер</a>
+        <a href="/subscription">Подписка</a>
+        <a href="/docs">B2B API</a>
+      </nav>
+      <div class="mode-badge" id="mode">Режим: загрузка…</div>
+      <div class="mode-badge" id="balance"></div>
+    </div>
+  </header>
+
+  <main>
+    <div class="card">
+      <h2>1. Загрузите фото лица</h2>
+      <div class="drop" id="drop">
+        <p>Перетащите фото сюда или <strong>нажмите, чтобы выбрать</strong></p>
+        <input type="file" id="file" accept="image/*" class="hidden" />
+        <img id="preview" class="preview hidden" alt="превью" />
+      </div>
+
+      <h2 style="margin-top:20px">2. Немного о вашей коже (по желанию)</h2>
+      <div class="quiz">
+        <div>
+          <label>Возраст</label>
+          <input type="number" id="age" min="10" max="100" placeholder="например, 32" />
+        </div>
+        <div>
+          <label>Время на солнце</label>
+          <select id="sun_exposure">
+            <option>низкая</option>
+            <option selected>средняя</option>
+            <option>высокая</option>
+          </select>
+        </div>
+        <div>
+          <label>Бюджет на уход</label>
+          <select id="budget">
+            <option>низкий</option>
+            <option selected>средний</option>
+            <option>высокий</option>
+          </select>
+        </div>
+        <div>
+          <label>Имя пользователя (для трекера)</label>
+          <input type="text" id="user_id" value="demo-user" />
+        </div>
+        <div class="full">
+          <label><input type="checkbox" id="sensitivity" /> Чувствительная кожа</label>
+          <label><input type="checkbox" id="pregnant" /> Беременность / ГВ</label>
+        </div>
+      </div>
+
+      <button class="primary" id="go" disabled>Проанализировать кожу по фото 🔒</button>
+      <p class="disclaimer" style="border:none;margin-top:6px;padding:0">
+        Фото-анализ платный. Протокол по типу кожи без фото — бесплатно.</p>
+
+      <div id="paywall" class="card hidden" style="background:#eef3ff;margin-top:12px">
+        <h2>Нужен скан</h2>
+        <p class="summary" id="paywallMsg"></p>
+        <div id="packs"></div>
+      </div>
+    </div>
+
+    <div id="loading" class="card hidden"><div class="spinner">Анализируем кожу…</div></div>
+
+    <div id="result" class="card hidden">
+      <h2>Результат анализа</h2>
+      <span class="skin-type" id="skinType"></span>
+      <p class="summary" id="summary"></p>
+      <div id="concerns"></div>
+
+      <h2 style="margin-top:18px">Персональный протокол</h2>
+      <h3>☀️ Утро</h3>
+      <ul class="steps" id="am"></ul>
+      <h3>🌙 Вечер</h3>
+      <ul class="steps" id="pm"></ul>
+      <div id="extra"></div>
+
+      <button class="ghost" id="downloadPdf">📄 Скачать PDF-отчёт</button>
+      <a class="ghost" href="/tracker" style="display:inline-block;text-decoration:none">📈 Открыть трекер</a>
+
+      <div id="recommended"></div>
+
+      <p class="disclaimer" id="disclaimer"></p>
+    </div>
+  </main>
+
+  <script src="/static/auth-helper.js"></script>
+  <script src="/static/app.js"></script>
+  <script>
+    if ("serviceWorker" in navigator) {
+      window.addEventListener("load", () => navigator.serviceWorker.register("/static/sw.js"));
+    }
+  </script>
+</body>
+</html>

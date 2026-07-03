@@ -15,7 +15,7 @@ from __future__ import annotations
 import io
 from pathlib import Path
 
-from fastapi import FastAPI, File, Form, UploadFile
+from fastapi import Depends, FastAPI, File, Form, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, JSONResponse, StreamingResponse
 from fastapi.staticfiles import StaticFiles
@@ -26,6 +26,8 @@ from app.analysis.engine import analyze_image
 from app.api.auth import seed_demo_client
 from app.api.v1 import router as api_v1
 from app.assistant.api import router as assistant_router
+from app.auth.api import router as auth_router
+from app.auth.deps import token_user_id
 from app.billing import service as credits
 from app.billing.api import router as billing_router
 from app.config import get_settings
@@ -69,6 +71,7 @@ app.add_middleware(
 )
 
 
+app.include_router(auth_router)
 app.include_router(api_v1)
 app.include_router(billing_router)
 app.include_router(shop_router)
@@ -99,12 +102,14 @@ async def api_analyze(
     pregnant: bool = Form(default=False),
     sun_exposure: str = Form(default="средняя"),
     budget: str = Form(default="средний"),
+    auth_id: str | None = Depends(token_user_id),
 ) -> JSONResponse:
     """Платный фото-анализ кожи: списывает 1 кредит, затем анализ + протокол + трекер.
 
     Платным является ТОЛЬКО фото-анализ. Протокол по квизу, история и магазин —
     бесплатны (см. /api/protocol-quiz).
     """
+    user_id = auth_id or user_id
     try:
         credits.charge(user_id, 1)
     except credits.InsufficientCredits as exc:
@@ -187,19 +192,29 @@ async def api_report(
 
 
 @app.get("/api/scans", tags=["трекер"])
-def api_scans(user_id: str = "demo-user") -> JSONResponse:
-    scans = store.list_scans(user_id)
+def api_scans(user_id: str = "demo-user", auth_id: str | None = Depends(token_user_id)) -> JSONResponse:
+    scans = store.list_scans(auth_id or user_id)
     return JSONResponse([s.model_dump(mode="json") for s in scans])
 
 
 @app.get("/api/trends", tags=["трекер"])
-def api_trends(user_id: str = "demo-user") -> JSONResponse:
-    return JSONResponse(tracker.compute_trends(user_id).model_dump(mode="json"))
+def api_trends(user_id: str = "demo-user", auth_id: str | None = Depends(token_user_id)) -> JSONResponse:
+    return JSONResponse(tracker.compute_trends(auth_id or user_id).model_dump(mode="json"))
 
 
 @app.get("/", include_in_schema=False)
 def index() -> FileResponse:
     return FileResponse(_STATIC / "index.html")
+
+
+@app.get("/skin", include_in_schema=False)
+def skin_page() -> FileResponse:
+    return FileResponse(_STATIC / "skin.html")
+
+
+@app.get("/auth", include_in_schema=False)
+def auth_page() -> FileResponse:
+    return FileResponse(_STATIC / "auth.html")
 
 
 @app.get("/tracker", include_in_schema=False)

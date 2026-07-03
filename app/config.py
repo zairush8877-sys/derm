@@ -15,7 +15,12 @@ class Settings:
 
     def __init__(self) -> None:
         self.anthropic_api_key: str = os.getenv("ANTHROPIC_API_KEY", "").strip()
+        # Vision-модель для фото-анализа (кожа/еда) — максимум качества.
         self.model: str = os.getenv("DERM_MODEL", "claude-opus-4-8").strip()
+        # Модель чат-ассистента — быстрая и дешёвая (можно поднять до Opus через env).
+        self.chat_model: str = os.getenv("DERM_CHAT_MODEL", "claude-haiku-4-5").strip()
+        # Секрет для подписи токенов авторизации. В проде задайте свой!
+        self.auth_secret: str = os.getenv("DERM_SECRET", "dev-secret-change-me").strip()
         self.db_path: str = os.getenv("DERM_DB_PATH", "derm.db").strip()
         self.demo_api_key: str = os.getenv("DERM_DEMO_API_KEY", "demo-key-derm-2026").strip()
 
