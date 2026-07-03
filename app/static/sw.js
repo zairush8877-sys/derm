@@ -1,11 +1,15 @@
 // Service worker для PWA: офлайн-кэш статики (app shell).
-const CACHE = "derm-v1";
+const CACHE = "derm-v2";
 const ASSETS = [
   "/",
   "/tracker",
+  "/food",
+  "/shop",
   "/static/styles.css",
   "/static/app.js",
   "/static/tracker.js",
+  "/static/food.js",
+  "/static/shop.js",
   "/static/icon.svg",
   "/static/manifest.webmanifest",
 ];

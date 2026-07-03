@@ -12,14 +12,17 @@
 <body>
   <header class="top">
     <div class="wrap">
-      <h1>derm — AI-анализ кожи</h1>
-      <p>Дерматологически обоснованный анализ кожи: загрузите фото и получите разбор + персональный уход.</p>
+      <h1>derm — красота и здоровье</h1>
+      <p>Анализ кожи, трекер питания и магазин ухода, гаджетов и спортпита — в одном приложении.</p>
       <nav class="tabs">
-        <a href="/" class="active">Анализ</a>
-        <a href="/tracker">AI-трекер</a>
+        <a href="/" class="active">Кожа</a>
+        <a href="/food">Еда</a>
+        <a href="/tracker">Трекер</a>
+        <a href="/shop">Магазин</a>
         <a href="/docs">B2B API</a>
       </nav>
       <div class="mode-badge" id="mode">Режим: загрузка…</div>
+      <div class="mode-badge" id="balance"></div>
     </div>
   </header>
 
@@ -64,7 +67,15 @@
         </div>
       </div>
 
-      <button class="primary" id="go" disabled>Проанализировать кожу</button>
+      <button class="primary" id="go" disabled>Проанализировать кожу по фото 🔒</button>
+      <p class="disclaimer" style="border:none;margin-top:6px;padding:0">
+        Фото-анализ платный. Протокол по типу кожи без фото — бесплатно.</p>
+
+      <div id="paywall" class="card hidden" style="background:#eef3ff;margin-top:12px">
+        <h2>Нужен скан</h2>
+        <p class="summary" id="paywallMsg"></p>
+        <div id="packs"></div>
+      </div>
     </div>
 
     <div id="loading" class="card hidden"><div class="spinner">Анализируем кожу…</div></div>
@@ -84,6 +95,8 @@
 
       <button class="ghost" id="downloadPdf">📄 Скачать PDF-отчёт</button>
       <a class="ghost" href="/tracker" style="display:inline-block;text-decoration:none">📈 Открыть трекер</a>
+
+      <div id="recommended"></div>
 
       <p class="disclaimer" id="disclaimer"></p>
     </div>

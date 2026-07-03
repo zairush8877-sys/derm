@@ -69,25 +69,74 @@ function renderResult(data) {
   const next = new Date(p.next_review).toLocaleDateString("ru-RU");
   extra.innerHTML += `<p style="color:var(--brand);font-weight:600">Следующее обновление протокола: ${next}</p>`;
 
+  renderRecommended(data.recommended);
   el("result").classList.remove("hidden");
 }
 
 async function analyze() {
   if (!selectedFile) return;
   el("result").classList.add("hidden");
+  el("paywall").classList.add("hidden");
   el("loading").classList.remove("hidden");
   el("go").disabled = true;
   try {
     const res = await fetch("/api/analyze", { method: "POST", body: collectForm() });
+    if (res.status === 402) {
+      const err = await res.json();
+      el("paywallMsg").textContent = err.error || "Недостаточно кредитов для скана.";
+      el("paywall").classList.remove("hidden");
+      return;
+    }
     if (!res.ok) throw new Error("Ошибка анализа: " + res.status);
     const data = await res.json();
     renderResult(data);
+    if (typeof data.balance === "number") showBalance(data.balance);
   } catch (e) {
     alert(e.message);
   } finally {
     el("loading").classList.add("hidden");
     el("go").disabled = false;
   }
+}
+
+function showBalance(n) {
+  el("balance").textContent = "Доступно сканов: " + n;
+}
+
+function renderRecommended(products) {
+  const box = el("recommended");
+  if (!products || !products.length) { box.innerHTML = ""; return; }
+  box.innerHTML = "<h3>Рекомендуем из магазина</h3>" +
+    products.map((p) =>
+      `<div class="trend"><span class="name">${p.name} · <span style="color:var(--muted)">${p.brand}</span></span>
+       <span class="score">${p.price_rub.toLocaleString("ru-RU")} ₽</span>
+       <a class="pill new" href="/shop" style="text-decoration:none">в магазин</a></div>`
+    ).join("");
+}
+
+async function loadBalance() {
+  const user = el("user_id").value || "demo-user";
+  try {
+    const res = await fetch("/api/billing/balance?user_id=" + encodeURIComponent(user));
+    const data = await res.json();
+    showBalance(data.balance);
+    const packs = el("packs");
+    packs.innerHTML = Object.entries(data.packs).map(([pack, count]) =>
+      `<button class="ghost" data-pack="${pack}">Купить ${count} скан(ов)</button>`
+    ).join("");
+    packs.querySelectorAll("button").forEach((b) =>
+      b.addEventListener("click", () => buyPack(b.dataset.pack)));
+  } catch { /* ignore */ }
+}
+
+async function buyPack(pack) {
+  const fd = new FormData();
+  fd.append("user_id", el("user_id").value || "demo-user");
+  fd.append("pack", pack);
+  const res = await fetch("/api/billing/checkout", { method: "POST", body: fd });
+  const data = await res.json();
+  // Демо-провайдер: переходим на страницу подтверждения (начислит кредиты и вернёт назад).
+  window.location = data.confirmation_url;
 }
 
 async function downloadPdf() {
@@ -134,5 +183,6 @@ async function loadMode() {
 
 initDropzone();
 loadMode();
+loadBalance();
 el("go").addEventListener("click", analyze);
 el("downloadPdf").addEventListener("click", downloadPdf);

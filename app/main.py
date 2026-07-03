@@ -22,11 +22,16 @@ from fastapi.staticfiles import StaticFiles
 from app import __version__
 from app.analysis.engine import analyze_image
 from app.api.v1 import router as api_v1
+from app.billing import service as credits
+from app.billing.api import router as billing_router
 from app.config import get_settings
 from app.db import store
+from app.food.api import router as food_router
 from app.protocol.engine import build_protocol
 from app.protocol.quiz import QUIZ_QUESTIONS, QuizAnswers
 from app.report.pdf import render_report
+from app.shop import catalog
+from app.shop.api import router as shop_router
 from app.tracker import service as tracker
 
 _STATIC = Path(__file__).parent / "static"
@@ -44,6 +49,9 @@ def _startup() -> None:
 
 
 app.include_router(api_v1)
+app.include_router(billing_router)
+app.include_router(shop_router)
+app.include_router(food_router)
 
 
 @app.get("/health", tags=["служебное"])
@@ -67,7 +75,16 @@ async def api_analyze(
     sun_exposure: str = Form(default="средняя"),
     budget: str = Form(default="средний"),
 ) -> JSONResponse:
-    """Анализ для демо-фронтенда: анализ + протокол + сохранение в трекер."""
+    """Платный фото-анализ кожи: списывает 1 кредит, затем анализ + протокол + трекер.
+
+    Платным является ТОЛЬКО фото-анализ. Протокол по квизу, история и магазин —
+    бесплатны (см. /api/protocol-quiz).
+    """
+    try:
+        credits.charge(user_id, 1)
+    except credits.InsufficientCredits as exc:
+        return JSONResponse(status_code=402, content={"error": str(exc), "need_payment": True})
+
     data = await image.read()
     analysis = analyze_image(data)
     quiz = QuizAnswers(
@@ -76,13 +93,47 @@ async def api_analyze(
     )
     protocol = build_protocol(analysis, quiz)
     record = tracker.record_scan(user_id, analysis)
+    # Рекомендации товаров из магазина под выявленные проблемы кожи.
+    top_keys = [c.key for c in sorted(analysis.concerns, key=lambda x: x.score, reverse=True)[:4]]
+    recommended = catalog.recommend_for_concerns(top_keys)
     return JSONResponse(
         {
             "scan_id": record.id,
             "analysis": analysis.model_dump(mode="json"),
             "protocol": protocol.model_dump(mode="json"),
+            "recommended": [p.model_dump(mode="json") for p in recommended],
+            "balance": credits.balance(user_id),
         }
     )
+
+
+@app.post("/api/protocol-quiz", tags=["демо"])
+async def api_protocol_quiz(
+    age: int | None = Form(default=None),
+    sensitivity: bool = Form(default=False),
+    pregnant: bool = Form(default=False),
+    sun_exposure: str = Form(default="средняя"),
+    budget: str = Form(default="средний"),
+    skin_type: str = Form(default="нормальная"),
+) -> JSONResponse:
+    """БЕСПЛАТНЫЙ протокол по квизу без фото (базовый уход по типу кожи)."""
+    from app.schemas import CONCERN_LABELS, Severity, SkinAnalysis, SkinConcern, SkinType
+
+    try:
+        st = SkinType(skin_type)
+    except ValueError:
+        st = SkinType.NORMAL
+    # Нейтральный «профиль» без фото: умеренные баллы, чтобы собрать базовый уход.
+    concerns = [
+        SkinConcern(key=k, name=v, score=40, severity=Severity.MODERATE, confidence=0.5)
+        for k, v in CONCERN_LABELS.items()
+    ]
+    analysis = SkinAnalysis(skin_type=st, concerns=concerns,
+                            summary="Базовый профиль по квизу (без фото).", model="quiz")
+    quiz = QuizAnswers(age=age, sensitivity=sensitivity, pregnant=pregnant,
+                       sun_exposure=sun_exposure, budget=budget)
+    protocol = build_protocol(analysis, quiz)
+    return JSONResponse({"protocol": protocol.model_dump(mode="json")})
 
 
 @app.post("/api/report", tags=["демо"])
@@ -129,6 +180,16 @@ def index() -> FileResponse:
 @app.get("/tracker", include_in_schema=False)
 def tracker_page() -> FileResponse:
     return FileResponse(_STATIC / "tracker.html")
+
+
+@app.get("/shop", include_in_schema=False)
+def shop_page() -> FileResponse:
+    return FileResponse(_STATIC / "shop.html")
+
+
+@app.get("/food", include_in_schema=False)
+def food_page() -> FileResponse:
+    return FileResponse(_STATIC / "food.html")
 
 
 # Статика (css/js) монтируется последней, чтобы не перехватывать маршруты выше.

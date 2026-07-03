@@ -24,6 +24,40 @@ CREATE TABLE IF NOT EXISTS api_usage (
     endpoint TEXT NOT NULL,
     created_at TEXT NOT NULL
 );
+
+-- Биллинг: баланс кредитов (1 кредит = 1 платный AI-скан) и платежи.
+CREATE TABLE IF NOT EXISTS credits (
+    user_id TEXT PRIMARY KEY,
+    balance INTEGER NOT NULL DEFAULT 0,
+    trial_granted INTEGER NOT NULL DEFAULT 0
+);
+CREATE TABLE IF NOT EXISTS payments (
+    id TEXT PRIMARY KEY,
+    user_id TEXT NOT NULL,
+    amount_rub INTEGER NOT NULL,
+    credits INTEGER NOT NULL,
+    status TEXT NOT NULL,
+    provider TEXT NOT NULL,
+    created_at TEXT NOT NULL
+);
+
+-- Магазин: корзина пользователя (товары берём из каталога в коде).
+CREATE TABLE IF NOT EXISTS cart (
+    user_id TEXT NOT NULL,
+    product_id TEXT NOT NULL,
+    qty INTEGER NOT NULL DEFAULT 1,
+    PRIMARY KEY (user_id, product_id)
+);
+
+-- Дневник питания: результаты фото-анализа еды.
+CREATE TABLE IF NOT EXISTS food_log (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id TEXT NOT NULL,
+    day TEXT NOT NULL,
+    analysis_json TEXT NOT NULL,
+    created_at TEXT NOT NULL
+);
+CREATE INDEX IF NOT EXISTS idx_food_user_day ON food_log(user_id, day);
 """
 
 
@@ -31,6 +65,11 @@ def _connect() -> sqlite3.Connection:
     conn = sqlite3.connect(get_settings().db_path)
     conn.row_factory = sqlite3.Row
     return conn
+
+
+# Публичный алиас для использования из модулей (billing/shop/food).
+def connect() -> sqlite3.Connection:
+    return _connect()
 
 
 def init_db() -> None:

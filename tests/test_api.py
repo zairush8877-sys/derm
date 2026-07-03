@@ -54,21 +54,42 @@ def test_b2b_protocol_and_usage():
 
 
 def test_demo_analyze_and_pdf():
+    from app.billing import service as credits
+
+    credits.grant("demo-user", 1)
     res = client.post(
         "/api/analyze",
         files={"image": ("face.png", _img(4), "image/png")},
         data={"user_id": "demo-user"},
     )
     assert res.status_code == 200
-    assert "analysis" in res.json() and "protocol" in res.json()
+    body = res.json()
+    assert "analysis" in body and "protocol" in body
+    assert "recommended" in body  # рекомендации товаров из магазина
 
+    # PDF-отчёт бесплатный (без гейтинга).
     pdf = client.post("/api/report", files={"image": ("face.png", _img(4), "image/png")})
     assert pdf.status_code == 200
     assert pdf.headers["content-type"] == "application/pdf"
     assert pdf.content[:4] == b"%PDF"
 
 
+def test_analyze_requires_credit_when_empty():
+    # Новый пользователь получает 1 пробный скан; после него — 402.
+    for _ in range(2):
+        res = client.post(
+            "/api/analyze",
+            files={"image": ("face.png", _img(6), "image/png")},
+            data={"user_id": "paywall-user"},
+        )
+    assert res.status_code == 402
+    assert res.json()["need_payment"] is True
+
+
 def test_tracker_endpoints():
+    from app.billing import service as credits
+
+    credits.grant("trk", 1)
     client.post(
         "/api/analyze",
         files={"image": ("face.png", _img(5), "image/png")},

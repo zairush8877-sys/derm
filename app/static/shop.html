@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>derm — Магазин</title>
+  <link rel="stylesheet" href="/static/styles.css" />
+  <link rel="manifest" href="/static/manifest.webmanifest" />
+  <link rel="icon" href="/static/icon.svg" type="image/svg+xml" />
+  <meta name="theme-color" content="#2563eb" />
+</head>
+<body>
+  <header class="top">
+    <div class="wrap">
+      <h1>Магазин</h1>
+      <p>Уходовая косметика, гаджеты и спортпит. Цены в рублях.</p>
+      <nav class="tabs">
+        <a href="/">Кожа</a>
+        <a href="/food">Еда</a>
+        <a href="/tracker">Трекер</a>
+        <a href="/shop" class="active">Магазин</a>
+        <a href="/docs">B2B API</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <div class="card">
+      <div id="cats"></div>
+    </div>
+
+    <div id="grid"></div>
+
+    <div class="card" id="cartCard">
+      <h2>Корзина 🛒</h2>
+      <div id="cart"></div>
+    </div>
+  </main>
+
+  <script src="/static/shop.js"></script>
+</body>
+</html>
