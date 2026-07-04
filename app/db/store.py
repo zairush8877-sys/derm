@@ -46,7 +46,16 @@ CREATE TABLE IF NOT EXISTS cart (
     user_id TEXT NOT NULL,
     product_id TEXT NOT NULL,
     qty INTEGER NOT NULL DEFAULT 1,
+    updated_at TEXT,
     PRIMARY KEY (user_id, product_id)
+);
+
+-- Журнал запусков автоматизаций.
+CREATE TABLE IF NOT EXISTS automation_runs (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    job TEXT NOT NULL,
+    detail TEXT NOT NULL,
+    created_at TEXT NOT NULL
 );
 
 -- Дневник питания: результаты фото-анализа еды.
@@ -138,9 +147,20 @@ def connect() -> sqlite3.Connection:
 
 
 def init_db() -> None:
-    """Создать таблицы, если их ещё нет."""
+    """Создать таблицы, если их ещё нет (+ лёгкие миграции для старых БД)."""
     with _connect() as conn:
         conn.executescript(_SCHEMA)
+        # Миграция: колонка updated_at появилась в cart позже.
+        try:
+            conn.execute("ALTER TABLE cart ADD COLUMN updated_at TEXT")
+            # Backfill: у старых позиций updated_at IS NULL — иначе они навсегда
+            # выпали бы из напоминаний о брошенной корзине. Помечаем «сейчас».
+            conn.execute(
+                "UPDATE cart SET updated_at = ? WHERE updated_at IS NULL",
+                (datetime.now(timezone.utc).isoformat(),),
+            )
+        except sqlite3.OperationalError:
+            pass  # колонка уже есть
 
 
 def save_scan(user_id: str, analysis: SkinAnalysis) -> ScanRecord:

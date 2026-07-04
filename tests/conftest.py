@@ -15,6 +15,7 @@ def _isolated_env(tmp_path, monkeypatch):
     monkeypatch.setenv("DERM_MOCK_MODE", "1")
     monkeypatch.delenv("ANTHROPIC_API_KEY", raising=False)
     monkeypatch.setenv("DERM_DB_PATH", str(tmp_path / "test.db"))
+    monkeypatch.setenv("DERM_AUTOMATION", "0")  # без фоновых потоков в тестах
     # Сбрасываем кэш настроек, чтобы подхватить временное окружение.
     from app.config import get_settings
     get_settings.cache_clear()

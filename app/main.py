@@ -28,6 +28,7 @@ from app.api.v1 import router as api_v1
 from app.assistant.api import router as assistant_router
 from app.auth.api import router as auth_router
 from app.auth.deps import token_user_id
+from app.automation.scheduler import start_background_scheduler
 from app.billing import service as credits
 from app.billing.api import router as billing_router
 from app.config import get_settings
@@ -57,8 +58,22 @@ app = FastAPI(
 
 @app.on_event("startup")
 def _startup() -> None:
+    import logging
+    import os
+
     store.init_db()
     seed_demo_client()
+    start_background_scheduler()
+    if not os.getenv("DERM_ADMIN_TOKEN"):
+        logging.getLogger("derm").warning(
+            "DERM_ADMIN_TOKEN не задан — используется небезопасный дефолт. "
+            "Задайте свой токен в .env перед публикацией."
+        )
+    if get_settings().auth_secret == "dev-secret-change-me":
+        logging.getLogger("derm").warning(
+            "DERM_SECRET не задан — токены входа подписаны дефолтным секретом. "
+            "Задайте DERM_SECRET в .env перед публикацией."
+        )
 
 
 # CORS: виджет анализа встраивается на сайты брендов и обращается к API
@@ -111,7 +126,7 @@ async def api_analyze(
     """
     user_id = auth_id or user_id
     try:
-        credits.charge(user_id, 1)
+        balance = credits.charge(user_id, 1)
     except credits.InsufficientCredits as exc:
         return JSONResponse(status_code=402, content={"error": str(exc), "need_payment": True})
 
@@ -126,13 +141,16 @@ async def api_analyze(
     # Рекомендации товаров из магазина под выявленные проблемы кожи.
     top_keys = [c.key for c in sorted(analysis.concerns, key=lambda x: x.score, reverse=True)[:4]]
     recommended = catalog.recommend_for_concerns(top_keys)
+    # balance получен атомарно из charge() — без повторного чтения (TOCTOU).
+    if balance == 0:
+        credits.notify_zero_balance(user_id)
     return JSONResponse(
         {
             "scan_id": record.id,
             "analysis": analysis.model_dump(mode="json"),
             "protocol": protocol.model_dump(mode="json"),
             "recommended": [p.model_dump(mode="json") for p in recommended],
-            "balance": credits.balance(user_id),
+            "balance": balance,
         }
     )
 

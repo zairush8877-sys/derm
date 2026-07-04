@@ -28,7 +28,8 @@
     <div class="card">
       <div class="quiz">
         <div class="full"><label>Админ-токен</label>
-          <input id="token" value="admin-derm-2026" /></div>
+          <input id="token" type="password" placeholder="введите токен (env DERM_ADMIN_TOKEN)"
+                 autocomplete="off" /></div>
       </div>
       <button class="primary" id="load">Загрузить сводку</button>
     </div>
@@ -37,7 +38,17 @@
 
     <div id="recentCard" class="card hidden">
       <h2>Последние заказы</h2>
+      <p class="summary" style="font-size:13px">Кнопка «→ статус» переводит заказ на следующий шаг —
+        покупатель получает уведомление автоматически.</p>
       <div id="recent"></div>
+    </div>
+
+    <div class="card">
+      <h2>Автоматизации ⚙️</h2>
+      <p class="summary" style="font-size:13px">Раз в час автоматически: обновление «живых» протоколов,
+        напоминания о брошенной корзине, чистка кодов входа. Можно запустить вручную.</p>
+      <button class="ghost" id="runJobs">▶ Запустить сейчас</button>
+      <div id="autoRuns"></div>
     </div>
   </main>
 

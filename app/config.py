@@ -30,6 +30,10 @@ class Settings:
         # Провайдер оплаты: demo (по умолчанию) | yookassa (подключается ключами).
         self.payment_provider: str = os.getenv("DERM_PAYMENT_PROVIDER", "demo").strip()
 
+        # Фоновые автоматизации (обновление протоколов, напоминания и т.п.).
+        self.automation_enabled: bool = os.getenv("DERM_AUTOMATION", "1").strip().lower() not in {"0", "false", "no"}
+        self.automation_interval: int = int(os.getenv("DERM_AUTOMATION_INTERVAL", "3600"))
+
         # Демо-режим: явно через DERM_MOCK_MODE=1 ИЛИ если нет ключа Anthropic.
         forced = os.getenv("DERM_MOCK_MODE", "").strip().lower() in {"1", "true", "yes"}
         self.mock_mode: bool = forced or not self.anthropic_api_key

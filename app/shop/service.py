@@ -21,11 +21,15 @@ def add_to_cart(user_id: str, product_id: str, qty: int = 1) -> None:
         raise ValueError("Товар не найден")
     if qty <= 0:
         raise ValueError("Количество должно быть положительным")
+    from datetime import datetime, timezone
+
+    now = datetime.now(timezone.utc).isoformat()
     with store.connect() as conn:
         conn.execute(
-            "INSERT INTO cart (user_id, product_id, qty) VALUES (?, ?, ?) "
-            "ON CONFLICT(user_id, product_id) DO UPDATE SET qty = qty + excluded.qty",
-            (user_id, product_id, qty),
+            "INSERT INTO cart (user_id, product_id, qty, updated_at) VALUES (?, ?, ?, ?) "
+            "ON CONFLICT(user_id, product_id) DO UPDATE SET "
+            "qty = qty + excluded.qty, updated_at = excluded.updated_at",
+            (user_id, product_id, qty, now),
         )
 
 

@@ -47,6 +47,18 @@ def grant(user_id: str, amount: int) -> int:
         return int(row["balance"])
 
 
+def notify_zero_balance(user_id: str) -> None:
+    """Уведомить, что сканы закончились (вызывается после платного скана)."""
+    from app.notifications import service as notifications
+
+    notifications.push(
+        user_id,
+        "Сканы закончились",
+        f"Баланс AI-сканов исчерпан. Пакет 5 сканов со скидкой 10% — от "
+        f"{get_settings().scan_price_rub} ₽ за скан в разделе покупки.",
+    )
+
+
 def charge(user_id: str, amount: int = 1) -> int:
     """Списать кредиты за платный скан. Бросает InsufficientCredits при нехватке."""
     with store.connect() as conn:

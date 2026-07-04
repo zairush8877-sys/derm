@@ -51,9 +51,23 @@ cd aura && git pull && docker compose up -d --build
 - `https://домен/docs` — Swagger B2B API
 - `docker compose logs -f app` — логи приложения
 
-## Данные
+## Данные и бэкапы
 База (SQLite) лежит в docker-томе `aura-data` и переживает перезапуски.
-Бэкап: `docker compose cp app:/data/aura.db ./backup-$(date +%F).db`
+
+Автобэкап раз в сутки (хранит 14 копий в `./backups`):
+```bash
+crontab -e
+# добавить строку:
+0 4 * * * /root/aura/scripts/backup.sh >> /root/aura/backups/backup.log 2>&1
+```
+Разовый бэкап: `./scripts/backup.sh`
+
+## Автоматизации
+Внутри приложения раз в час автоматически выполняются: обновление «живых»
+протоколов подписчиков, напоминания о брошенной корзине, чистка кодов входа.
+Управление и журнал — в админке (`/admin`). Интервал: `DERM_AUTOMATION_INTERVAL`
+(секунды), выключить: `DERM_AUTOMATION=0` (тогда дергайте
+`POST /api/admin/run-jobs` внешним cron).
 
 ## Что дальше (по мере роста)
 - SMS-вход: получить ключ у SMS-провайдера → `SMS_API_KEY` в `.env`

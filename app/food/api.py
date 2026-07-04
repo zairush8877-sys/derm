@@ -22,15 +22,18 @@ async def analyze(
     """Платный фото-анализ еды: списывает 1 кредит, затем анализирует и логирует."""
     user_id = auth_id or user_id
     try:
-        credits.charge(user_id, 1)
+        balance = credits.charge(user_id, 1)
     except credits.InsufficientCredits as exc:
         return JSONResponse(status_code=402, content={"error": str(exc), "need_payment": True})
 
     data = await image.read()
     analysis = analyze_food(data)
     service.log_meal(user_id, analysis)
+    # balance получен атомарно из charge() — без повторного чтения (TOCTOU).
+    if balance == 0:
+        credits.notify_zero_balance(user_id)
     return JSONResponse(
-        {"analysis": analysis.model_dump(mode="json"), "balance": credits.balance(user_id)}
+        {"analysis": analysis.model_dump(mode="json"), "balance": balance}
     )
 
 

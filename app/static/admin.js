@@ -1,7 +1,16 @@
-// Админ-панель: сводка (read-only).
+// Админ-панель: сводка, статусы заказов, автоматизации.
 "use strict";
 
 const el = (id) => document.getElementById(id);
+let statusFlow = [];
+
+// Экранирование пользовательских строк перед вставкой в innerHTML.
+const esc = (s) => String(s).replace(/[&<>"']/g, (c) =>
+  ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+
+function headers() {
+  return { "X-Admin-Token": el("token").value };
+}
 
 function kpi(title, value) {
   return `<div class="pcard"><span class="cat">${title}</span>
@@ -9,9 +18,17 @@ function kpi(title, value) {
 }
 
 async function load() {
-  const res = await fetch("/api/admin/overview", { headers: { "X-Admin-Token": el("token").value } });
+  if (!el("token").value) return;  // не дёргаем API без токена
+  let res;
+  try {
+    res = await fetch("/api/admin/overview", { headers: headers() });
+  } catch {
+    alert("Сеть недоступна"); return;
+  }
   if (res.status === 401) { alert("Неверный админ-токен"); return; }
+  if (!res.ok) { alert("Ошибка сервера: " + res.status); return; }
   const d = await res.json();
+  statusFlow = d.status_flow || [];
   el("kpis").innerHTML = [
     kpi("Заказов", d.orders.count),
     kpi("Выручка, ₽", d.orders.revenue_rub.toLocaleString("ru-RU")),
@@ -21,18 +38,81 @@ async function load() {
     kpi("Сканов кожи", d.ai.skin_scans),
     kpi("Сканов еды", d.ai.food_scans),
   ].join("");
+
   if (d.recent_orders.length) {
-    el("recent").innerHTML = d.recent_orders.map((o) => `
+    el("recent").innerHTML = d.recent_orders.map((o) => {
+      const idx = statusFlow.indexOf(o.status);
+      const next = idx >= 0 && idx < statusFlow.length - 1 ? statusFlow[idx + 1] : null;
+      const btn = next
+        ? `<button class="ghost" style="margin:0" data-oid="${esc(o.id)}" data-next="${next}">→ ${next}</button>`
+        : "";
+      return `
       <div class="trend">
-        <span class="name">${o.id} · ${o.user_id}</span>
+        <span class="name">${esc(o.id)} · ${esc(o.user_id)}</span>
         <span class="score">${Number(o.total_rub).toLocaleString("ru-RU")} ₽</span>
-        <span class="pill new">${o.status}</span>
-      </div>`).join("");
+        <span class="pill new">${esc(o.status)}</span>
+        ${btn}
+      </div>`;
+    }).join("");
+    el("recent").querySelectorAll("[data-oid]").forEach((b) =>
+      b.addEventListener("click", () => advance(b.dataset.oid, b.dataset.next)));
   } else {
     el("recent").innerHTML = `<p class="summary">Заказов пока нет.</p>`;
   }
   el("recentCard").classList.remove("hidden");
+  loadAutomation();
+}
+
+let advancing = false;
+async function advance(orderId, status) {
+  if (advancing) return;  // защита от двойного клика
+  advancing = true;
+  const fd = new FormData();
+  fd.append("order_id", orderId);
+  fd.append("status", status);
+  try {
+    const res = await fetch("/api/admin/order-status", { method: "POST", body: fd, headers: headers() });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      alert(err.detail || "Не удалось сменить статус"); return;
+    }
+    load();
+  } finally {
+    advancing = false;
+  }
+}
+
+async function loadAutomation() {
+  const res = await fetch("/api/admin/automation", { headers: headers() });
+  if (!res.ok) return;
+  const data = await res.json();
+  el("autoRuns").innerHTML = data.runs.length
+    ? data.runs.map((r) => `
+      <div class="trend">
+        <span class="name">${esc(r.job)}</span>
+        <span class="score">${esc(r.detail)}</span>
+        <span class="pill flat">${new Date(r.created_at).toLocaleString("ru-RU")}</span>
+      </div>`).join("")
+    : `<p class="summary">Запусков ещё не было. Планировщик выполняет задачи раз в час автоматически.</p>`;
+}
+
+async function runJobs() {
+  el("runJobs").disabled = true;
+  try {
+    const res = await fetch("/api/admin/run-jobs", { method: "POST", headers: headers() });
+    if (res.status === 401) { alert("Неверный админ-токен"); return; }
+    if (!res.ok) { alert("Ошибка запуска: " + res.status); return; }
+    const results = await res.json();
+    alert("Выполнено:\n" + Object.entries(results).map(([k, v]) => `${k}: ${v}`).join("\n"));
+    loadAutomation();
+  } catch {
+    alert("Сеть недоступна");
+  } finally {
+    el("runJobs").disabled = false;  // всегда разблокируем (в т.ч. при ошибке сети)
+  }
 }
 
 el("load").addEventListener("click", load);
-load();
+el("runJobs").addEventListener("click", runJobs);
+// Автозагрузка только если токен уже введён (например, сохранён браузером).
+if (el("token").value) load();

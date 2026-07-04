@@ -8,10 +8,12 @@ from __future__ import annotations
 
 import os
 
-from fastapi import APIRouter, Header, HTTPException
+from fastapi import APIRouter, Form, Header, HTTPException
 from fastapi.responses import JSONResponse
 
+from app.automation import service as automation
 from app.db import store
+from app.shop import orders
 
 router = APIRouter(prefix="/api/admin", tags=["Админ-панель"])
 
@@ -19,7 +21,9 @@ ADMIN_TOKEN = os.getenv("DERM_ADMIN_TOKEN", "admin-derm-2026")
 
 
 def _guard(token: str) -> None:
-    if token != ADMIN_TOKEN:
+    import hmac
+
+    if not hmac.compare_digest(token.encode(), ADMIN_TOKEN.encode()):
         raise HTTPException(status_code=401, detail="Неверный админ-токен")
 
 
@@ -51,5 +55,36 @@ def overview(x_admin_token: str = Header(default="", alias="X-Admin-Token")) -> 
             "b2b": {"clients": clients, "api_calls": b2b_calls},
             "ai": {"skin_scans": scans, "food_scans": food},
             "recent_orders": [dict(r) for r in recent],
+            "status_flow": orders.STATUS_FLOW,
         }
     )
+
+
+@router.post("/run-jobs")
+def run_jobs(x_admin_token: str = Header(default="", alias="X-Admin-Token")) -> JSONResponse:
+    """Запустить все автоматизации сейчас (для внешнего cron или кнопки в админке)."""
+    _guard(x_admin_token)
+    return JSONResponse(automation.run_all())
+
+
+@router.get("/automation")
+def automation_runs(x_admin_token: str = Header(default="", alias="X-Admin-Token")) -> JSONResponse:
+    _guard(x_admin_token)
+    return JSONResponse({"runs": automation.list_runs()})
+
+
+@router.post("/order-status")
+def order_status(
+    order_id: str = Form(...),
+    status: str = Form(...),
+    x_admin_token: str = Header(default="", alias="X-Admin-Token"),
+) -> JSONResponse:
+    """Сменить статус заказа (покупатель получит уведомление)."""
+    _guard(x_admin_token)
+    try:
+        result = orders.update_status(order_id, status)
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc))
+    except LookupError as exc:
+        raise HTTPException(status_code=404, detail=str(exc))
+    return JSONResponse(result)

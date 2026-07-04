@@ -97,7 +97,20 @@ def register(phone: str, password: str, name: str = "") -> dict:
             (user_id, phone, name.strip(), hash_password(password),
              datetime.now(timezone.utc).isoformat()),
         )
+    _welcome(user_id, name.strip())
     return {"user": {"id": user_id, "phone": phone, "name": name.strip()}, "token": create_token(user_id)}
+
+
+def _welcome(user_id: str, name: str = "") -> None:
+    from app.notifications import service as notifications
+
+    hello = f"{name}, добро" if name else "Добро"
+    notifications.push(
+        user_id,
+        "Добро пожаловать в Aura ✨",
+        f"{hello} пожаловать! Первый AI-скан — бесплатно: попробуйте анализ кожи "
+        "или оценку калорий по фото.",
+    )
 
 
 def login(phone: str, password: str) -> dict:
@@ -174,7 +187,8 @@ def verify_otp(phone: str, code: str) -> dict:
         user = conn.execute(
             "SELECT id, phone, name FROM users WHERE phone = ?", (phone,)
         ).fetchone()
-        if user is None:
+        is_new = user is None
+        if is_new:
             user_id = "u-" + uuid.uuid4().hex[:16]
             conn.execute(
                 "INSERT INTO users (id, phone, name, password_hash, created_at) VALUES (?, ?, '', ?, ?)",
@@ -184,4 +198,6 @@ def verify_otp(phone: str, code: str) -> dict:
             user_dict = {"id": user_id, "phone": phone, "name": ""}
         else:
             user_dict = dict(user)
+    if is_new:
+        _welcome(user_dict["id"])
     return {"user": user_dict, "token": create_token(user_dict["id"])}
