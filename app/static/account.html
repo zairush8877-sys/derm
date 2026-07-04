@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Aura — личный кабинет</title>
+  <link rel="stylesheet" href="/static/styles.css" />
+  <link rel="icon" href="/static/icon.svg" type="image/svg+xml" />
+  <meta name="theme-color" content="#101010" />
+  <style>
+    .acc-title { font-size: 34px; font-weight: 700; letter-spacing: -0.5px; text-transform: lowercase;
+      margin: 8px 0 4px; }
+    .acc-sub { color: var(--muted); font-size: 14.5px; margin: 0 0 18px; }
+    .stat-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 18px; }
+    .stat { background: var(--soft); border-radius: 14px; padding: 16px; text-align: center; }
+    .stat .num { font-size: 24px; font-weight: 800; }
+    .stat .lbl { font-size: 12px; color: var(--muted); margin-top: 2px; }
+    .sec-link { font-size: 13.5px; color: var(--ink); font-weight: 600; text-decoration: none; }
+    .notif { padding: 10px 0; border-bottom: 1px solid var(--line); }
+    .notif .t { font-weight: 600; font-size: 14px; }
+    .notif .b { color: var(--muted); font-size: 13px; line-height: 1.5; }
+    .notif.unread .t::before { content: "●"; color: var(--accent); margin-right: 6px; font-size: 10px; }
+    @media (max-width: 640px) { .stat-row { grid-template-columns: repeat(3, 1fr); } .stat .num { font-size: 19px; } }
+  </style>
+</head>
+<body>
+  <header class="top">
+    <div class="wrap">
+      <nav class="tabs">
+        <a href="/">Главная</a>
+        <a href="/shop">Магазин</a>
+        <a href="/skin">Кожа</a>
+        <a href="/food">Еда</a>
+        <a href="/tracker">Трекер</a>
+        <a href="/subscription">Подписка</a>
+      </nav>
+    </div>
+  </header>
+
+  <main style="max-width:640px">
+    <h1 class="acc-title">личный кабинет</h1>
+    <p class="acc-sub" id="who">Загрузка…</p>
+
+    <div class="stat-row">
+      <div class="stat"><div class="num" id="stBalance">—</div><div class="lbl">AI-сканов</div></div>
+      <div class="stat"><div class="num" id="stPoints">—</div><div class="lbl">баллов</div></div>
+      <div class="stat"><div class="num" id="stTier">—</div><div class="lbl">уровень</div></div>
+    </div>
+
+    <div class="card">
+      <h2>Сканы <a class="sec-link" href="/skin" style="float:right">новый скан →</a></h2>
+      <div id="packs" class="hidden" style="margin-bottom:8px"></div>
+      <div id="scans"><p class="summary">Загрузка…</p></div>
+      <a class="sec-link" href="/tracker">Динамика кожи →</a>
+    </div>
+
+    <div class="card">
+      <h2>Заказы <a class="sec-link" href="/shop" style="float:right">в магазин →</a></h2>
+      <div id="orders"><p class="summary">Загрузка…</p></div>
+    </div>
+
+    <div class="card">
+      <h2>«Живой» протокол</h2>
+      <div id="sub"><p class="summary">Загрузка…</p></div>
+    </div>
+
+    <div class="card">
+      <h2>Уведомления <button class="ghost" id="markRead" style="float:right;margin:0;padding:7px 14px;font-size:12.5px">прочитано</button></h2>
+      <div id="notifs"><p class="summary">Загрузка…</p></div>
+    </div>
+
+    <button class="ghost" id="logout" style="width:100%">Выйти из аккаунта</button>
+  </main>
+
+  <script src="/static/auth-helper.js"></script>
+  <script src="/static/account.js"></script>
+</body>
+</html>

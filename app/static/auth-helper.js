@@ -30,8 +30,8 @@
     // 2) Логотип-бар: aura. по центру, профиль и корзина справа.
     const bar = document.createElement("div");
     bar.className = "logobar";
-    const profileHref = "/auth";
-    const profileIcon = token ? "👤" : "👤";
+    const profileHref = token ? "/account" : "/auth";
+    const profileIcon = "👤";
     bar.innerHTML =
       `<span style="width:70px"></span>` +
       `<a class="logo" href="/">aura</a>` +
@@ -55,8 +55,8 @@
     const nav = document.querySelector("nav.tabs");
     if (nav) {
       const a = document.createElement("a");
-      a.href = "/auth";
-      a.textContent = token ? "👤 " + (localStorage.getItem("aura_name") || "Профиль") : "Войти";
+      a.href = token ? "/account" : "/auth";
+      a.textContent = token ? "👤 " + (localStorage.getItem("aura_name") || "Кабинет") : "Войти";
       nav.appendChild(a);
     }
     const authLink = document.getElementById("authLink");

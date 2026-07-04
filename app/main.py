@@ -235,6 +235,11 @@ def auth_page() -> FileResponse:
     return FileResponse(_STATIC / "auth.html")
 
 
+@app.get("/account", include_in_schema=False)
+def account_page() -> FileResponse:
+    return FileResponse(_STATIC / "account.html")
+
+
 @app.get("/legal", include_in_schema=False)
 def legal_page() -> FileResponse:
     return FileResponse(_STATIC / "legal.html")

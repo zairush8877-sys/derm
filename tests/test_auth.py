@@ -78,5 +78,5 @@ def test_scan_binds_to_account_not_form_user():
 
 
 def test_pages_served():
-    for path in ["/", "/skin", "/auth"]:
+    for path in ["/", "/skin", "/auth", "/account"]:
         assert client.get(path).status_code == 200
