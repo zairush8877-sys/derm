@@ -112,6 +112,23 @@ async function runJobs() {
   }
 }
 
+async function aiTest() {
+  el("aiTest").disabled = true;
+  el("aiTest").textContent = "Проверяем…";
+  try {
+    const res = await fetch("/api/admin/ai-test", { method: "POST", headers: headers() });
+    if (res.status === 401) { alert("Неверный админ-токен"); return; }
+    const r = await res.json();
+    alert((r.ok ? "✅ Реальный AI работает!" : "❌ AI не подключён") +
+      "\nКлюч: " + (r.key_present ? "задан" : "НЕ задан") +
+      "\nЧат: " + (r.chat || "—") +
+      "\nVision: " + (r.vision || "—") +
+      (r.hint ? "\n\n" + r.hint : ""));
+  } catch { alert("Сеть недоступна"); }
+  finally { el("aiTest").disabled = false; el("aiTest").textContent = "🤖 Проверить AI"; }
+}
+
+el("aiTest").addEventListener("click", aiTest);
 el("load").addEventListener("click", load);
 el("runJobs").addEventListener("click", runJobs);
 // Автозагрузка только если токен уже введён (например, сохранён браузером).

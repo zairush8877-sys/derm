@@ -58,6 +58,24 @@ def _cmd_analyze(args: argparse.Namespace) -> int:
     return 0
 
 
+def _cmd_aitest(args: argparse.Namespace) -> int:
+    from app.aitest import run_selftest
+
+    r = run_selftest()
+    print(f"Ключ задан:      {'да' if r['key_present'] else 'НЕТ'}")
+    print(f"Режим:           {'демо (mock)' if r['mock_mode'] else 'реальный AI'}")
+    print(f"Vision-модель:   {r['vision_model']}")
+    print(f"Чат-модель:      {r['chat_model']}")
+    if r["chat"] is not None:
+        print(f"Чат-проба:       {r['chat']}")
+    if r["vision"] is not None:
+        print(f"Vision-проба:    {r['vision']}")
+    if r.get("hint"):
+        print(f"\nПодсказка: {r['hint']}")
+    print("\n✅ Реальный AI подключён и работает!" if r["ok"] else "\n❌ Реальный AI пока не работает.")
+    return 0 if r["ok"] else 1
+
+
 def _cmd_serve(args: argparse.Namespace) -> int:
     import uvicorn
 
@@ -78,6 +96,9 @@ def build_parser() -> argparse.ArgumentParser:
     p_an.add_argument("--sensitivity", action="store_true", help="Чувствительная кожа")
     p_an.add_argument("--pregnant", action="store_true", help="Беременность/ГВ")
     p_an.set_defaults(func=_cmd_analyze)
+
+    p_ai = sub.add_parser("aitest", help="Проверить подключение реального AI (ключ Anthropic)")
+    p_ai.set_defaults(func=_cmd_aitest)
 
     p_sv = sub.add_parser("serve", help="Запустить веб-сервер")
     p_sv.add_argument("--host", default="0.0.0.0")

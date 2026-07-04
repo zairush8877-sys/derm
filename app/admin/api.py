@@ -73,6 +73,15 @@ def automation_runs(x_admin_token: str = Header(default="", alias="X-Admin-Token
     return JSONResponse({"runs": automation.list_runs()})
 
 
+@router.post("/ai-test")
+def ai_test(x_admin_token: str = Header(default="", alias="X-Admin-Token")) -> JSONResponse:
+    """Самопроверка ключа Anthropic: пробные вызовы чат- и vision-модели."""
+    _guard(x_admin_token)
+    from app.aitest import run_selftest
+
+    return JSONResponse(run_selftest())
+
+
 @router.post("/order-status")
 def order_status(
     order_id: str = Form(...),

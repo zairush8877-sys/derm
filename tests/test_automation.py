@@ -187,3 +187,22 @@ def test_zero_balance_notification_food_scan():
                     data={"user_id": "auto-food"})
     assert credits.balance("auto-food") == 0
     assert any("Сканы закончились" in t for t in _titles("auto-food"))
+
+
+# --- Самопроверка AI ---
+
+def test_aitest_without_key_reports_clearly():
+    from app.aitest import run_selftest
+
+    r = run_selftest()
+    assert r["key_present"] is False and r["ok"] is False
+    assert "ANTHROPIC_API_KEY" in r["hint"]
+    assert r["vision_model"] and r["chat_model"]
+
+
+def test_admin_ai_test_endpoint():
+    assert client.post("/api/admin/ai-test").status_code == 401
+    res = client.post("/api/admin/ai-test", headers=ADMIN)
+    assert res.status_code == 200
+    body = res.json()
+    assert body["ok"] is False and body["key_present"] is False

@@ -100,7 +100,10 @@ app.include_router(admin_router)
 @app.get("/health", tags=["служебное"])
 def health() -> dict:
     s = get_settings()
-    return {"status": "ok", "version": __version__, "mode": s.mode_label}
+    return {
+        "status": "ok", "version": __version__, "mode": s.mode_label,
+        "vision_model": s.model, "chat_model": s.chat_model,
+    }
 
 
 @app.get("/quiz", tags=["демо"])
