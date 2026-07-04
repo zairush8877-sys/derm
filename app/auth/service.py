@@ -138,35 +138,81 @@ def get_user(user_id: str) -> dict | None:
 
 # --- Вход по SMS-коду (OTP) ---
 
-OTP_TTL_SECONDS = 300  # код живёт 5 минут
+OTP_TTL_SECONDS = 300        # код живёт 5 минут
+OTP_MAX_ATTEMPTS = 5         # попыток ввода кода, дальше — только новый код
+OTP_RESEND_COOLDOWN = 60     # секунд между повторными отправками
+OTP_MAX_PER_HOUR = 5         # SMS на один номер в час (SMS стоят денег)
+
+
+def _check_sms_throttle(row, now: datetime) -> tuple[int, str]:
+    """Антиспам реальных SMS. Возвращает (новый sent_count, window_start)."""
+    if row is None:
+        return 1, now.isoformat()
+    if row["last_sent"]:
+        elapsed = (now - datetime.fromisoformat(row["last_sent"])).total_seconds()
+        if elapsed < OTP_RESEND_COOLDOWN:
+            wait = int(OTP_RESEND_COOLDOWN - elapsed) + 1
+            raise AuthError(f"Код уже отправлен — повторная отправка через {wait} сек.")
+    window_start = row["window_start"]
+    sent_count = row["sent_count"] or 0
+    in_window = (
+        window_start
+        and (now - datetime.fromisoformat(window_start)).total_seconds() < 3600
+    )
+    if in_window:
+        if sent_count >= OTP_MAX_PER_HOUR:
+            raise AuthError("Слишком много запросов кода — попробуйте через час.")
+        return sent_count + 1, window_start
+    return 1, now.isoformat()
 
 
 def request_otp(phone: str) -> dict:
-    """Сгенерировать код входа. В демо-режиме код возвращается в ответе
-    (SMS не отправляется и не стоит денег); с SMS-провайдером — отправляется."""
+    """Сгенерировать код входа и отправить SMS через провайдера.
+
+    Без настроенного провайдера — демо-режим: SMS не отправляется и не стоит
+    денег, код возвращается в ответе и показывается в интерфейсе.
+    """
     import secrets
     from datetime import timedelta
 
+    from app.auth import sms
+
     phone = _normalize_phone(phone)
-    code = f"{secrets.randbelow(10000):04d}"
-    expires = (datetime.now(timezone.utc) + timedelta(seconds=OTP_TTL_SECONDS)).isoformat()
+    now = datetime.now(timezone.utc)
+    real = sms.provider_configured()
+
     with store.connect() as conn:
+        sent_count, window_start = 0, None
+        if real:  # троттлинг только для реальных SMS — в демо коды бесплатны
+            row = conn.execute(
+                "SELECT last_sent, sent_count, window_start FROM otp_codes WHERE phone = ?",
+                (phone,),
+            ).fetchone()
+            sent_count, window_start = _check_sms_throttle(row, now)
+
+        code = f"{secrets.randbelow(10000):04d}"
+        expires = (now + timedelta(seconds=OTP_TTL_SECONDS)).isoformat()
         conn.execute(
-            "INSERT INTO otp_codes (phone, code, expires) VALUES (?, ?, ?) "
-            "ON CONFLICT(phone) DO UPDATE SET code=excluded.code, expires=excluded.expires",
-            (phone, code, expires),
+            "INSERT INTO otp_codes (phone, code, expires, attempts, last_sent, sent_count, window_start) "
+            "VALUES (?, ?, ?, 0, ?, ?, ?) "
+            "ON CONFLICT(phone) DO UPDATE SET code=excluded.code, expires=excluded.expires, "
+            "attempts=0, last_sent=excluded.last_sent, sent_count=excluded.sent_count, "
+            "window_start=excluded.window_start",
+            (phone, code, expires, now.isoformat() if real else None,
+             sent_count, window_start),
         )
 
-    sms_api_key = os.getenv("SMS_API_KEY", "").strip()
-    if sms_api_key:
-        # TODO: подключить SMS-провайдера (SMS.ru / SMSC): POST с phone и текстом
-        # f"Aura: код входа {code}". До подключения работает демо-режим ниже.
-        pass
+    if real:
+        try:
+            sms.send_sms(phone, f"Aura: код входа {code}. Никому не сообщайте его.")
+        except sms.SmsError as exc:
+            import logging
 
-    result = {"sent": True, "phone": phone}
-    if not sms_api_key:
-        result["demo_code"] = code  # демо: показываем код прямо в интерфейсе
-    return result
+            logging.getLogger("derm.auth").warning("Сбой отправки SMS: %s", exc)
+            raise AuthError("Не удалось отправить SMS — попробуйте ещё раз через минуту.")
+        return {"sent": True, "phone": phone}
+
+    return {"sent": True, "phone": phone, "demo_code": code}
 
 
 def verify_otp(phone: str, code: str) -> dict:
@@ -174,11 +220,19 @@ def verify_otp(phone: str, code: str) -> dict:
     phone = _normalize_phone(phone)
     with store.connect() as conn:
         row = conn.execute(
-            "SELECT code, expires FROM otp_codes WHERE phone = ?", (phone,)
+            "SELECT code, expires, attempts FROM otp_codes WHERE phone = ?", (phone,)
         ).fetchone()
-        if row is None or not hmac.compare_digest(
-            row["code"].encode(), code.strip().encode()
-        ):
+        if row is None:
+            raise AuthError("Неверный код")
+        if row["attempts"] >= OTP_MAX_ATTEMPTS:
+            conn.execute("DELETE FROM otp_codes WHERE phone = ?", (phone,))
+            conn.commit()  # иначе raise откатит удаление кода
+            raise AuthError("Слишком много попыток — запросите новый код")
+        if not hmac.compare_digest(row["code"].encode(), code.strip().encode()):
+            conn.execute(
+                "UPDATE otp_codes SET attempts = attempts + 1 WHERE phone = ?", (phone,)
+            )
+            conn.commit()  # иначе raise откатит счётчик попыток
             raise AuthError("Неверный код")
         if datetime.fromisoformat(row["expires"]) < datetime.now(timezone.utc):
             raise AuthError("Код истёк — запросите новый")

@@ -52,6 +52,14 @@ class Settings:
         # Провайдер оплаты: demo (по умолчанию) | yookassa (подключается ключами).
         self.payment_provider: str = os.getenv("DERM_PAYMENT_PROVIDER", "demo").strip()
 
+        # SMS-провайдер для кодов входа: smsru (по умолчанию) | smsc.
+        # Если ключи не заданы — демо-режим (код показывается в интерфейсе).
+        self.sms_provider: str = os.getenv("SMS_PROVIDER", "smsru").strip().lower()
+        self.sms_api_key: str = os.getenv("SMS_API_KEY", "").strip()      # api_id SMS.ru
+        self.sms_login: str = os.getenv("SMS_LOGIN", "").strip()          # логин SMSC.ru
+        self.sms_password: str = os.getenv("SMS_PASSWORD", "").strip()    # пароль SMSC.ru
+        self.sms_sender: str = os.getenv("SMS_SENDER", "").strip()        # имя отправителя
+
         # Фоновые автоматизации (обновление протоколов, напоминания и т.п.).
         self.automation_enabled: bool = os.getenv("DERM_AUTOMATION", "1").strip().lower() not in {"0", "false", "no"}
         self.automation_interval: int = int(os.getenv("DERM_AUTOMATION_INTERVAL", "3600"))

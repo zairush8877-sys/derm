@@ -106,11 +106,15 @@ CREATE TABLE IF NOT EXISTS loyalty (
     lifetime_spent_rub INTEGER NOT NULL DEFAULT 0
 );
 
--- Одноразовые коды входа по SMS.
+-- Одноразовые коды входа по SMS (+ счётчики против спама и перебора).
 CREATE TABLE IF NOT EXISTS otp_codes (
     phone TEXT PRIMARY KEY,
     code TEXT NOT NULL,
-    expires TEXT NOT NULL
+    expires TEXT NOT NULL,
+    attempts INTEGER NOT NULL DEFAULT 0,
+    last_sent TEXT,
+    sent_count INTEGER NOT NULL DEFAULT 0,
+    window_start TEXT
 );
 
 -- Пользователи (аккаунты сайта/приложения).
@@ -161,6 +165,17 @@ def init_db() -> None:
             )
         except sqlite3.OperationalError:
             pass  # колонка уже есть
+        # Миграция: счётчики OTP против спама/перебора появились позже.
+        for ddl in (
+            "ALTER TABLE otp_codes ADD COLUMN attempts INTEGER NOT NULL DEFAULT 0",
+            "ALTER TABLE otp_codes ADD COLUMN last_sent TEXT",
+            "ALTER TABLE otp_codes ADD COLUMN sent_count INTEGER NOT NULL DEFAULT 0",
+            "ALTER TABLE otp_codes ADD COLUMN window_start TEXT",
+        ):
+            try:
+                conn.execute(ddl)
+            except sqlite3.OperationalError:
+                pass  # колонка уже есть
 
 
 def save_scan(user_id: str, analysis: SkinAnalysis) -> ScanRecord:
