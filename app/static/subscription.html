@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Aura — Подписка на протокол</title>
+  <link rel="stylesheet" href="/static/styles.css" />
+  <link rel="manifest" href="/static/manifest.webmanifest" />
+  <link rel="icon" href="/static/icon.svg" type="image/svg+xml" />
+  <meta name="theme-color" content="#1f6f5c" />
+</head>
+<body>
+  <header class="top">
+    <div class="wrap">
+      <h1>«Живой» протокол ухода</h1>
+      <p>Персональный протокол, который обновляется каждые 30 дней под сезон, возраст и гормональную фазу.</p>
+      <nav class="tabs">
+        <a href="/">Главная</a>
+        <a href="/shop">Магазин</a>
+        <a href="/skin">Кожа</a>
+        <a href="/food">Еда</a>
+        <a href="/assistant">Ассистент</a>
+        <a href="/tracker">Трекер</a>
+        <a href="/subscription" class="active">Подписка</a>
+        <a href="/docs">B2B API</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <div class="card">
+      <h2>Оформить подписку</h2>
+      <div class="quiz">
+        <div><label>Возраст</label><input type="number" id="age" min="10" max="100" placeholder="32" /></div>
+        <div><label>Тип кожи</label>
+          <select id="skin_type">
+            <option>нормальная</option><option>сухая</option><option>жирная</option>
+            <option>комбинированная</option><option>чувствительная</option>
+          </select></div>
+        <div><label>Гормональная фаза</label>
+          <select id="hormonal_phase">
+            <option value="">—</option><option>менструальная</option><option>фолликулярная</option>
+            <option>овуляторная</option><option>лютеиновая</option><option>менопауза</option>
+          </select></div>
+        <div><label>Время на солнце</label>
+          <select id="sun_exposure"><option>низкая</option><option selected>средняя</option><option>высокая</option></select></div>
+        <div class="full">
+          <label><input type="checkbox" id="sensitivity" /> Чувствительная кожа</label>
+          <label><input type="checkbox" id="pregnant" /> Беременность / ГВ</label>
+        </div>
+      </div>
+      <button class="primary" id="subscribe">Подписаться и получить протокол</button>
+    </div>
+
+    <div id="current" class="card hidden">
+      <h2>Ваш протокол <span class="badge" id="season"></span></h2>
+      <p class="summary" id="meta"></p>
+      <h3>☀️ Утро</h3><ul class="steps" id="am"></ul>
+      <h3>🌙 Вечер</h3><ul class="steps" id="pm"></ul>
+      <div id="extra"></div>
+      <button class="ghost" id="refresh">🔄 Обновить сейчас</button>
+      <button class="ghost" id="cancel">Отменить подписку</button>
+    </div>
+  </main>
+
+  <script src="/static/auth-helper.js"></script>
+  <script src="/static/subscription.js"></script>
+</body>
+</html>

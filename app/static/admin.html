@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Aura — Админ-панель</title>
+  <link rel="stylesheet" href="/static/styles.css" />
+  <meta name="theme-color" content="#1f6f5c" />
+</head>
+<body>
+  <header class="top">
+    <div class="wrap">
+      <h1>Админ-панель</h1>
+      <p>Сводка по заказам, подпискам, B2B и AI-использованию.</p>
+      <nav class="tabs">
+        <a href="/">Главная</a>
+        <a href="/shop">Магазин</a>
+        <a href="/skin">Кожа</a>
+        <a href="/food">Еда</a>
+        <a href="/assistant">Ассистент</a>
+        <a href="/subscription">Подписка</a>
+        <a href="/docs">B2B API</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <div class="card">
+      <div class="quiz">
+        <div class="full"><label>Админ-токен</label>
+          <input id="token" type="password" placeholder="введите токен (env DERM_ADMIN_TOKEN)"
+                 autocomplete="off" /></div>
+      </div>
+      <button class="primary" id="load">Загрузить сводку</button>
+    </div>
+
+    <div id="kpis" class="pgrid"></div>
+
+    <div id="recentCard" class="card hidden">
+      <h2>Последние заказы</h2>
+      <p class="summary" style="font-size:13px">Кнопка «→ статус» переводит заказ на следующий шаг —
+        покупатель получает уведомление автоматически.</p>
+      <div id="recent"></div>
+    </div>
+
+    <div class="card">
+      <h2>Автоматизации ⚙️</h2>
+      <p class="summary" style="font-size:13px">Раз в час автоматически: обновление «живых» протоколов,
+        напоминания о брошенной корзине, чистка кодов входа. Можно запустить вручную.</p>
+      <button class="ghost" id="runJobs">▶ Запустить сейчас</button>
+      <button class="ghost" id="aiTest">🤖 Проверить AI</button>
+      <div id="autoRuns"></div>
+    </div>
+  </main>
+
+  <script src="/static/auth-helper.js"></script>
+  <script src="/static/admin.js"></script>
+</body>
+</html>

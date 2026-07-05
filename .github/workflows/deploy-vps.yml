@@ -1,0 +1,73 @@
+# Деплой Aura на VPS по паролю root (запуск вручную: Actions → Деплой на VPS).
+# Пароль лучше хранить в секрете VPS_ROOT_PASSWORD (Settings → Secrets → Actions);
+# поле password — запасной вариант для первого запуска.
+name: Деплой на VPS
+
+on:
+  workflow_dispatch:
+    inputs:
+      host:
+        description: "IP-адрес сервера"
+        required: true
+      password:
+        description: "root-пароль (если не задан секрет VPS_ROOT_PASSWORD)"
+        required: false
+        default: ""
+      anthropic_key:
+        description: "ANTHROPIC_API_KEY (если не задан секрет ANTHROPIC_API_KEY)"
+        required: false
+        default: ""
+      admin_token:
+        description: "DERM_ADMIN_TOKEN для админ-панели"
+        required: false
+        default: ""
+      domain:
+        description: "Домен (пусто = доступ по IP без HTTPS)"
+        required: false
+        default: ""
+
+concurrency: deploy-vps
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Установка sshpass
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq sshpass
+
+      - name: Деплой на сервер
+        env:
+          HOST: ${{ inputs.host }}
+          SSHPASS: ${{ secrets.VPS_ROOT_PASSWORD != '' && secrets.VPS_ROOT_PASSWORD || inputs.password }}
+          APP_ANTHROPIC_KEY: ${{ secrets.ANTHROPIC_API_KEY != '' && secrets.ANTHROPIC_API_KEY || inputs.anthropic_key }}
+          APP_ADMIN_TOKEN: ${{ inputs.admin_token }}
+          APP_DOMAIN: ${{ inputs.domain }}
+        run: |
+          set -euo pipefail
+          if [ -z "$SSHPASS" ]; then
+            echo "::error::Не задан root-пароль (секрет VPS_ROOT_PASSWORD или поле password)"
+            exit 1
+          fi
+          SSH_OPTS="-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o ConnectTimeout=15"
+
+          echo "Архивируем код…"
+          tar czf /tmp/aura.tgz --exclude .git .
+
+          echo "Копируем на сервер…"
+          sshpass -e ssh $SSH_OPTS "root@$HOST" "mkdir -p /root/aura"
+          sshpass -e scp $SSH_OPTS /tmp/aura.tgz "root@$HOST:/root/aura.tgz"
+
+          echo "Разворачиваем…"
+          sshpass -e ssh $SSH_OPTS "root@$HOST" \
+            "tar xzf /root/aura.tgz -C /root/aura && rm /root/aura.tgz && \
+             ANTHROPIC_API_KEY='$APP_ANTHROPIC_KEY' \
+             DERM_ADMIN_TOKEN='$APP_ADMIN_TOKEN' \
+             DOMAIN='${APP_DOMAIN:-:80}' \
+             bash /root/aura/scripts/vps-bootstrap.sh"
+
+      - name: Итог
+        run: |
+          echo "Готово. Проверка: http://${{ inputs.host }}/health"

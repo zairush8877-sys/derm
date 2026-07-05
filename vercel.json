@@ -1,0 +1,15 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "version": 2,
+  "builds": [
+    { "src": "api/index.py", "use": "@vercel/python" }
+  ],
+  "routes": [
+    { "src": "/static/(.*)", "dest": "/app/static/$1" },
+    { "src": "/(.*)", "dest": "api/index.py" }
+  ],
+  "env": {
+    "DERM_MOCK_MODE": "1",
+    "DERM_DB_PATH": "/tmp/derm.db"
+  }
+}

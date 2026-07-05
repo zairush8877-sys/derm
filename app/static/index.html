@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Aura — premium wellness пространство</title>
+  <meta name="description" content="AI-анализ кожи, трекер питания, персональный уход и магазин косметики, БАДов и biohacking-продуктов. Всё в одном приложении." />
+  <link rel="stylesheet" href="/static/styles.css" />
+  <link rel="manifest" href="/static/manifest.webmanifest" />
+  <link rel="icon" href="/static/icon.svg" type="image/svg+xml" />
+  <meta name="theme-color" content="#101010" />
+  <meta property="og:title" content="Aura — premium wellness пространство" />
+  <meta property="og:description" content="AI-анализ кожи, трекер питания, персональный уход и магазин wellness-товаров." />
+  <meta property="og:type" content="website" />
+  <style>
+    .hero { text-align: center; padding: 44px 20px 46px; }
+    .hero h1 { font-size: 46px; margin: 0 0 14px; letter-spacing: -1px; font-weight: 800; }
+    .hero p.lead { font-size: 19px; max-width: 560px; margin: 0 auto 28px; }
+    .hero .cta { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+    .hero .cta a { text-decoration: none; }
+    .features { padding-bottom: 10px; }
+    .fcard h3 { margin-top: 0; font-family: "Georgia", serif; font-size: 19px; }
+    .fcard .emoji { font-size: 30px; }
+    .fcard a { color: var(--brand); font-weight: 600; text-decoration: none; font-size: 14px; }
+    .price-line { display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid var(--line); }
+    footer { text-align: center; color: var(--muted); font-size: 12px; padding: 30px 20px 50px; line-height: 1.6; }
+    @media (max-width: 640px) {
+      .hero h1 { font-size: 30px; }
+      .hero p.lead { font-size: 16px; }
+    }
+  </style>
+</head>
+<body>
+  <header class="top">
+    <div class="wrap">
+      <nav class="tabs">
+        <a href="/" class="active">Главная</a>
+        <a href="/shop">Магазин</a>
+        <a href="/skin">Кожа</a>
+        <a href="/food">Еда</a>
+        <a href="/assistant">Ассистент</a>
+        <a href="/tracker">Трекер</a>
+        <a href="/subscription">Подписка</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <div class="hero">
+      <h1>Красота и здоровье,<br/>подтверждённые AI</h1>
+      <p class="lead summary">Анализ кожи по фото, подсчёт калорий по фото еды, персональный протокол
+        ухода и магазин premium-wellness товаров — в одном месте.</p>
+      <div class="cta">
+        <a href="/skin"><button class="primary" style="margin:0">🔬 Проанализировать кожу</button></a>
+        <a href="/shop"><button class="ghost" style="margin:0">🛍 Перейти в магазин</button></a>
+        <button class="ghost hidden" id="installBtn" style="margin:0">📲 Установить приложение</button>
+      </div>
+      <p class="mode-badge" style="margin-top:14px"><a href="/auth" style="color:var(--ink);font-weight:600" id="authLink">Войти или создать аккаунт →</a></p>
+    </div>
+
+    <div class="card search-row" style="padding:14px 16px">
+      <input type="search" id="homeSearch" placeholder="Поиск по товарам: протеин, витамин D, матча…" />
+      <a class="ai-pill" href="/assistant">✦ Спросить Aura</a>
+    </div>
+
+    <div class="pgrid features">
+      <div class="pcard fcard">
+        <div class="emoji">🔬</div>
+        <h3>AI-анализ кожи</h3>
+        <p class="summary" style="font-size:14px">Загрузите фото — получите разбор по 9 параметрам,
+          персональный протокол ухода и PDF-отчёт. Первый скан бесплатно.</p>
+        <a href="/skin">Попробовать →</a>
+      </div>
+      <div class="pcard fcard">
+        <div class="emoji">🍎</div>
+        <h3>Трекер питания</h3>
+        <p class="summary" style="font-size:14px">Сфотографируйте блюдо — AI оценит калории и БЖУ.
+          Дневник питания и суточный калораж автоматически.</p>
+        <a href="/food">Попробовать →</a>
+      </div>
+      <div class="pcard fcard">
+        <div class="emoji">🛍</div>
+        <h3>Магазин wellness</h3>
+        <p class="summary" style="font-size:14px">Косметика, витамины, пептиды, biohacking, спортпит и
+          healthy food. Рекомендации под ваш анализ кожи. Кешбэк баллами до 12%.</p>
+        <a href="/shop">В каталог →</a>
+      </div>
+      <div class="pcard fcard">
+        <div class="emoji">📋</div>
+        <h3>«Живой» протокол ухода</h3>
+        <p class="summary" style="font-size:14px">Персональный уход утро/вечер, который обновляется
+          каждые 30 дней под сезон, возраст и гормональную фазу.</p>
+        <a href="/subscription">Оформить →</a>
+      </div>
+      <div class="pcard fcard">
+        <div class="emoji">💬</div>
+        <h3>Wellness-ассистент</h3>
+        <p class="summary" style="font-size:14px">Вопросы про уход, питание, сон, добавки и
+          восстановление — практичные ответы 24/7.</p>
+        <a href="/assistant">Спросить →</a>
+      </div>
+      <div class="pcard fcard">
+        <div class="emoji">📈</div>
+        <h3>Динамика кожи</h3>
+        <p class="summary" style="font-size:14px">Каждый скан сохраняется — следите, что улучшилось,
+          а что требует внимания.</p>
+        <a href="/tracker">Открыть →</a>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Прозрачные цены</h2>
+      <div class="price-line"><span>Первый AI-скан (кожа или еда)</span><strong>бесплатно</strong></div>
+      <div class="price-line"><span>AI-скан по фото</span><strong>199 ₽</strong></div>
+      <div class="price-line"><span>Пакет 5 сканов</span><strong>896 ₽ <span class="pill up">−10%</span></strong></div>
+      <div class="price-line"><span>Пакет 20 сканов</span><strong>3 184 ₽ <span class="pill up">−20%</span></strong></div>
+      <div class="price-line" style="border:none"><span>Протокол по квизу, трекер, ассистент</span><strong>бесплатно</strong></div>
+    </div>
+  </main>
+
+  <footer>
+    Aura Wellness Space · Косметический анализ кожи и ориентировочная оценка питания —
+    не медицинский диагноз и не заменяют консультацию врача.<br/>
+    <a href="/legal" style="color:var(--muted)">Оферта и политика конфиденциальности</a> · <a href="/docs" style="color:var(--muted)">B2B API для брендов</a>
+  </footer>
+
+  <script src="/static/auth-helper.js"></script>
+  <script>
+    // Кнопка «Установить приложение» (PWA).
+    let deferredPrompt = null;
+    window.addEventListener("beforeinstallprompt", (e) => {
+      e.preventDefault();
+      deferredPrompt = e;
+      document.getElementById("installBtn").classList.remove("hidden");
+    });
+    document.getElementById("installBtn").addEventListener("click", async () => {
+      if (!deferredPrompt) return;
+      deferredPrompt.prompt();
+      deferredPrompt = null;
+      document.getElementById("installBtn").classList.add("hidden");
+    });
+    document.getElementById("homeSearch").addEventListener("keydown", (e) => {
+      if (e.key === "Enter" && e.target.value.trim())
+        window.location = "/shop?q=" + encodeURIComponent(e.target.value.trim());
+    });
+    if ("serviceWorker" in navigator) {
+      window.addEventListener("load", () => navigator.serviceWorker.register("/static/sw.js"));
+    }
+  </script>
+</body>
+</html>

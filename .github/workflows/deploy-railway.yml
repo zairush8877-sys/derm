@@ -1,0 +1,36 @@
+name: Deploy to Railway
+
+# Автодеплой на Railway при пуше в основную ветку.
+# Требует секрет RAILWAY_TOKEN в настройках репозитория (Settings → Secrets).
+# Если токен не задан — шаг деплоя пропускается, workflow не падает.
+
+on:
+  push:
+    branches: ["main"]
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Проверка наличия токена
+        id: guard
+        run: |
+          if [ -z "${{ secrets.RAILWAY_TOKEN }}" ]; then
+            echo "enabled=false" >> "$GITHUB_OUTPUT"
+            echo "RAILWAY_TOKEN не задан — деплой пропущен."
+          else
+            echo "enabled=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Установка Railway CLI
+        if: steps.guard.outputs.enabled == 'true'
+        run: npm i -g @railway/cli
+
+      - name: Деплой
+        if: steps.guard.outputs.enabled == 'true'
+        env:
+          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+        run: railway up --service derm --detach

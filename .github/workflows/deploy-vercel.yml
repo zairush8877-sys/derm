@@ -1,0 +1,37 @@
+name: Deploy to Vercel
+
+# Автодеплой на Vercel при пуше в основную ветку.
+# Требует секреты VERCEL_TOKEN, VERCEL_ORG_ID, VERCEL_PROJECT_ID.
+# Если токен не задан — деплой пропускается, workflow не падает.
+
+on:
+  push:
+    branches: ["main"]
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Проверка наличия токена
+        id: guard
+        run: |
+          if [ -z "${{ secrets.VERCEL_TOKEN }}" ]; then
+            echo "enabled=false" >> "$GITHUB_OUTPUT"
+            echo "VERCEL_TOKEN не задан — деплой пропущен."
+          else
+            echo "enabled=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Установка Vercel CLI
+        if: steps.guard.outputs.enabled == 'true'
+        run: npm i -g vercel
+
+      - name: Деплой (prod)
+        if: steps.guard.outputs.enabled == 'true'
+        env:
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+        run: vercel deploy --prod --yes --token "${{ secrets.VERCEL_TOKEN }}"

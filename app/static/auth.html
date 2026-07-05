@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Aura — вход в личный кабинет</title>
+  <link rel="stylesheet" href="/static/styles.css" />
+  <link rel="icon" href="/static/icon.svg" type="image/svg+xml" />
+  <meta name="theme-color" content="#101010" />
+  <style>
+    /* Флоу входа в стиле Gold Apple: телефон -> код, без пароля. */
+    .auth-wrap { max-width: 440px; margin: 30px auto 0; }
+    .auth-title { font-size: 34px; font-weight: 700; line-height: 1.15; letter-spacing: -0.5px;
+      margin: 10px 0 26px; text-transform: lowercase; }
+    .back { font-size: 26px; cursor: pointer; background: none; border: none; padding: 0; margin: 0 0 6px; }
+    .country { display: flex; align-items: center; gap: 10px; padding: 14px 2px;
+      border-bottom: 1px solid var(--line); font-size: 14px; letter-spacing: 1px; }
+    .phone-row { display: flex; align-items: center; gap: 10px; padding: 6px 2px 10px;
+      border-bottom: 1.5px solid var(--ink); margin-bottom: 26px; }
+    .phone-row .prefix { font-size: 18px; font-weight: 600; }
+    .phone-row input { border: none; outline: none; font-size: 18px; flex: 1; letter-spacing: 2px;
+      background: transparent; }
+    .code-row input { border: none; outline: none; font-size: 28px; letter-spacing: 14px;
+      border-bottom: 1.5px solid var(--ink); width: 100%; padding: 8px 2px; text-align: center; }
+    .cta { width: 100%; background: var(--ink); color: #fff; border: none; padding: 18px;
+      font-size: 14px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase;
+      cursor: pointer; }
+    .cta:disabled { opacity: .4; }
+    .consent { font-size: 12.5px; color: var(--muted); line-height: 1.55; margin-top: 16px; }
+    .consent a { color: var(--ink); }
+    .services { text-align: center; margin: 30px 0 6px; }
+    .services .label { font-size: 14px; color: var(--muted); margin-bottom: 18px; }
+    .svc-row { display: flex; justify-content: center; gap: 26px; }
+    .svc { width: 74px; }
+    .svc .circle { width: 64px; height: 64px; border-radius: 50%; background: var(--ink); color: #fff;
+      display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 20px;
+      margin: 0 auto 8px; opacity: .35; }
+    .svc .name { font-size: 12.5px; color: var(--muted); }
+    .demo-code { background: var(--soft); border-radius: 12px; padding: 12px 16px; margin: 14px 0;
+      font-size: 14px; }
+    .alt-link { display: block; text-align: center; margin-top: 22px; font-size: 13.5px;
+      color: var(--muted); cursor: pointer; text-decoration: underline; background: none; border: none; width: 100%; }
+  </style>
+</head>
+<body>
+  <main class="auth-wrap">
+
+    <!-- Профиль (если уже вошли) -->
+    <div id="profileCard" class="hidden">
+      <h1 class="auth-title">личный кабинет</h1>
+      <p class="summary" id="profileInfo"></p>
+      <a href="/account"><button class="cta" style="margin-top:18px">открыть кабинет</button></a>
+      <button class="alt-link" id="logout">Выйти из аккаунта</button>
+    </div>
+
+    <!-- Шаг 1: номер телефона -->
+    <div id="stepPhone">
+      <h1 class="auth-title">войти в личный кабинет</h1>
+      <p class="summary" style="font-size:14.5px">Отправим код для входа. Если аккаунта ещё нет —
+        он создастся автоматически.</p>
+
+      <div class="country">🇷🇺&nbsp; РОССИЯ</div>
+      <div class="phone-row">
+        <span class="prefix">+7</span>
+        <input id="phone" inputmode="numeric" autocomplete="tel" placeholder="___-___-__-__" />
+      </div>
+
+      <button class="cta" id="getCode">Получить код</button>
+
+      <p class="consent">При входе и регистрации я даю <a href="/legal#consent" target="_blank">согласие</a>
+        на обработку своих персональных данных в соответствии с
+        <a href="/legal#privacy" target="_blank">политикой обработки персональных данных</a>
+        и принимаю <a href="/legal#offer" target="_blank">оферту</a>.</p>
+
+      <div class="services">
+        <div class="label">через сервис</div>
+        <div class="svc-row">
+          <div class="svc" title="Скоро"><div class="circle">Я</div><div class="name">Яндекс ID<br/>скоро</div></div>
+          <div class="svc" title="Скоро"><div class="circle">VK</div><div class="name">VK ID<br/>скоро</div></div>
+        </div>
+      </div>
+
+      <button class="alt-link" id="toPassword">Войти по паролю</button>
+    </div>
+
+    <!-- Шаг 2: код -->
+    <div id="stepCode" class="hidden">
+      <button class="back" id="backToPhone">←</button>
+      <h1 class="auth-title">введите код</h1>
+      <p class="summary" style="font-size:14.5px">Отправили код на <strong id="sentTo"></strong>.</p>
+      <div class="demo-code hidden" id="demoCode"></div>
+      <div class="code-row" style="margin:18px 0 26px">
+        <input id="code" inputmode="numeric" maxlength="4" placeholder="····" />
+      </div>
+      <button class="cta" id="verify">Войти</button>
+      <button class="alt-link" id="resend">Отправить код ещё раз</button>
+    </div>
+
+    <!-- Запасной вход по паролю (для тех, кто регистрировался раньше) -->
+    <div id="stepPassword" class="hidden">
+      <button class="back" id="backFromPassword">←</button>
+      <h1 class="auth-title">вход по паролю</h1>
+      <div class="quiz" style="grid-template-columns:1fr">
+        <div><label>Телефон</label><input id="pPhone" placeholder="+7 900 000-00-00" autocomplete="tel" /></div>
+        <div><label>Пароль</label><input id="pPass" type="password" placeholder="ваш пароль" /></div>
+      </div>
+      <button class="cta" id="pLogin" style="margin-top:22px">Войти</button>
+      <p class="consent">Нет пароля? Вернитесь и войдите по коду — это быстрее.</p>
+    </div>
+
+    <p class="disclaimer" id="error" style="color:var(--red);border:none;text-align:center"></p>
+  </main>
+
+  <script src="/static/auth-helper.js"></script>
+  <script>
+    const el = (id) => document.getElementById(id);
+    const show = (id) => ["stepPhone", "stepCode", "stepPassword", "profileCard"]
+      .forEach((s) => el(s).classList.toggle("hidden", s !== id));
+    const err = (m) => { el("error").textContent = m || ""; };
+
+    // Маска +7 XXX-XXX-XX-XX.
+    el("phone").addEventListener("input", (e) => {
+      let d = e.target.value.replace(/\D/g, "").slice(0, 10);
+      let out = d.slice(0, 3);
+      if (d.length > 3) out += "-" + d.slice(3, 6);
+      if (d.length > 6) out += "-" + d.slice(6, 8);
+      if (d.length > 8) out += "-" + d.slice(8, 10);
+      e.target.value = out;
+    });
+
+    const fullPhone = () => "+7" + el("phone").value.replace(/\D/g, "");
+
+    async function getCode() {
+      err("");
+      const digits = el("phone").value.replace(/\D/g, "");
+      if (digits.length !== 10) { err("Введите 10 цифр номера"); return; }
+      el("getCode").disabled = true;
+      try {
+        const fd = new FormData();
+        fd.append("phone", fullPhone());
+        const res = await fetch("/api/auth/otp/request", { method: "POST", body: fd });
+        const data = await res.json();
+        if (!res.ok) { err(data.detail || "Не удалось отправить код"); return; }
+        el("sentTo").textContent = "+7 " + el("phone").value;
+        if (data.demo_code) {
+          el("demoCode").textContent = "Демо-режим (SMS ещё не подключены) — ваш код: " + data.demo_code;
+          el("demoCode").classList.remove("hidden");
+        } else {
+          el("demoCode").classList.add("hidden");
+        }
+        el("code").value = "";
+        show("stepCode");
+        el("code").focus();
+      } catch { err("Сеть недоступна"); }
+      finally { el("getCode").disabled = false; }
+    }
+
+    async function verify() {
+      err("");
+      el("verify").disabled = true;
+      try {
+        const fd = new FormData();
+        fd.append("phone", fullPhone());
+        fd.append("code", el("code").value.trim());
+        const res = await fetch("/api/auth/otp/verify", { method: "POST", body: fd });
+        const data = await res.json();
+        if (!res.ok) { err(data.detail || "Неверный код"); return; }
+        finish(data);
+      } catch { err("Сеть недоступна"); }
+      finally { el("verify").disabled = false; }
+    }
+
+    async function passwordLogin() {
+      err("");
+      const fd = new FormData();
+      fd.append("phone", el("pPhone").value);
+      fd.append("password", el("pPass").value);
+      const res = await fetch("/api/auth/login", { method: "POST", body: fd });
+      const data = await res.json();
+      if (!res.ok) { err(data.detail || "Неверный телефон или пароль"); return; }
+      finish(data);
+    }
+
+    function finish(data) {
+      localStorage.setItem("aura_token", data.token);
+      localStorage.setItem("aura_name", data.user.name || data.user.phone);
+      window.location = "/";
+    }
+
+    function showProfile() {
+      const token = localStorage.getItem("aura_token");
+      if (!token) return;
+      fetch("/api/auth/me", { headers: { Authorization: "Bearer " + token } })
+        .then((r) => { if (!r.ok) throw new Error(); return r.json(); })
+        .then((u) => {
+          el("profileInfo").textContent = (u.name ? u.name + " · " : "") + u.phone;
+          show("profileCard");
+        })
+        .catch(() => { localStorage.removeItem("aura_token"); localStorage.removeItem("aura_name"); });
+    }
+
+    el("getCode").addEventListener("click", getCode);
+    el("verify").addEventListener("click", verify);
+    el("resend").addEventListener("click", getCode);
+    el("backToPhone").addEventListener("click", () => { err(""); show("stepPhone"); });
+    el("toPassword").addEventListener("click", () => { err(""); show("stepPassword"); });
+    el("backFromPassword").addEventListener("click", () => { err(""); show("stepPhone"); });
+    el("pLogin").addEventListener("click", passwordLogin);
+    el("phone").addEventListener("keydown", (e) => { if (e.key === "Enter") getCode(); });
+    el("code").addEventListener("keydown", (e) => { if (e.key === "Enter") verify(); });
+    el("logout").addEventListener("click", () => {
+      localStorage.removeItem("aura_token");
+      localStorage.removeItem("aura_name");
+      window.location.reload();
+    });
+    showProfile();
+  </script>
+</body>
+</html>

@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>derm — AI-трекер кожи</title>
+  <link rel="stylesheet" href="/static/styles.css" />
+  <link rel="manifest" href="/static/manifest.webmanifest" />
+  <link rel="icon" href="/static/icon.svg" type="image/svg+xml" />
+  <meta name="theme-color" content="#2563eb" />
+</head>
+<body>
+  <header class="top">
+    <div class="wrap">
+      <h1>AI-трекер кожи</h1>
+      <p>Динамика состояния кожи во времени: что улучшилось, а что требует внимания.</p>
+      <nav class="tabs">
+        <a href="/">Главная</a>
+        <a href="/shop">Магазин</a>
+        <a href="/skin">Кожа</a>
+        <a href="/food">Еда</a>
+        <a href="/assistant">Ассистент</a>
+        <a href="/tracker" class="active">Трекер</a>
+        <a href="/subscription">Подписка</a>
+        <a href="/docs">B2B API</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <div class="card">
+      <h2>Пользователь</h2>
+      <div class="quiz">
+        <div>
+          <label>Имя пользователя</label>
+          <input type="text" id="user_id" value="demo-user" />
+        </div>
+        <div style="display:flex;align-items:flex-end">
+          <button class="ghost" id="load">Показать динамику</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="summary" class="card hidden">
+      <h2>Сводка</h2>
+      <p id="overall" class="summary"></p>
+      <p class="mode-badge" id="count"></p>
+    </div>
+
+    <div id="trends" class="card hidden">
+      <h2>Динамика по проблемам</h2>
+      <p class="summary" style="margin-bottom:8px">↓ ниже балл = лучше. Сравнение последнего скана с предыдущим.</p>
+      <div id="trendList"></div>
+    </div>
+
+    <div id="chart" class="card hidden">
+      <h2>График баллов по сканам</h2>
+      <canvas id="canvas" width="820" height="260" style="max-width:100%"></canvas>
+    </div>
+
+    <div id="empty" class="card hidden">
+      <p class="summary">Сканов пока нет. Сделайте <a href="/skin">анализ кожи</a> — и здесь появится динамика.</p>
+    </div>
+  </main>
+
+  <script src="/static/auth-helper.js"></script>
+  <script src="/static/tracker.js"></script>
+  <script>
+    if ("serviceWorker" in navigator) {
+      window.addEventListener("load", () => navigator.serviceWorker.register("/static/sw.js"));
+    }
+  </script>
+</body>
+</html>
