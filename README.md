@@ -108,6 +108,7 @@ pytest
 | Ключ Anthropic | [ANTHROPIC_SETUP.md](ANTHROPIC_SETUP.md) | Настоящий AI-анализ кожи/еды и ассистент |
 | SMS-провайдер | [SMS_SETUP.md](SMS_SETUP.md) | Настоящие SMS-коды входа (SMS.ru / SMSC.ru) |
 | Деплой на VPS | [DEPLOY.md](DEPLOY.md) | Сайт с HTTPS одной командой |
+| Домен + HTTPS | [DOMAIN_SETUP.md](DOMAIN_SETUP.md) | Постоянный адрес с замочком |
 | Стоимость | [COSTS.md](COSTS.md) | Экономика AI-вызовов и подписок |
 
 Без ключей всё работает в демо-режиме — бесплатно и без сети.

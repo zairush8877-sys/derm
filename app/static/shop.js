@@ -50,14 +50,20 @@ function renderGrid(products) {
     const { rating, reviews } = ratingFor(p);
     const stars = "★".repeat(Math.round(rating)) + "☆".repeat(5 - Math.round(rating));
     const freeShip = p.price_rub >= 3500 ? `<span class="badge-free">Бесплатная доставка</span>` : "";
+    const disc = p.old_price_rub && p.old_price_rub > p.price_rub
+      ? Math.round((1 - p.price_rub / p.old_price_rub) * 100) : 0;
+    const cornerBadge = disc ? `<span class="badge-disc">−${disc}%</span>`
+      : (p.hit ? `<span class="badge-hit">Хит</span>` : "");
+    const oldPrice = disc
+      ? `<span class="old-price">${p.old_price_rub.toLocaleString("ru-RU")} ₽</span>` : "";
     return `
     <div class="pcard">
-      <div class="ptile">${freeShip}${catIcon[p.category] || "🌿"}
+      <div class="ptile">${cornerBadge}${freeShip}${catIcon[p.category] || "🌿"}
         <button class="addbtn" data-add="${p.id}" title="${p.is_service ? "Записаться" : "В корзину"}">+</button>
       </div>
       <span class="cat">${p.brand}</span>
       <h3>${p.name}</h3>
-      <div class="price">${p.price_rub.toLocaleString("ru-RU")} ₽</div>
+      <div class="price">${p.price_rub.toLocaleString("ru-RU")} ₽${oldPrice}</div>
       <div class="stars">${stars}<span class="cnt">(${reviews})</span></div>
     </div>`;
   }).join("");
