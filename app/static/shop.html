@@ -32,6 +32,12 @@
       <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:12px">
         <input type="search" id="q" placeholder="Поиск: протеин, витамин D, матча…"
                style="flex:1;min-width:200px;padding:11px 14px;border:1px solid var(--line);border-radius:10px" />
+        <select id="sort" style="padding:11px 14px;border:1px solid var(--line);border-radius:10px;background:#fff">
+          <option value="popular">Сначала популярные</option>
+          <option value="discount">Со скидкой</option>
+          <option value="cheap">Дешевле</option>
+          <option value="expensive">Дороже</option>
+        </select>
         <span class="badge" id="loyalty">Лояльность…</span>
       </div>
       <div id="cats"></div>
