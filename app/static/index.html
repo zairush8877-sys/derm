@@ -163,6 +163,29 @@
       window.addEventListener("load", () => navigator.serviceWorker.register("/static/sw.js"));
     }
 
+    // Параллакс авроры: пятна тянутся за курсором (мягко, только на десктопе).
+    if (window.matchMedia("(pointer: fine)").matches &&
+        !window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      const orbs = document.querySelectorAll(".aurora .orb");
+      const hero = document.querySelector(".hero");
+      let raf = null;
+      hero.addEventListener("mousemove", (e) => {
+        if (raf) return;
+        raf = requestAnimationFrame(() => {
+          const r = hero.getBoundingClientRect();
+          const dx = (e.clientX - r.left) / r.width - 0.5;
+          const dy = (e.clientY - r.top) / r.height - 0.5;
+          orbs.forEach((o, i) => {
+            const k = (i + 1) * 14;
+            o.style.translate = `${dx * k}px ${dy * k}px`;
+          });
+          raf = null;
+        });
+      });
+      hero.addEventListener("mouseleave", () =>
+        orbs.forEach((o) => o.style.translate = "0px 0px"));
+    }
+
     // Анимированные счётчики фактов (запуск при попадании в кадр).
     const animateCount = (b) => {
       const target = +b.dataset.count, suffix = b.dataset.suffix || "";

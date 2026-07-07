@@ -56,7 +56,7 @@ function renderCats(categories) {
     categories.map((c) => ({ v: c, label: (catIcon[c] || "") + " " + c })));
   box.innerHTML = all.map((c) =>
     `<button class="ghost" data-cat="${c.v ?? ""}"
-      style="${c.v === activeCat ? "background:var(--brand);color:#fff" : ""}">${c.label}</button>`
+      style="${c.v === activeCat ? "background:var(--ink);color:var(--on-ink)" : ""}">${c.label}</button>`
   ).join("");
   box.querySelectorAll("button").forEach((b) =>
     b.addEventListener("click", () => { activeCat = b.dataset.cat || null; loadProducts(); }));
@@ -95,7 +95,12 @@ function renderGrid(products) {
     </div>`;
   }).join("");
   el("grid").querySelectorAll("[data-add]").forEach((b) =>
-    b.addEventListener("click", () => addToCart(b.dataset.add)));
+    b.addEventListener("click", async () => {
+      await addToCart(b.dataset.add);
+      // Микро-анимация успеха: «+» превращается в «✓» на секунду.
+      b.textContent = "✓"; b.classList.add("added");
+      setTimeout(() => { b.textContent = "+"; b.classList.remove("added"); }, 900);
+    }));
 }
 
 async function addToCart(productId) {

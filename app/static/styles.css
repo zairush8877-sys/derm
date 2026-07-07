@@ -31,6 +31,9 @@
   --red: #b3402f;
   --radius: 16px;
   --shadow: 0 1px 3px rgba(0,0,0,0.04);
+  --on-ink: #ffffff;          /* текст на чернильном фоне */
+  --hover-soft: #ececea;      /* ховеры подложек */
+  --glass: rgba(255,255,255,.72);
   --maxw: 960px;
 }
 
@@ -92,8 +95,8 @@ nav.tabs a {
   padding: 8px 16px; border-radius: 999px; font-size: 13.5px; white-space: nowrap;
   border: 1px solid transparent; transition: background .15s;
 }
-nav.tabs a:hover { background: #ececea; }
-nav.tabs a.active { background: var(--ink); color: #fff; font-weight: 600; }
+nav.tabs a:hover { background: var(--hover-soft); }
+nav.tabs a.active { background: var(--ink); color: var(--on-ink); font-weight: 600; }
 
 main { max-width: var(--maxw); margin: 0 auto; padding: 22px 20px 90px; }
 
@@ -108,22 +111,22 @@ main { max-width: var(--maxw); margin: 0 auto; padding: 22px 20px 90px; }
 .search-row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
 .search-row input[type="search"], input#q {
   flex: 1; min-width: 200px; padding: 13px 18px; font-size: 15px;
-  border: 1.5px solid var(--ink); border-radius: 999px; background: #fff; color: var(--ink);
+  border: 1.5px solid var(--ink); border-radius: 999px; background: var(--card); color: var(--ink);
 }
 .ai-pill {
   display: inline-flex; align-items: center; gap: 6px; padding: 12px 18px;
-  border: 1.5px solid var(--line); border-radius: 999px; background: #fff;
+  border: 1.5px solid var(--line); border-radius: 999px; background: var(--card);
   color: var(--ink); font-size: 14.5px; font-weight: 600; text-decoration: none;
   cursor: pointer; white-space: nowrap;
 }
 .ai-pill:hover { border-color: var(--ink); }
 
 .drop {
-  border: 1.5px dashed #d4d4d0; border-radius: var(--radius);
+  border: 1.5px dashed var(--line); border-radius: var(--radius);
   padding: 40px 16px; text-align: center; color: var(--muted); cursor: pointer;
   background: var(--soft); transition: border-color .15s, background .15s;
 }
-.drop.drag { border-color: var(--ink); background: #efefec; }
+.drop.drag { border-color: var(--ink); background: var(--hover-soft); }
 .drop strong { color: var(--ink); }
 
 .preview { max-width: 190px; border-radius: 12px; margin-top: 14px; }
@@ -132,20 +135,20 @@ main { max-width: var(--maxw); margin: 0 auto; padding: 22px 20px 90px; }
 .quiz label { font-size: 12px; color: var(--muted); display: block; margin-bottom: 5px; letter-spacing: 0.4px; text-transform: uppercase; }
 .quiz input, .quiz select {
   width: 100%; padding: 12px 14px; border: 1px solid var(--line); border-radius: 12px;
-  font-size: 14.5px; background: #fff; color: var(--ink);
+  font-size: 14.5px; background: var(--card); color: var(--ink);
 }
 .quiz input:focus, .quiz select:focus { outline: none; border-color: var(--ink); }
 .quiz .full { grid-column: 1 / -1; }
 
 button.primary {
-  background: var(--ink); color: #fff; border: none; border-radius: 999px;
+  background: var(--ink); color: var(--on-ink); border: none; border-radius: 999px;
   padding: 14px 24px; font-size: 15px; font-weight: 600; cursor: pointer; margin-top: 16px;
   letter-spacing: 0.2px; transition: opacity .15s;
 }
 button.primary:hover { opacity: .85; }
 button.primary:disabled { opacity: .35; cursor: default; }
 button.ghost {
-  background: #fff; color: var(--ink); border: 1.5px solid var(--line);
+  background: var(--card); color: var(--ink); border: 1.5px solid var(--line);
   border-radius: 999px; padding: 11px 18px; font-size: 14px; font-weight: 600;
   cursor: pointer; margin: 8px 8px 0 0; transition: border-color .15s;
 }
@@ -187,7 +190,7 @@ button.ghost:hover { border-color: var(--ink); }
 /* Сетка товаров: чистые карточки как у healf */
 .pgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 14px; }
 .pcard {
-  background: #fff; border: 1px solid var(--line); border-radius: var(--radius);
+  background: var(--card); border: 1px solid var(--line); border-radius: var(--radius);
   padding: 14px; box-shadow: var(--shadow); display: flex; flex-direction: column;
   position: relative; transition: box-shadow .15s;
 }
@@ -198,7 +201,7 @@ button.ghost:hover { border-color: var(--ink); }
   margin-bottom: 10px; position: relative;
 }
 .pcard .badge-free {
-  position: absolute; top: 10px; left: 10px; background: #fff; border: 1px solid var(--line);
+  position: absolute; top: 10px; left: 10px; background: var(--glass); border: 1px solid var(--line);
   border-radius: 999px; padding: 4px 11px; font-size: 11.5px; font-weight: 600;
 }
 .pcard .badge-disc {
@@ -215,10 +218,10 @@ button.ghost:hover { border-color: var(--ink); }
 }
 .pcard .addbtn {
   position: absolute; right: 10px; bottom: 10px; width: 38px; height: 38px;
-  border-radius: 50%; border: 1px solid var(--line); background: #fff; font-size: 20px;
+  border-radius: 50%; border: 1px solid var(--line); background: var(--card); font-size: 20px;
   cursor: pointer; line-height: 1; transition: background .15s;
 }
-.pcard .addbtn:hover { background: var(--ink); color: #fff; }
+.pcard .addbtn:hover { background: var(--ink); color: var(--on-ink); }
 .pcard .cat { color: var(--muted); font-size: 11px; font-weight: 600; letter-spacing: 0.8px; text-transform: uppercase; }
 .pcard h3 { margin: 4px 0 2px; font-size: 15.5px; font-weight: 600; line-height: 1.35; }
 .pcard .price { font-size: 16.5px; font-weight: 700; margin: 6px 0 2px; }
@@ -228,7 +231,7 @@ button.ghost:hover { border-color: var(--ink); }
 /* Чат ассистента */
 .chat { display: flex; flex-direction: column; gap: 10px; max-height: 460px; overflow-y: auto; padding: 4px; }
 .msg { padding: 12px 15px; border-radius: 16px; max-width: 82%; line-height: 1.5; font-size: 14.5px; }
-.msg.user { align-self: flex-end; background: var(--ink); color: #fff; }
+.msg.user { align-self: flex-end; background: var(--ink); color: var(--on-ink); }
 .msg.bot { align-self: flex-start; background: var(--soft); color: var(--ink); }
 .chat-input { display: flex; gap: 8px; margin-top: 12px; }
 .chat-input input { flex: 1; padding: 13px 16px; border: 1.5px solid var(--line); border-radius: 999px; font-size: 14.5px; }
@@ -301,7 +304,7 @@ button.ghost:hover { border-color: var(--ink); }
 }
 .pcard .ptile { overflow: hidden; }
 .pcard .ptile { transition: background .3s ease; }
-.pcard:hover .ptile { background: #efefeb; }
+.pcard:hover .ptile { background: var(--hover-soft); }
 
 /* Кнопки: блик-пробег и подъём */
 button.primary, .cta button {
@@ -330,7 +333,7 @@ button.ghost:hover { transform: translateY(-1px); }
 }
 
 /* Стеклянные бейджи на плитках товаров */
-.pcard .badge-free { background: rgba(255,255,255,.72); backdrop-filter: blur(6px); }
+.pcard .badge-free { background: var(--glass); backdrop-filter: blur(6px); }
 
 /* Плавный скролл и аккуратный фокус */
 html { scroll-behavior: smooth; }
@@ -366,7 +369,7 @@ html { scroll-behavior: smooth; }
   background: var(--card);
 }
 .skel .ph {
-  border-radius: 10px; background: linear-gradient(90deg, var(--soft) 25%, #ececea 37%, var(--soft) 63%);
+  border-radius: 10px; background: linear-gradient(90deg, var(--soft) 25%, var(--hover-soft) 37%, var(--soft) 63%);
   background-size: 400% 100%; animation: shimmer 1.3s ease-in-out infinite;
 }
 .skel .ph.tile { height: 150px; margin-bottom: 12px; }
@@ -374,3 +377,87 @@ html { scroll-behavior: smooth; }
 .skel .ph.line.short { width: 55%; }
 @keyframes shimmer { 0% { background-position: 100% 0; } 100% { background-position: -100% 0; } }
 @media (prefers-reduced-motion: reduce) { .skel .ph { animation: none; } }
+
+/* ===== Тёмная тема (переключатель 🌙 в шапке) ===== */
+:root[data-theme="dark"] {
+  --bg: #0f100f;
+  --brand: #f0f0ec;
+  --brand-dark: #ffffff;
+  --card: #171817;
+  --ink: #f0f0ec;
+  --muted: #9c9c95;
+  --line: #272826;
+  --soft: #1d1e1c;
+  --hover-soft: #242523;
+  --on-ink: #101010;
+  --glass: rgba(23,24,23,.72);
+  --shadow: 0 1px 3px rgba(0,0,0,.45);
+}
+:root[data-theme="dark"] .aurora .orb { opacity: .28; }
+:root[data-theme="dark"] .ticker { background: #000; }
+:root[data-theme="dark"] .pcard:hover {
+  box-shadow: 0 14px 34px rgba(0,0,0,.55), 0 2px 8px rgba(31,111,92,.18);
+}
+:root[data-theme="dark"] button.primary:hover { box-shadow: 0 10px 24px rgba(0,0,0,.5); }
+.theme-toggle { cursor: pointer; user-select: none; }
+html { color-scheme: light; }
+:root[data-theme="dark"] { color-scheme: dark; }
+/* Плавная смена темы */
+body, .card, .pcard, .stat, nav.tabs a, button.ghost, .ai-pill, .skel {
+  transition: background-color .35s ease, border-color .35s ease, color .35s ease;
+}
+
+/* ===== Ещё больше анимаций ===== */
+/* Вход героя каскадом при загрузке */
+.hero h1 { animation: riseIn .7s cubic-bezier(.2,.8,.2,1) both; }
+.hero .lead { animation: riseIn .7s .12s cubic-bezier(.2,.8,.2,1) both; }
+.hero .cta { animation: riseIn .7s .24s cubic-bezier(.2,.8,.2,1) both; }
+@keyframes riseIn { from { opacity: 0; transform: translateY(18px); } }
+
+/* Эмодзи-иконки на карточках мягко «дышат» */
+.fcard .emoji { display: inline-block; animation: bob 4.5s ease-in-out infinite; }
+.fcard:nth-child(2n) .emoji { animation-delay: -1.6s; }
+.fcard:nth-child(3n) .emoji { animation-delay: -3s; }
+@keyframes bob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
+
+/* Нажатие кнопок — тактильный отклик */
+button.primary:active, button.ghost:active, .addbtn:active { transform: scale(.96) !important; }
+
+/* Бегущая строка замирает под курсором (можно дочитать оффер) */
+.ticker:hover .track { animation-play-state: paused; }
+
+/* Свечение AI-пилюли и активной категории */
+.ai-pill { transition: box-shadow .25s ease, border-color .25s ease; }
+.ai-pill:hover { box-shadow: 0 0 0 4px rgba(31,111,92,.14); }
+
+/* Появление плавающей кнопки ассистента */
+.fab { animation: fabIn .5s .4s cubic-bezier(.2,.8,.2,1) both, fabPulse 3.4s 1.2s ease-in-out infinite; }
+@keyframes fabIn { from { opacity: 0; transform: translateY(20px) scale(.8); } }
+
+/* Плитка товара: лёгкий зум содержимого при ховере */
+.pcard .ptile { transition: background .3s ease, transform .3s ease; }
+.pcard:hover .ptile { transform: scale(1.02); }
+
+@media (prefers-reduced-motion: reduce) {
+  .hero h1, .hero .lead, .hero .cta, .fcard .emoji, .fab { animation: none !important; }
+  .pcard:hover .ptile { transform: none; }
+  body, .card, .pcard, .stat, nav.tabs a, button.ghost, .ai-pill, .skel { transition: none; }
+}
+
+/* Пульс фирменной точки логотипа */
+.logobar .logo { position: relative; }
+.logobar .logo::after { display: inline-block; animation: dotPulse 2.6s ease-in-out infinite; }
+@keyframes dotPulse { 0%,100% { opacity: 1; transform: scale(1); } 50% { opacity: .55; transform: scale(1.25); } }
+
+/* Счётчики фактов приподнимаются под курсором */
+.stat { transition: transform .25s ease, box-shadow .25s ease; }
+.stat:hover { transform: translateY(-4px); box-shadow: 0 10px 26px rgba(16,16,16,.10); }
+:root[data-theme="dark"] .stat:hover { box-shadow: 0 10px 26px rgba(0,0,0,.5); }
+
+/* Успешное добавление в корзину: кнопка «+» превращается в ✓ */
+.addbtn.added { background: var(--accent) !important; color: #fff !important; border-color: var(--accent) !important; }
+
+@media (prefers-reduced-motion: reduce) {
+  .logobar .logo::after { animation: none; }
+  .stat { transition: none; }
+}
