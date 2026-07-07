@@ -40,6 +40,12 @@ function renderResult(data) {
   el("skinType").textContent = "Тип кожи: " + a.skin_type;
   el("summary").textContent = a.summary;
   el("disclaimer").textContent = a.disclaimer;
+  // Честность: если реальный AI недоступен и сработал демо-режим — предупреждаем.
+  if ((a.model || "").includes("mock")) {
+    el("summary").insertAdjacentHTML("beforebegin",
+      `<p class="pill down" style="display:inline-block;margin-bottom:8px">⚠️ Демо-оценка:
+       реальный AI сейчас недоступен, результат ориентировочный</p>`);
+  }
 
   const concerns = el("concerns");
   concerns.innerHTML = "";
