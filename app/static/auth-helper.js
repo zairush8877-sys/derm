@@ -5,6 +5,13 @@
   "use strict";
   const token = localStorage.getItem("aura_token");
 
+  // Тема (день/ночь): применяем сразу, до отрисовки — без «мигания».
+  const savedTheme = localStorage.getItem("aura_theme");
+  if (savedTheme === "dark" ||
+      (!savedTheme && window.matchMedia("(prefers-color-scheme: dark)").matches)) {
+    document.documentElement.dataset.theme = "dark";
+  }
+
   if (token) {
     const orig = window.fetch.bind(window);
     window.fetch = (url, opts = {}) => {
@@ -32,14 +39,23 @@
     bar.className = "logobar";
     const profileHref = token ? "/account" : "/auth";
     const profileIcon = "👤";
+    const isDark = () => document.documentElement.dataset.theme === "dark";
     bar.innerHTML =
       `<span style="width:70px"></span>` +
       `<a class="logo" href="/">aura</a>` +
       `<span class="icons">` +
+      `<a class="theme-toggle" id="themeToggle" title="Тема: день/ночь">${isDark() ? "☀️" : "🌙"}</a>` +
       `<a href="${profileHref}" title="${token ? (localStorage.getItem("aura_name") || "Профиль") : "Войти"}">${profileIcon}</a>` +
       `<a href="/shop#cartCard" title="Корзина">🛍</a>` +
       `</span>`;
     document.body.insertBefore(bar, ticker.nextSibling);
+    document.getElementById("themeToggle").addEventListener("click", () => {
+      const dark = !isDark();
+      if (dark) document.documentElement.dataset.theme = "dark";
+      else delete document.documentElement.dataset.theme;
+      localStorage.setItem("aura_theme", dark ? "dark" : "light");
+      document.getElementById("themeToggle").textContent = dark ? "☀️" : "🌙";
+    });
 
     // 3) Плавающая кнопка ассистента (кроме самой страницы ассистента).
     if (!location.pathname.startsWith("/assistant")) {
