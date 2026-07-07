@@ -8,6 +8,9 @@ services:
     env_file: .env
     environment:
       DERM_DB_PATH: /data/aura.db
+      # AI-запросы идут через Cloudflare AI Gateway (шлюз «aura»):
+      # Anthropic не принимает запросы напрямую с российских IP.
+      ANTHROPIC_BASE_URL: ${ANTHROPIC_BASE_URL:-https://gateway.ai.cloudflare.com/v1/48cbb2b7945df7726c1770a990e494a2/aura/anthropic}
     volumes:
       - aura-data:/data
     expose:
