@@ -1,5 +1,21 @@
 /* Aura — светлый минимализм в духе healf.com: белый фон, чёрный текст,
    скругления-пилюли, тонкие линии, чистые карточки товаров. */
+
+/* Фирменные шрифты (самостоятельный хостинг, переменные woff2):
+   Unbounded — футуристичные заголовки/логотип; Manrope — текст. */
+@font-face { font-family: 'Manrope'; font-style: normal; font-weight: 400 800; font-display: swap;
+  src: url('/static/fonts/manrope-lat-bcbadc.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+2000-206F, U+20AC, U+2212; }
+@font-face { font-family: 'Manrope'; font-style: normal; font-weight: 400 800; font-display: swap;
+  src: url('/static/fonts/manrope-cyr-d0354d.woff2') format('woff2');
+  unicode-range: U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116; }
+@font-face { font-family: 'Unbounded'; font-style: normal; font-weight: 400 900; font-display: swap;
+  src: url('/static/fonts/unbounded-lat-f2b2b2.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+2000-206F, U+20AC, U+2212; }
+@font-face { font-family: 'Unbounded'; font-style: normal; font-weight: 400 900; font-display: swap;
+  src: url('/static/fonts/unbounded-cyr-92a538.woff2') format('woff2');
+  unicode-range: U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116; }
+
 :root {
   --bg: #ffffff;
   --card: #ffffff;
@@ -22,11 +38,20 @@
 
 body {
   margin: 0;
-  font-family: -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  font-family: 'Manrope', -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   background: var(--bg);
   color: var(--ink);
   -webkit-font-smoothing: antialiased;
 }
+
+/* Дисплейный шрифт для заголовков и логотипа */
+.logobar .logo, .hero h1, header.top h1, .card h2 {
+  font-family: 'Unbounded', 'Manrope', sans-serif;
+  letter-spacing: -0.5px;
+}
+.logobar .logo { font-weight: 700; }
+.hero h1 { font-weight: 700 !important; }
+.card h2 { font-weight: 600; font-size: 18px; }
 
 /* Бегущая строка с офферами (как у healf: чёрная полоса сверху) */
 .ticker {
@@ -318,3 +343,34 @@ html { scroll-behavior: smooth; }
   .pcard, .card, button.primary, button.ghost { transition: none !important; }
   html { scroll-behavior: auto; }
 }
+
+/* Полоса фактов с анимированными цифрами */
+.stats {
+  display: flex; gap: 12px; flex-wrap: wrap; justify-content: center;
+  margin: 4px 0 18px;
+}
+.stat {
+  flex: 1; min-width: 150px; text-align: center; padding: 18px 12px;
+  background: var(--card); border: 1px solid var(--line); border-radius: var(--radius);
+  box-shadow: var(--shadow);
+}
+.stat b {
+  display: block; font-family: 'Unbounded', sans-serif; font-weight: 700;
+  font-size: 26px; letter-spacing: -0.5px; margin-bottom: 4px;
+}
+.stat span { color: var(--muted); font-size: 12.5px; }
+
+/* Шиммер-скелетоны при загрузке каталога */
+.skel {
+  border: 1px solid var(--line); border-radius: var(--radius); padding: 14px;
+  background: var(--card);
+}
+.skel .ph {
+  border-radius: 10px; background: linear-gradient(90deg, var(--soft) 25%, #ececea 37%, var(--soft) 63%);
+  background-size: 400% 100%; animation: shimmer 1.3s ease-in-out infinite;
+}
+.skel .ph.tile { height: 150px; margin-bottom: 12px; }
+.skel .ph.line { height: 13px; margin: 8px 0; }
+.skel .ph.line.short { width: 55%; }
+@keyframes shimmer { 0% { background-position: 100% 0; } 100% { background-position: -100% 0; } }
+@media (prefers-reduced-motion: reduce) { .skel .ph { animation: none; } }
