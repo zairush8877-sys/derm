@@ -10,7 +10,7 @@ from app.analysis.engine import _detect_media_type
 from app.config import get_settings
 from app.food.mock import mock_food_analysis
 from app.food.prompts import SYSTEM_PROMPT, USER_PROMPT
-from app.food.schemas import FoodAnalysis, FoodItem
+from app.food.schemas import FoodAnalysis, FoodItem, Micro
 
 logger = logging.getLogger("derm.food")
 
@@ -38,7 +38,18 @@ def _parse(raw: str, model: str) -> FoodAnalysis:
     if not items:
         raise ValueError("Claude не вернул позиции еды")
     summary = str(data.get("summary", "")).strip() or "Оценка калорий выполнена."
-    return FoodAnalysis.from_items(items, summary, model=model)
+
+    micros: list[Micro] = []
+    for m in data.get("micros", [])[:10]:
+        try:
+            micros.append(Micro(
+                name=str(m.get("name", "")).strip() or "—",
+                amount=str(m.get("amount", "")).strip(),
+                daily_pct=max(0, min(999, int(m.get("daily_pct", 0)))),
+            ))
+        except Exception:
+            continue  # некорректную позицию пропускаем, не роняя анализ
+    return FoodAnalysis.from_items(items, summary, model=model, micros=micros)
 
 
 def _analyze_with_claude(image_bytes: bytes) -> FoodAnalysis:

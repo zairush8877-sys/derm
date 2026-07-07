@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import hashlib
 
-from app.food.schemas import FoodAnalysis, FoodItem
+from app.food.schemas import FoodAnalysis, FoodItem, Micro
 
 # Небольшая база «блюд» для демо-распознавания.
 _DISHES = [
@@ -49,4 +49,16 @@ def mock_food_analysis(image_bytes: bytes) -> FoodAnalysis:
 
     total = sum(i.calories for i in items)
     summary = f"Всего примерно {total} ккал, {len(items)} поз. Оценка ориентировочная."
-    return FoodAnalysis.from_items(items, summary, model="mock (демо-режим)")
+    _MICROS = ["Витамин C", "Железо", "Кальций", "Магний", "Калий", "Витамин A", "Цинк", "B12"]
+    micros = [
+        Micro(name=_MICROS[digest[(i + 5) % len(digest)] % len(_MICROS)],
+              amount="", daily_pct=5 + digest[(i + 9) % len(digest)] % 60)
+        for i in range(3)
+    ]
+    # Без дублей названий.
+    seen, uniq = set(), []
+    for m in micros:
+        if m.name not in seen:
+            uniq.append(m)
+            seen.add(m.name)
+    return FoodAnalysis.from_items(items, summary, model="mock (демо-режим)", micros=uniq)

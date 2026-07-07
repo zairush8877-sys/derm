@@ -12,7 +12,22 @@ function macroRow(label, value, unit) {
 function renderResult(a) {
   el("summary").textContent = a.summary;
   el("disclaimer").textContent = a.disclaimer;
-  el("items").innerHTML = a.items.map((it) => `
+  // Честность: если реальный AI недоступен и сработал демо-режим — говорим об этом.
+  const demoNote = (a.model || "").includes("mock")
+    ? `<p class="pill down" style="display:inline-block;margin-bottom:10px">⚠️ Демо-оценка:
+       реальный AI сейчас недоступен, цифры ориентировочные</p>` : "";
+  const micros = (a.micros && a.micros.length)
+    ? `<h3 style="margin:14px 0 8px">Витамины и минералы ≈</h3>` +
+      a.micros.map((m) => `
+        <div class="concern" style="margin:8px 0">
+          <div class="row"><span>${m.name}${m.amount ? " · " + m.amount : ""}</span>
+            <span class="score">${m.daily_pct}%</span></div>
+          <div class="bar"><span style="width:${Math.min(100, m.daily_pct)}%;
+            background:var(--accent)"></span></div>
+        </div>`).join("") +
+      `<p class="summary" style="font-size:12px">% от примерной дневной нормы взрослого</p>`
+    : "";
+  el("items").innerHTML = demoNote + a.items.map((it) => `
     <div class="trend">
       <span class="name">${it.name} · <span style="color:var(--muted)">${it.grams} г</span></span>
       <span class="score">${it.calories} ккал</span>
@@ -20,7 +35,8 @@ function renderResult(a) {
     <div style="margin:2px 0 8px">
       ${macroRow("Б", it.protein, "г")}${macroRow("Ж", it.fat, "г")}${macroRow("У", it.carbs, "г")}
     </div>`).join("") +
-    `<p style="text-align:right;font-weight:700">Всего: ${a.total_calories} ккал</p>`;
+    `<p style="text-align:right;font-weight:700">Всего: ${a.total_calories} ккал</p>` +
+    micros;
   el("result").classList.remove("hidden");
 }
 
