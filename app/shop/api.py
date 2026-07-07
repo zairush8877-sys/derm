@@ -99,11 +99,12 @@ def checkout(
     name: str = Form(""),
     phone: str = Form(""),
     delivery_method: str = Form("courier"),
+    comment: str = Form(""),
     auth_id: str | None = Depends(token_user_id),
 ) -> JSONResponse:
     try:
         result = orders.checkout(auth_id or user_id, address=address, name=name,
-                                 phone=phone, method=delivery_method)
+                                 phone=phone, method=delivery_method, comment=comment)
     except ValueError as exc:
         raise HTTPException(status_code=400, detail=str(exc))
     return JSONResponse(result)

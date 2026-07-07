@@ -60,6 +60,15 @@ class Settings:
         self.sms_password: str = os.getenv("SMS_PASSWORD", "").strip()    # пароль SMSC.ru
         self.sms_sender: str = os.getenv("SMS_SENDER", "").strip()        # имя отправителя
 
+        # СДЭК (после договора с ИП): Account/Secure password из ЛК СДЭК.
+        self.cdek_account: str = os.getenv("CDEK_ACCOUNT", "").strip()
+        self.cdek_password: str = os.getenv("CDEK_PASSWORD", "").strip()
+        self.cdek_from_city: int = int(os.getenv("CDEK_FROM_CITY", "44"))  # 44 = Москва
+
+        # Telegram-уведомления владельцу о новых заказах.
+        self.telegram_bot_token: str = os.getenv("TELEGRAM_BOT_TOKEN", "").strip()
+        self.telegram_chat_id: str = os.getenv("TELEGRAM_CHAT_ID", "").strip()
+
         # Фоновые автоматизации (обновление протоколов, напоминания и т.п.).
         self.automation_enabled: bool = os.getenv("DERM_AUTOMATION", "1").strip().lower() not in {"0", "false", "no"}
         self.automation_interval: int = int(os.getenv("DERM_AUTOMATION_INTERVAL", "3600"))

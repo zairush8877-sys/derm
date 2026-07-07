@@ -46,16 +46,21 @@ async function load() {
       const btn = next
         ? `<button class="ghost" style="margin:0" data-oid="${esc(o.id)}" data-next="${next}">→ ${next}</button>`
         : "";
+      const trackBtn = (o.status === "собирается" || o.status === "отправлен")
+        ? `<button class="ghost" style="margin:0" data-track="${esc(o.id)}" title="Вписать трек-номер СДЭК">📦 трек</button>`
+        : "";
       return `
       <div class="trend">
         <span class="name">${esc(o.id)} · ${esc(o.user_id)}</span>
         <span class="score">${Number(o.total_rub).toLocaleString("ru-RU")} ₽</span>
         <span class="pill new">${esc(o.status)}</span>
-        ${btn}
+        ${btn}${trackBtn}
       </div>`;
     }).join("");
     el("recent").querySelectorAll("[data-oid]").forEach((b) =>
       b.addEventListener("click", () => advance(b.dataset.oid, b.dataset.next)));
+    el("recent").querySelectorAll("[data-track]").forEach((b) =>
+      b.addEventListener("click", () => setTrack(b.dataset.track)));
   } else {
     el("recent").innerHTML = `<p class="summary">Заказов пока нет.</p>`;
   }
@@ -80,6 +85,20 @@ async function advance(orderId, status) {
   } finally {
     advancing = false;
   }
+}
+
+async function setTrack(orderId) {
+  const track = prompt("Трек-номер СДЭК для заказа " + orderId + ":");
+  if (!track || !track.trim()) return;
+  const fd = new FormData();
+  fd.append("order_id", orderId);
+  fd.append("track", track.trim());
+  const res = await fetch("/api/admin/order-track", { method: "POST", body: fd, headers: headers() });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    alert(err.detail || "Не удалось сохранить трек"); return;
+  }
+  alert("Трек сохранён — покупатель получил ссылку отслеживания.");
 }
 
 async function loadAutomation() {

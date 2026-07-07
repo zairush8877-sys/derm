@@ -156,6 +156,7 @@ async function submitCheckout() {
   fd.append("user_id", USER); fd.append("address", addr);
   fd.append("name", el("co-name").value); fd.append("phone", el("co-phone").value);
   fd.append("delivery_method", el("co-method").value);
+  fd.append("comment", el("co-comment").value);
   const res = await fetch("/api/shop/checkout", { method: "POST", body: fd });
   if (!res.ok) { alert("Не удалось оформить заказ"); return; }
   const o = await res.json();
