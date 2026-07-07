@@ -97,3 +97,20 @@ def order_status(
     except LookupError as exc:
         raise HTTPException(status_code=404, detail=str(exc))
     return JSONResponse(result)
+
+
+@router.post("/order-track")
+def order_track(
+    order_id: str = Form(...),
+    track: str = Form(...),
+    x_admin_token: str = Header(default="", alias="X-Admin-Token"),
+) -> JSONResponse:
+    """Присвоить заказу трек-номер СДЭК (покупатель получит ссылку отслеживания)."""
+    _guard(x_admin_token)
+    try:
+        result = orders.set_track_number(order_id, track)
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc))
+    except LookupError as exc:
+        raise HTTPException(status_code=404, detail=str(exc))
+    return JSONResponse(result)

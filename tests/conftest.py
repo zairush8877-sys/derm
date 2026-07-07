@@ -17,6 +17,9 @@ def _isolated_env(tmp_path, monkeypatch):
     # SMS — всегда демо-режим в тестах (реальные SMS стоят денег).
     for var in ("SMS_PROVIDER", "SMS_API_KEY", "SMS_LOGIN", "SMS_PASSWORD", "SMS_SENDER"):
         monkeypatch.delenv(var, raising=False)
+    # Внешние интеграции (СДЭК, Telegram) в тестах выключены.
+    for var in ("CDEK_ACCOUNT", "CDEK_PASSWORD", "TELEGRAM_BOT_TOKEN", "TELEGRAM_CHAT_ID"):
+        monkeypatch.delenv(var, raising=False)
     monkeypatch.setenv("DERM_DB_PATH", str(tmp_path / "test.db"))
     monkeypatch.setenv("DERM_AUTOMATION", "0")  # без фоновых потоков в тестах
     # Сбрасываем кэш настроек, чтобы подхватить временное окружение.
