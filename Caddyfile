@@ -1,6 +1,17 @@
 # Aura: реверс-прокси с автоматическим HTTPS (Let's Encrypt).
-# Домен берётся из переменной DOMAIN в .env; для локального теста — localhost.
-{$DOMAIN} {
+# Основной адрес — aura-wellness.ru; сертификат выпускается и продлевается сам.
+aura-wellness.ru {
+	encode gzip
+	reverse_proxy app:8000
+}
+
+# www → без www (постоянный редирект)
+www.aura-wellness.ru {
+	redir https://aura-wellness.ru{uri} permanent
+}
+
+# Запасной доступ по IP/туннелю на 80-м порту (работает и пока DNS расходится)
+:80 {
 	encode gzip
 	reverse_proxy app:8000
 }
