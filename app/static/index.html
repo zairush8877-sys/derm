@@ -14,18 +14,18 @@
   <meta property="og:type" content="website" />
   <style>
     .hero { text-align: center; padding: 44px 20px 46px; }
-    .hero h1 { font-size: 46px; margin: 0 0 14px; letter-spacing: -1px; font-weight: 800; }
+    .hero h1 { font-size: 38px; margin: 0 0 16px; letter-spacing: -1px; font-weight: 800; line-height: 1.25; }
     .hero p.lead { font-size: 19px; max-width: 560px; margin: 0 auto 28px; }
     .hero .cta { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
     .hero .cta a { text-decoration: none; }
     .features { padding-bottom: 10px; }
-    .fcard h3 { margin-top: 0; font-family: "Georgia", serif; font-size: 19px; }
+    .fcard h3 { margin-top: 0; font-family: "Unbounded", "Manrope", sans-serif; font-weight: 600; font-size: 16px; }
     .fcard .emoji { font-size: 30px; }
     .fcard a { color: var(--brand); font-weight: 600; text-decoration: none; font-size: 14px; }
     .price-line { display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid var(--line); }
     footer { text-align: center; color: var(--muted); font-size: 12px; padding: 30px 20px 50px; line-height: 1.6; }
     @media (max-width: 640px) {
-      .hero h1 { font-size: 30px; }
+      .hero h1 { font-size: 24px; }
       .hero p.lead { font-size: 16px; }
     }
   </style>
@@ -62,6 +62,13 @@
     <div class="card search-row" style="padding:14px 16px">
       <input type="search" id="homeSearch" placeholder="Поиск по товарам: протеин, витамин D, матча…" />
       <a class="ai-pill" href="/assistant">✦ Спросить Aura</a>
+    </div>
+
+    <div class="stats" id="stats">
+      <div class="stat"><b data-count="9">0</b><span>параметров анализа кожи</span></div>
+      <div class="stat"><b data-count="60" data-suffix="+">0</b><span>wellness-товаров</span></div>
+      <div class="stat"><b data-count="24" data-suffix="/7">0</b><span>AI-ассистент на связи</span></div>
+      <div class="stat"><b data-count="199" data-suffix=" ₽">0</b><span>за AI-скан по фото</span></div>
     </div>
 
     <div class="pgrid features">
@@ -154,6 +161,28 @@
     });
     if ("serviceWorker" in navigator) {
       window.addEventListener("load", () => navigator.serviceWorker.register("/static/sw.js"));
+    }
+
+    // Анимированные счётчики фактов (запуск при попадании в кадр).
+    const animateCount = (b) => {
+      const target = +b.dataset.count, suffix = b.dataset.suffix || "";
+      const t0 = performance.now(), dur = 1100;
+      const tick = (t) => {
+        const k = Math.min(1, (t - t0) / dur);
+        const eased = 1 - Math.pow(1 - k, 3);
+        b.textContent = Math.round(target * eased) + suffix;
+        if (k < 1) requestAnimationFrame(tick);
+      };
+      requestAnimationFrame(tick);
+    };
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      document.querySelectorAll(".stat b").forEach((b) =>
+        b.textContent = b.dataset.count + (b.dataset.suffix || ""));
+    } else {
+      const sio = new IntersectionObserver((es) => es.forEach((e) => {
+        if (e.isIntersecting) { animateCount(e.target); sio.unobserve(e.target); }
+      }), { threshold: 0.4 });
+      document.querySelectorAll(".stat b").forEach((b) => sio.observe(b));
     }
 
     // Хиты недели: живые карточки из каталога (хиты и скидки).

@@ -29,7 +29,18 @@ function sortProducts(products) {
   return arr;
 }
 
+function renderSkeletons(n = 8) {
+  el("grid").innerHTML = Array.from({ length: n }, () => `
+    <div class="skel">
+      <div class="ph tile"></div>
+      <div class="ph line short"></div>
+      <div class="ph line"></div>
+      <div class="ph line short"></div>
+    </div>`).join("");
+}
+
 async function loadProducts() {
+  renderSkeletons();
   var url = "/api/shop/products?";
   if (activeCat) url += "category=" + encodeURIComponent(activeCat) + "&";
   if (query) url += "q=" + encodeURIComponent(query);
