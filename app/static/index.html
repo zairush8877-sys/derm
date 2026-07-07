@@ -108,6 +108,14 @@
       </div>
     </div>
 
+    <div class="card" id="hitsCard" style="display:none">
+      <div style="display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:8px">
+        <h2 style="margin:0">Хиты недели 🔥</h2>
+        <a href="/shop" style="font-size:14px">Весь каталог →</a>
+      </div>
+      <div class="pgrid" id="hitsGrid" style="margin-top:14px"></div>
+    </div>
+
     <div class="card">
       <h2>Прозрачные цены</h2>
       <div class="price-line"><span>Первый AI-скан (кожа или еда)</span><strong>бесплатно</strong></div>
@@ -146,6 +154,35 @@
     if ("serviceWorker" in navigator) {
       window.addEventListener("load", () => navigator.serviceWorker.register("/static/sw.js"));
     }
+
+    // Хиты недели: живые карточки из каталога (хиты и скидки).
+    const escHtml = (s) => String(s).replace(/[&<>"']/g, (c) =>
+      ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+    fetch("/api/shop/products").then((r) => r.json()).then((d) => {
+      const icons = { "уходовая косметика": "🧴", "гаджеты": "📱", "спортпит": "💪",
+        "витамины и БАДы": "💊", "пептиды": "🧬", "biohacking": "🔬",
+        "функциональные напитки": "🍵", "healthy food": "🥗" };
+      const hits = d.products
+        .filter((p) => p.hit || (p.old_price_rub && p.old_price_rub > p.price_rub))
+        .slice(0, 4);
+      if (!hits.length) return;
+      document.getElementById("hitsGrid").innerHTML = hits.map((p) => {
+        const disc = p.old_price_rub && p.old_price_rub > p.price_rub
+          ? Math.round((1 - p.price_rub / p.old_price_rub) * 100) : 0;
+        const badge = disc ? `<span class="badge-disc">−${disc}%</span>`
+          : `<span class="badge-hit">Хит</span>`;
+        const oldP = disc
+          ? `<span class="old-price">${p.old_price_rub.toLocaleString("ru-RU")} ₽</span>` : "";
+        return `
+        <a class="pcard" href="/shop" style="text-decoration:none;color:inherit">
+          <div class="ptile">${badge}${icons[p.category] || "🌿"}</div>
+          <span class="cat">${escHtml(p.brand)}</span>
+          <h3>${escHtml(p.name)}</h3>
+          <div class="price">${p.price_rub.toLocaleString("ru-RU")} ₽${oldP}</div>
+        </a>`;
+      }).join("");
+      document.getElementById("hitsCard").style.display = "";
+    }).catch(() => {});
   </script>
 </body>
 </html>

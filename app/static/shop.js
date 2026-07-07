@@ -13,6 +13,22 @@ const catIcon = {
   "wellness check-up": "🩺",
 };
 
+function sortProducts(products) {
+  const mode = el("sort") ? el("sort").value : "popular";
+  const arr = [...products];
+  if (mode === "cheap") arr.sort((a, b) => a.price_rub - b.price_rub);
+  else if (mode === "expensive") arr.sort((a, b) => b.price_rub - a.price_rub);
+  else if (mode === "discount") {
+    const d = (p) => (p.old_price_rub ? 1 - p.price_rub / p.old_price_rub : 0);
+    arr.sort((a, b) => d(b) - d(a));
+  } else {
+    // «Популярные»: сначала хиты и скидки, затем по рейтингу.
+    const w = (p) => (p.hit ? 2 : 0) + (p.old_price_rub ? 1 : 0) + ratingFor(p).rating;
+    arr.sort((a, b) => w(b) - w(a));
+  }
+  return arr;
+}
+
 async function loadProducts() {
   var url = "/api/shop/products?";
   if (activeCat) url += "category=" + encodeURIComponent(activeCat) + "&";
@@ -20,7 +36,7 @@ async function loadProducts() {
   const res = await fetch(url);
   const data = await res.json();
   renderCats(data.categories);
-  renderGrid(data.products);
+  renderGrid(sortProducts(data.products));
 }
 
 function renderCats(categories) {
@@ -157,6 +173,7 @@ el("q").addEventListener("input", (e) => {
   query = e.target.value;
   searchTimer = setTimeout(loadProducts, 250);
 });
+el("sort").addEventListener("change", loadProducts);
 el("co-submit").addEventListener("click", submitCheckout);
 el("co-cancel").addEventListener("click", () => el("checkoutModal").classList.add("hidden"));
 
