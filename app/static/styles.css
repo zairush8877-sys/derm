@@ -229,3 +229,92 @@ button.ghost:hover { border-color: var(--ink); }
 #cats { display: flex; gap: 8px; overflow-x: auto; padding: 4px 0 6px; scrollbar-width: none; }
 #cats::-webkit-scrollbar { display: none; }
 #cats button { white-space: nowrap; margin: 0; flex: 0 0 auto; }
+
+/* ===== Aura Futurism: премиум-слой с анимациями (2026) ===== */
+
+/* Аврора-фон героя: дрейфующие цветовые пятна под блюром */
+.aurora { position: relative; overflow: hidden; }
+.aurora .orb {
+  position: absolute; border-radius: 50%; filter: blur(70px); opacity: .55;
+  pointer-events: none; will-change: transform;
+  animation: orbFloat 18s ease-in-out infinite;
+}
+.aurora .orb.o1 { width: 420px; height: 420px; left: -120px; top: -140px;
+  background: radial-gradient(circle, #b8f0dd 0%, transparent 70%); }
+.aurora .orb.o2 { width: 380px; height: 380px; right: -110px; top: -60px;
+  background: radial-gradient(circle, #ffd9c4 0%, transparent 70%); animation-delay: -6s; }
+.aurora .orb.o3 { width: 300px; height: 300px; left: 38%; bottom: -160px;
+  background: radial-gradient(circle, #d7e3ff 0%, transparent 70%); animation-delay: -12s; }
+@keyframes orbFloat {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33% { transform: translate(40px, 26px) scale(1.08); }
+  66% { transform: translate(-28px, -18px) scale(0.95); }
+}
+.aurora > * { position: relative; z-index: 1; }
+
+/* Живой градиент в заголовке */
+.grad-text {
+  background: linear-gradient(90deg, #1f6f5c, #3b82f6, #b46bd6, #1f6f5c);
+  background-size: 280% 100%;
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+  animation: gradSlide 7s ease-in-out infinite;
+}
+@keyframes gradSlide { 0%,100% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } }
+
+/* Появление при скролле (класс ставит JS — без JS всё видно сразу) */
+.reveal { opacity: 0; transform: translateY(18px); transition: opacity .6s ease, transform .6s ease; }
+.reveal.in { opacity: 1; transform: none; }
+
+/* Карточки: парение и мягкое свечение */
+.pcard, .card {
+  transition: transform .28s cubic-bezier(.2,.8,.2,1), box-shadow .28s ease, border-color .28s ease;
+}
+.pcard:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 14px 34px rgba(16,16,16,.10), 0 2px 8px rgba(31,111,92,.08);
+  border-color: #dcdcd8;
+}
+.pcard .ptile { overflow: hidden; }
+.pcard .ptile { transition: background .3s ease; }
+.pcard:hover .ptile { background: #efefeb; }
+
+/* Кнопки: блик-пробег и подъём */
+button.primary, .cta button {
+  position: relative; overflow: hidden;
+  transition: transform .2s ease, box-shadow .2s ease;
+}
+button.primary:hover { transform: translateY(-2px); box-shadow: 0 10px 24px rgba(16,16,16,.18); }
+button.primary::after {
+  content: ""; position: absolute; top: 0; left: -80%;
+  width: 50%; height: 100%; transform: skewX(-20deg);
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,.22), transparent);
+  transition: left .5s ease;
+}
+button.primary:hover::after { left: 130%; }
+button.ghost { transition: transform .18s ease, background .18s ease, color .18s ease; }
+button.ghost:hover { transform: translateY(-1px); }
+
+/* Стеклянная плавающая кнопка ассистента + пульс */
+.fab {
+  backdrop-filter: blur(8px);
+  animation: fabPulse 3.4s ease-in-out infinite;
+}
+@keyframes fabPulse {
+  0%, 100% { box-shadow: 0 6px 22px rgba(16,16,16,.24); }
+  50% { box-shadow: 0 6px 30px rgba(31,111,92,.42); }
+}
+
+/* Стеклянные бейджи на плитках товаров */
+.pcard .badge-free { background: rgba(255,255,255,.72); backdrop-filter: blur(6px); }
+
+/* Плавный скролл и аккуратный фокус */
+html { scroll-behavior: smooth; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 6px; }
+
+/* Уважение к отключённой анимации */
+@media (prefers-reduced-motion: reduce) {
+  .aurora .orb, .grad-text, .fab, .ticker .track { animation: none !important; }
+  .reveal { opacity: 1 !important; transform: none !important; transition: none !important; }
+  .pcard, .card, button.primary, button.ghost { transition: none !important; }
+  html { scroll-behavior: auto; }
+}

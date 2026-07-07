@@ -61,5 +61,34 @@
     }
     const authLink = document.getElementById("authLink");
     if (authLink && token) authLink.parentElement.classList.add("hidden");
+
+    // 5) Появление карточек при скролле (прогрессивно: без JS всё видно сразу).
+    if ("IntersectionObserver" in window &&
+        !window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      const io = new IntersectionObserver((entries) => {
+        entries.forEach((e) => {
+          if (e.isIntersecting) { e.target.classList.add("in"); io.unobserve(e.target); }
+        });
+      }, { threshold: 0.08 });
+      const animate = (els) => els.forEach((n, i) => {
+        n.classList.add("reveal");
+        n.style.transitionDelay = Math.min(i % 6, 4) * 60 + "ms";  // лёгкий каскад
+        io.observe(n);
+        // Страховка: что бы ни случилось, элемент не остаётся невидимым.
+        setTimeout(() => n.classList.add("in"), 1500);
+      });
+      animate([...document.querySelectorAll(".card, .pcard")]);
+      // Динамически добавленные карточки (магазин, кабинет) тоже анимируем.
+      const mo = new MutationObserver((muts) => {
+        const fresh = [];
+        muts.forEach((m) => m.addedNodes.forEach((n) => {
+          if (n.nodeType !== 1) return;
+          if (n.matches && n.matches(".card, .pcard")) fresh.push(n);
+          if (n.querySelectorAll) fresh.push(...n.querySelectorAll(".card, .pcard"));
+        }));
+        if (fresh.length) animate(fresh.filter((n) => !n.classList.contains("reveal")));
+      });
+      mo.observe(document.body, { childList: true, subtree: true });
+    }
   });
 })();
