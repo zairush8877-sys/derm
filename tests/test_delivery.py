@@ -160,3 +160,18 @@ def test_quote_survives_cdek_error(monkeypatch):
 
 def test_track_url():
     assert cdek.track_url("AB 1").startswith("https://www.cdek.ru/ru/tracking?order_id=AB")
+
+
+# --- Рекомендации после скана: приоритет профессиональных брендов ---
+
+def test_recommendations_prefer_jan_marini():
+    from app.shop import catalog
+    rec = catalog.recommend_for_concerns(["acne", "pigmentation", "wrinkles"], limit=6)
+    assert rec, "рекомендации не должны быть пустыми"
+    assert rec[0].brand == "Jan Marini", "профессиональный бренд должен идти первым"
+
+
+def test_recommendations_still_match_concerns():
+    from app.shop import catalog
+    rec = catalog.recommend_for_concerns(["dark_circles"], limit=4)
+    assert all("dark_circles" in p.for_concerns for p in rec)

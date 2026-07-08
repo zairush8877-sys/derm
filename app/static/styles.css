@@ -484,3 +484,10 @@ button.primary:active, button.ghost:active, .addbtn:active { transform: scale(.9
 .pcard .ptile .sticker { filter: drop-shadow(0 8px 14px rgba(58,51,43,.22)); }
 nav .sticker, #cats .sticker { vertical-align: -4px; margin-right: 2px; }
 @media (prefers-reduced-motion: reduce) { .fcard .icon3d { animation: none; } }
+
+/* Правка граммов в трекере еды */
+.gram-input {
+  width: 62px; padding: 3px 6px; border: 1px solid var(--line); border-radius: 8px;
+  font-size: 13.5px; background: var(--card); color: var(--ink); text-align: right;
+}
+.gram-input:focus { outline: none; border-color: var(--accent); }
