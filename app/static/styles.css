@@ -17,22 +17,25 @@
   unicode-range: U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116; }
 
 :root {
-  --bg: #ffffff;
-  --card: #ffffff;
-  --ink: #101010;
-  --muted: #6f6f6f;
-  --line: #e9e9e9;
-  --soft: #f5f5f3;          /* светло-серые подложки/плитки */
-  --brand: #101010;          /* основной акцент — чёрный, как у healf */
-  --brand-dark: #000000;
-  --accent: #1f6f5c;         /* wellness-зелёный для успеха/ссылок */
-  --green: #1f6f5c;
+  /* Палитра «Спа»: тёплый беж, пудровая роза, тёмно-синий, шампань */
+  --bg: #faf7f1;              /* светло-бежевый тёплый */
+  --card: #ffffff;            /* белый тюль */
+  --ink: #232a4b;             /* тёмно-синий (текст) */
+  --muted: #8b8578;           /* тёплый серый */
+  --line: #e7dfd2;
+  --soft: #f1ebdf;            /* бежевые подложки/плитки */
+  --brand: #232a4b;
+  --brand-dark: #1d2a52;
+  --accent: #c0705b;          /* пудрово-розовый акцент (читаемый тон) */
+  --rose: #e2a091;            /* пудрово-розовый светлый (заливки) */
+  --champagne: #b49a6a;       /* металл шампань (рейтинги, детали) */
+  --green: #4a7d63;
   --orange: #c07a2c;
   --red: #b3402f;
   --radius: 16px;
-  --shadow: 0 1px 3px rgba(0,0,0,0.04);
+  --shadow: 0 2px 8px rgba(35,42,75,0.05);
   --on-ink: #ffffff;          /* текст на чернильном фоне */
-  --hover-soft: #ececea;      /* ховеры подложек */
+  --hover-soft: #eae3d3;      /* ховеры подложек */
   --glass: rgba(255,255,255,.72);
   --maxw: 960px;
 }
@@ -58,7 +61,7 @@ body {
 
 /* Бегущая строка с офферами (как у healf: чёрная полоса сверху) */
 .ticker {
-  background: #101010; color: #fff; font-size: 12.5px; letter-spacing: 0.2px;
+  background: var(--brand-dark); color: #fff; font-size: 12.5px; letter-spacing: 0.2px;
   overflow: hidden; white-space: nowrap; padding: 8px 0;
 }
 .ticker .track { display: inline-block; padding-left: 100%; animation: ticker 22s linear infinite; }
@@ -225,7 +228,7 @@ button.ghost:hover { border-color: var(--ink); }
 .pcard .cat { color: var(--muted); font-size: 11px; font-weight: 600; letter-spacing: 0.8px; text-transform: uppercase; }
 .pcard h3 { margin: 4px 0 2px; font-size: 15.5px; font-weight: 600; line-height: 1.35; }
 .pcard .price { font-size: 16.5px; font-weight: 700; margin: 6px 0 2px; }
-.pcard .stars { font-size: 12.5px; color: var(--ink); letter-spacing: 1px; }
+.pcard .stars { font-size: 12.5px; color: var(--champagne); letter-spacing: 1px; }
 .pcard .stars .cnt { color: var(--muted); letter-spacing: 0; margin-left: 4px; }
 
 /* Чат ассистента */
@@ -240,7 +243,7 @@ button.ghost:hover { border-color: var(--ink); }
 /* Плавающая кнопка ассистента (как чат-кнопка healf) */
 .fab {
   position: fixed; right: 18px; bottom: 18px; width: 54px; height: 54px;
-  border-radius: 50%; background: #101010; color: #fff; font-size: 24px;
+  border-radius: 50%; background: var(--brand-dark); color: #fff; font-size: 24px;
   display: flex; align-items: center; justify-content: center; text-decoration: none;
   box-shadow: 0 4px 14px rgba(0,0,0,0.25); z-index: 50;
 }
@@ -268,11 +271,11 @@ button.ghost:hover { border-color: var(--ink); }
   animation: orbFloat 18s ease-in-out infinite;
 }
 .aurora .orb.o1 { width: 420px; height: 420px; left: -120px; top: -140px;
-  background: radial-gradient(circle, #b8f0dd 0%, transparent 70%); }
+  background: radial-gradient(circle, #f0cdbf 0%, transparent 70%); }
 .aurora .orb.o2 { width: 380px; height: 380px; right: -110px; top: -60px;
-  background: radial-gradient(circle, #ffd9c4 0%, transparent 70%); animation-delay: -6s; }
+  background: radial-gradient(circle, #ead9b8 0%, transparent 70%); animation-delay: -6s; }
 .aurora .orb.o3 { width: 300px; height: 300px; left: 38%; bottom: -160px;
-  background: radial-gradient(circle, #d7e3ff 0%, transparent 70%); animation-delay: -12s; }
+  background: radial-gradient(circle, #c7d2f0 0%, transparent 70%); animation-delay: -12s; }
 @keyframes orbFloat {
   0%, 100% { transform: translate(0, 0) scale(1); }
   33% { transform: translate(40px, 26px) scale(1.08); }
@@ -282,7 +285,7 @@ button.ghost:hover { border-color: var(--ink); }
 
 /* Живой градиент в заголовке */
 .grad-text {
-  background: linear-gradient(90deg, #1f6f5c, #3b82f6, #b46bd6, #1f6f5c);
+  background: linear-gradient(90deg, #c0705b, #232a4b, #b49a6a, #c0705b);
   background-size: 280% 100%;
   -webkit-background-clip: text; background-clip: text; color: transparent;
   animation: gradSlide 7s ease-in-out infinite;
@@ -299,7 +302,7 @@ button.ghost:hover { border-color: var(--ink); }
 }
 .pcard:hover {
   transform: translateY(-5px);
-  box-shadow: 0 14px 34px rgba(16,16,16,.10), 0 2px 8px rgba(31,111,92,.08);
+  box-shadow: 0 14px 34px rgba(16,16,16,.10), 0 2px 8px rgba(192,112,91,.10);
   border-color: #dcdcd8;
 }
 .pcard .ptile { overflow: hidden; }
@@ -329,7 +332,7 @@ button.ghost:hover { transform: translateY(-1px); }
 }
 @keyframes fabPulse {
   0%, 100% { box-shadow: 0 6px 22px rgba(16,16,16,.24); }
-  50% { box-shadow: 0 6px 30px rgba(31,111,92,.42); }
+  50% { box-shadow: 0 6px 30px rgba(192,112,91,.45); }
 }
 
 /* Стеклянные бейджи на плитках товаров */
@@ -380,23 +383,23 @@ html { scroll-behavior: smooth; }
 
 /* ===== Тёмная тема (переключатель 🌙 в шапке) ===== */
 :root[data-theme="dark"] {
-  --bg: #0f100f;
-  --brand: #f0f0ec;
-  --brand-dark: #ffffff;
-  --card: #171817;
-  --ink: #f0f0ec;
-  --muted: #9c9c95;
-  --line: #272826;
-  --soft: #1d1e1c;
-  --hover-soft: #242523;
-  --on-ink: #101010;
-  --glass: rgba(23,24,23,.72);
-  --shadow: 0 1px 3px rgba(0,0,0,.45);
+  --bg: #10141f;              /* глубокий синий вечер */
+  --brand: #f0ede6;
+  --brand-dark: #0b0e18;
+  --card: #181d2c;
+  --ink: #f0ede6;
+  --muted: #9a97a8;
+  --line: #2a3044;
+  --soft: #1e2434;
+  --hover-soft: #252c40;
+  --on-ink: #10141f;
+  --glass: rgba(24,29,44,.72);
+  --shadow: 0 1px 3px rgba(0,0,0,.5);
 }
 :root[data-theme="dark"] .aurora .orb { opacity: .28; }
 :root[data-theme="dark"] .ticker { background: #000; }
 :root[data-theme="dark"] .pcard:hover {
-  box-shadow: 0 14px 34px rgba(0,0,0,.55), 0 2px 8px rgba(31,111,92,.18);
+  box-shadow: 0 14px 34px rgba(0,0,0,.55), 0 2px 8px rgba(192,112,91,.20);
 }
 :root[data-theme="dark"] button.primary:hover { box-shadow: 0 10px 24px rgba(0,0,0,.5); }
 .theme-toggle { cursor: pointer; user-select: none; }
@@ -428,7 +431,7 @@ button.primary:active, button.ghost:active, .addbtn:active { transform: scale(.9
 
 /* Свечение AI-пилюли и активной категории */
 .ai-pill { transition: box-shadow .25s ease, border-color .25s ease; }
-.ai-pill:hover { box-shadow: 0 0 0 4px rgba(31,111,92,.14); }
+.ai-pill:hover { box-shadow: 0 0 0 4px rgba(192,112,91,.16); }
 
 /* Появление плавающей кнопки ассистента */
 .fab { animation: fabIn .5s .4s cubic-bezier(.2,.8,.2,1) both, fabPulse 3.4s 1.2s ease-in-out infinite; }
@@ -461,3 +464,13 @@ button.primary:active, button.ghost:active, .addbtn:active { transform: scale(.9
   .logobar .logo::after { animation: none; }
   .stat { transition: none; }
 }
+
+
+/* Фото товара в плитке */
+.pcard .ptile.has-img { background: #fff; }
+.pcard .pimg {
+  width: 100%; height: 100%; object-fit: contain; border-radius: 12px;
+  display: block;
+}
+.pcard:hover .ptile.has-img { background: #fff; }
+:root[data-theme="dark"] .pcard .ptile.has-img { background: #f4f4f2; }

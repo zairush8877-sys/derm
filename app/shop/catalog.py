@@ -8,6 +8,7 @@
 from __future__ import annotations
 
 from enum import Enum
+from pathlib import Path
 
 from pydantic import BaseModel, Field
 
@@ -39,6 +40,7 @@ class Product(BaseModel):
     in_stock: bool = True
     is_service: bool = Field(False, description="Услуга (диагностика/check-up), не товар")
     hit: bool = Field(False, description="Хит продаж — выделяется бейджем")
+    image: str | None = Field(None, description="Путь к фото товара (/static/products/…)")
 
     @property
     def discount_pct(self) -> int:
@@ -517,6 +519,13 @@ _CATALOG: list[Product] = [
             description="Восстанавливающий лосьон для тела с AHA и PHA кислотами для идеальной гладкости.",
             for_concerns=["texture"], tags=["тело", "кислоты", "MSS064"]),
 ]
+
+# Автопривязка фото: если в static/products лежит <id>.jpg — товар получает фото.
+# Достаточно положить файл с именем позиции (например, jm-020.jpg) — без правок кода.
+_IMG_DIR = Path(__file__).resolve().parent.parent / "static" / "products"
+for _p in _CATALOG:
+    if _p.image is None and (_IMG_DIR / f"{_p.id}.jpg").is_file():
+        _p.image = f"/static/products/{_p.id}.jpg"
 
 _BY_ID: dict[str, Product] = {p.id: p for p in _CATALOG}
 
