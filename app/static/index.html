@@ -4,145 +4,151 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Aura — premium wellness пространство</title>
-  <meta name="description" content="AI-анализ кожи, трекер питания, персональный уход и магазин косметики, БАДов и biohacking-продуктов. Всё в одном приложении." />
+  <meta name="description" content="AI-анализ кожи, трекер питания, персональный уход и магазин косметики, БАДов и biohacking-продуктов. Всё в одном пространстве." />
   <link rel="stylesheet" href="/static/styles.css" />
   <link rel="manifest" href="/static/manifest.webmanifest" />
   <link rel="icon" href="/static/icon.svg" type="image/svg+xml" />
-  <meta name="theme-color" content="#3a332b" />
+  <meta name="theme-color" content="#17130f" />
   <meta property="og:title" content="Aura — premium wellness пространство" />
   <meta property="og:description" content="AI-анализ кожи, трекер питания, персональный уход и магазин wellness-товаров." />
   <meta property="og:type" content="website" />
-  <style>
-    .hero { text-align: center; padding: 44px 20px 46px; }
-    .hero h1 { font-size: 38px; margin: 0 0 16px; letter-spacing: -1px; font-weight: 800; line-height: 1.25; }
-    .hero p.lead { font-size: 19px; max-width: 560px; margin: 0 auto 28px; }
-    .hero .cta { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
-    .hero .cta a { text-decoration: none; }
-    .features { padding-bottom: 10px; }
-    .fcard h3 { margin-top: 0; font-family: "Unbounded", "Manrope", sans-serif; font-weight: 600; font-size: 16px; }
-    .fcard .emoji { font-size: 30px; }
-    .fcard a { color: var(--brand); font-weight: 600; text-decoration: none; font-size: 14px; }
-    .price-line { display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid var(--line); }
-    footer { text-align: center; color: var(--muted); font-size: 12px; padding: 30px 20px 50px; line-height: 1.6; }
-    @media (max-width: 640px) {
-      .hero h1 { font-size: 24px; }
-      .hero p.lead { font-size: 16px; }
-    }
-  </style>
 </head>
-<body>
-  <header class="top">
-    <div class="wrap">
-      <nav class="tabs">
-        <a href="/" class="active">Главная</a>
-        <a href="/shop">Магазин</a>
-        <a href="/skin">Кожа</a>
-        <a href="/food">Еда</a>
-        <a href="/assistant">Ассистент</a>
-        <a href="/tracker">Трекер</a>
-        <a href="/subscription">Подписка</a>
-      </nav>
-    </div>
-  </header>
+<body class="home">
 
-  <main>
-    <div class="hero aurora">
-      <span class="orb o1"></span><span class="orb o2"></span><span class="orb o3"></span>
-      <h1>Красота и здоровье,<br/>подтверждённые <span class="grad-text">AI</span></h1>
-      <p class="lead summary">Анализ кожи по фото, подсчёт калорий по фото еды, персональный протокол
-        ухода и магазин premium-wellness товаров — в одном месте.</p>
-      <div class="cta">
-        <a href="/skin"><button class="primary" style="margin:0">🔬 Проанализировать кожу</button></a>
-        <a href="/shop"><button class="ghost" style="margin:0">🛍 Перейти в магазин</button></a>
-        <button class="ghost hidden" id="installBtn" style="margin:0">📲 Установить приложение</button>
+  <!-- ===== Заставка-открытие (один раз за сессию) ===== -->
+  <div class="splash" id="splash" aria-hidden="true">
+    <div class="splash-inner">
+      <div class="splash-word">
+        <span>A</span><span>U</span><span>R</span><span>A<i class="dot">.</i></span>
       </div>
-      <p class="mode-badge" style="margin-top:14px"><a href="/auth" style="color:var(--ink);font-weight:600" id="authLink">Войти или создать аккаунт →</a></p>
+      <div class="splash-line"></div>
+      <div class="splash-tag">wellness пространство</div>
     </div>
+    <div class="splash-skip">нажмите, чтобы войти</div>
+  </div>
+  <script>
+    (function () {
+      var s = document.getElementById("splash");
+      if (!s) return;
+      if (sessionStorage.getItem("aura_splash_seen")) { s.remove(); return; }
+      document.body.classList.add("splash-on");
+      var lift = function () {
+        s.classList.add("lift");
+        document.body.classList.remove("splash-on");
+        sessionStorage.setItem("aura_splash_seen", "1");
+        setTimeout(function () { if (s.parentNode) s.remove(); }, 1100);
+      };
+      var t = setTimeout(lift, 2700);
+      s.addEventListener("click", function () { clearTimeout(t); lift(); });
+    })();
+  </script>
 
-    <div class="card search-row" style="padding:14px 16px">
-      <input type="search" id="homeSearch" placeholder="Поиск по товарам: протеин, витамин D, матча…" />
+  <!-- (шапка: бегущая строка + логотип-бар вставляются auth-helper.js) -->
+
+  <nav class="tabs">
+    <a href="/" class="active">Главная</a>
+    <a href="/shop">Магазин</a>
+    <a href="/skin">Кожа</a>
+    <a href="/food">Еда</a>
+    <a href="/assistant">Ассистент</a>
+    <a href="/tracker">Трекер</a>
+    <a href="/subscription">Подписка</a>
+  </nav>
+
+  <!-- ===== HERO во всю ширину ===== -->
+  <section class="hero-e">
+    <p class="eyebrow">AI-Wellness · Россия</p>
+    <h1>Красота и здоровье, подтверждённые интеллектом</h1>
+    <p class="lead">Анализ кожи по фото, подсчёт калорий и микронутриентов,
+      персональный протокол ухода и магазин premium-wellness — в одном пространстве.</p>
+    <div class="cta">
+      <a class="btn-fill" href="/skin">Анализ кожи</a>
+      <a class="btn-line" href="/shop">В магазин</a>
+      <a class="btn-line hidden" id="installBtn">Установить приложение</a>
+    </div>
+    <a class="scroll-cue" href="#explore" aria-label="ниже">↓</a>
+  </section>
+
+  <!-- ===== Тонкая строка поиска ===== -->
+  <div class="featured" id="explore" style="padding-top:clamp(48px,7vw,90px);padding-bottom:0">
+    <div class="search-row" style="max-width:720px;margin:0 auto">
+      <input type="search" id="homeSearch" placeholder="Поиск по каталогу: сыворотка, витамин D, пептиды…" />
       <a class="ai-pill" href="/assistant">✦ Спросить Aura</a>
     </div>
+  </div>
 
-    <div class="stats" id="stats">
-      <div class="stat"><b data-count="9">0</b><span>параметров анализа кожи</span></div>
-      <div class="stat"><b data-count="110" data-suffix="+">0</b><span>wellness-товаров</span></div>
-      <div class="stat"><b data-count="24" data-suffix="/7">0</b><span>AI-ассистент на связи</span></div>
-      <div class="stat"><b data-count="199" data-suffix=" ₽">0</b><span>за AI-скан по фото</span></div>
+  <!-- ===== Editorial split-блоки ===== -->
+  <section class="split">
+    <div class="media p1"><span class="idx">01</span><span class="kw">Разбор кожи<br/>по 9 параметрам</span></div>
+    <div class="body">
+      <p class="tag">AI-анализ кожи</p>
+      <h2>Загрузите фото — получите протокол</h2>
+      <p>Тон, увлажнённость, поры, морщины, пигментация и ещё 4 параметра.
+        Персональный уход утро/вечер и PDF-отчёт. Первый скан — бесплатно.</p>
+      <a class="more" href="/skin">Проанализировать →</a>
     </div>
+  </section>
 
-    <div class="pgrid features">
-      <div class="pcard fcard">
-        <img class="icon3d" src="/static/icons/skin.png" alt="" />
-        <h3>AI-анализ кожи</h3>
-        <p class="summary" style="font-size:14px">Загрузите фото — получите разбор по 9 параметрам,
-          персональный протокол ухода и PDF-отчёт. Первый скан бесплатно.</p>
-        <a href="/skin">Попробовать →</a>
-      </div>
-      <div class="pcard fcard">
-        <img class="icon3d" src="/static/icons/food.png" alt="" />
-        <h3>Трекер питания</h3>
-        <p class="summary" style="font-size:14px">Сфотографируйте блюдо — AI оценит калории и БЖУ.
-          Дневник питания и суточный калораж автоматически.</p>
-        <a href="/food">Попробовать →</a>
-      </div>
-      <div class="pcard fcard">
-        <img class="icon3d" src="/static/icons/shop.png" alt="" />
-        <h3>Магазин wellness</h3>
-        <p class="summary" style="font-size:14px">Косметика, витамины, пептиды, biohacking, спортпит и
-          healthy food. Рекомендации под ваш анализ кожи. Кешбэк баллами до 12%.</p>
-        <a href="/shop">В каталог →</a>
-      </div>
-      <div class="pcard fcard">
-        <img class="icon3d" src="/static/icons/protocol.png" alt="" />
-        <h3>«Живой» протокол ухода</h3>
-        <p class="summary" style="font-size:14px">Персональный уход утро/вечер, который обновляется
-          каждые 30 дней под сезон, возраст и гормональную фазу.</p>
-        <a href="/subscription">Оформить →</a>
-      </div>
-      <div class="pcard fcard">
-        <img class="icon3d" src="/static/icons/assistant.png" alt="" />
-        <h3>Wellness-ассистент</h3>
-        <p class="summary" style="font-size:14px">Вопросы про уход, питание, сон, добавки и
-          восстановление — практичные ответы 24/7.</p>
-        <a href="/assistant">Спросить →</a>
-      </div>
-      <div class="pcard fcard">
-        <img class="icon3d" src="/static/icons/trend.png" alt="" />
-        <h3>Динамика кожи</h3>
-        <p class="summary" style="font-size:14px">Каждый скан сохраняется — следите, что улучшилось,
-          а что требует внимания.</p>
-        <a href="/tracker">Открыть →</a>
-      </div>
+  <section class="split reverse">
+    <div class="media p2"><span class="idx">02</span><span class="kw">Косметика · БАДы<br/>Biohacking</span></div>
+    <div class="body">
+      <p class="tag">Магазин</p>
+      <h2>Premium-уход и добавки с доставкой по России</h2>
+      <p>Профессиональная косметика Jan Marini, витамины, пептиды, спортпит и
+        healthy food. Рекомендации под ваш анализ кожи. Кешбэк баллами до 12%.</p>
+      <a class="more" href="/shop">В каталог →</a>
     </div>
+  </section>
 
-    <div class="card" id="hitsCard" style="display:none">
-      <div style="display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:8px">
-        <h2 style="margin:0">Хиты недели 🔥</h2>
-        <a href="/shop" style="font-size:14px">Весь каталог →</a>
-      </div>
-      <div class="pgrid" id="hitsGrid" style="margin-top:14px"></div>
+  <section class="split">
+    <div class="media p3"><span class="idx">03</span><span class="kw">Калории · БЖУ<br/>Витамины</span></div>
+    <div class="body">
+      <p class="tag">Трекер питания</p>
+      <h2>Сфотографируйте блюдо — посчитаем всё</h2>
+      <p>AI оценивает калории, белки-жиры-углеводы и ключевые витамины с минералами.
+        Порции легко поправить вручную — пересчёт мгновенный.</p>
+      <a class="more" href="/food">Открыть трекер →</a>
     </div>
+  </section>
 
-    <div class="card">
-      <h2>Прозрачные цены</h2>
-      <div class="price-line"><span>Первый AI-скан (кожа или еда)</span><strong>бесплатно</strong></div>
-      <div class="price-line"><span>AI-скан по фото</span><strong>199 ₽</strong></div>
-      <div class="price-line"><span>Пакет 5 сканов</span><strong>896 ₽ <span class="pill up">−10%</span></strong></div>
-      <div class="price-line"><span>Пакет 20 сканов</span><strong>3 184 ₽ <span class="pill up">−20%</span></strong></div>
-      <div class="price-line" style="border:none"><span>Протокол по квизу, трекер, ассистент</span><strong>бесплатно</strong></div>
+  <section class="split reverse">
+    <div class="media p4"><span class="idx">04</span><span class="kw">«Живой»<br/>протокол ухода</span></div>
+    <div class="body">
+      <p class="tag">Подписка</p>
+      <h2>Уход, который обновляется под вас</h2>
+      <p>Персональная программа утро/вечер меняется каждые 30 дней под сезон,
+        возраст и гормональную фазу. Плюс wellness-ассистент 24/7.</p>
+      <a class="more" href="/subscription">Оформить →</a>
     </div>
-  </main>
+  </section>
+
+  <!-- ===== Избранное ===== -->
+  <section class="featured" id="featured" style="display:none">
+    <div class="head">
+      <h2>Избранное</h2>
+      <a href="/shop">Весь каталог →</a>
+    </div>
+    <div class="prow" id="hitsGrid"></div>
+  </section>
+
+  <!-- ===== CTA-полоса ===== -->
+  <section class="cta-strip">
+    <h2>Ваш ритуал красоты<br/>начинается здесь</h2>
+    <p>Первый AI-скан бесплатно. Протокол ухода, трекер и ассистент — тоже.
+      Платите только за последующие сканы по фото.</p>
+    <a class="btn-line" href="/auth" id="ctaAuth">Создать аккаунт</a>
+  </section>
 
   <footer>
     Aura Wellness Space · Косметический анализ кожи и ориентировочная оценка питания —
     не медицинский диагноз и не заменяют консультацию врача.<br/>
-    <a href="/legal" style="color:var(--muted)">Оферта и политика конфиденциальности</a> · <a href="/docs" style="color:var(--muted)">B2B API для брендов</a>
+    <a href="/legal" style="color:var(--muted)">Оферта и политика конфиденциальности</a> ·
+    <a href="/docs" style="color:var(--muted)">B2B API для брендов</a>
   </footer>
 
   <script src="/static/auth-helper.js"></script>
   <script>
-    // Кнопка «Установить приложение» (PWA).
+    // «Установить приложение» (PWA).
     let deferredPrompt = null;
     window.addEventListener("beforeinstallprompt", (e) => {
       e.preventDefault();
@@ -155,92 +161,49 @@
       deferredPrompt = null;
       document.getElementById("installBtn").classList.add("hidden");
     });
+
     document.getElementById("homeSearch").addEventListener("keydown", (e) => {
       if (e.key === "Enter" && e.target.value.trim())
         window.location = "/shop?q=" + encodeURIComponent(e.target.value.trim());
     });
+
     if ("serviceWorker" in navigator) {
       window.addEventListener("load", () => navigator.serviceWorker.register("/static/sw.js"));
     }
 
-    // Параллакс авроры: пятна тянутся за курсором (мягко, только на десктопе).
-    if (window.matchMedia("(pointer: fine)").matches &&
-        !window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-      const orbs = document.querySelectorAll(".aurora .orb");
-      const hero = document.querySelector(".hero");
-      let raf = null;
-      hero.addEventListener("mousemove", (e) => {
-        if (raf) return;
-        raf = requestAnimationFrame(() => {
-          const r = hero.getBoundingClientRect();
-          const dx = (e.clientX - r.left) / r.width - 0.5;
-          const dy = (e.clientY - r.top) / r.height - 0.5;
-          orbs.forEach((o, i) => {
-            const k = (i + 1) * 14;
-            o.style.translate = `${dx * k}px ${dy * k}px`;
-          });
-          raf = null;
-        });
-      });
-      hero.addEventListener("mouseleave", () =>
-        orbs.forEach((o) => o.style.translate = "0px 0px"));
-    }
-
-    // Анимированные счётчики фактов (запуск при попадании в кадр).
-    const animateCount = (b) => {
-      const target = +b.dataset.count, suffix = b.dataset.suffix || "";
-      const t0 = performance.now(), dur = 1100;
-      const tick = (t) => {
-        const k = Math.min(1, (t - t0) / dur);
-        const eased = 1 - Math.pow(1 - k, 3);
-        b.textContent = Math.round(target * eased) + suffix;
-        if (k < 1) requestAnimationFrame(tick);
-      };
-      requestAnimationFrame(tick);
-    };
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-      document.querySelectorAll(".stat b").forEach((b) =>
-        b.textContent = b.dataset.count + (b.dataset.suffix || ""));
-    } else {
-      const sio = new IntersectionObserver((es) => es.forEach((e) => {
-        if (e.isIntersecting) { animateCount(e.target); sio.unobserve(e.target); }
-      }), { threshold: 0.4 });
-      document.querySelectorAll(".stat b").forEach((b) => sio.observe(b));
-    }
-
-    // Хиты недели: живые карточки из каталога (хиты и скидки).
+    // Избранное: живые карточки из каталога (хиты и скидки), минималистично.
     const escHtml = (s) => String(s).replace(/[&<>"']/g, (c) =>
       ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
     fetch("/api/shop/products").then((r) => r.json()).then((d) => {
-      const stickers = { "уходовая косметика": "cat-skincare", "декоративная косметика": "cat-makeup",
-        "гаджеты": "cat-gadgets", "спортпит": "cat-sport", "витамины и БАДы": "cat-vitamins",
-        "пептиды": "cat-peptides", "biohacking": "cat-biohack", "функциональные напитки": "cat-drinks",
-        "healthy food": "cat-food", "лабораторная диагностика": "cat-lab", "wellness check-up": "cat-checkup" };
       const hits = d.products
-        .filter((p) => p.hit || (p.old_price_rub && p.old_price_rub > p.price_rub))
-        .slice(0, 4);
-      if (!hits.length) return;
-      document.getElementById("hitsGrid").innerHTML = hits.map((p) => {
+        .filter((p) => p.image && (p.hit || (p.old_price_rub && p.old_price_rub > p.price_rub)))
+        .slice(0, 8);
+      const pool = hits.length >= 4 ? hits
+        : d.products.filter((p) => p.image).slice(0, 8);
+      if (!pool.length) return;
+      document.getElementById("hitsGrid").innerHTML = pool.slice(0, 4).map((p) => {
         const disc = p.old_price_rub && p.old_price_rub > p.price_rub
           ? Math.round((1 - p.price_rub / p.old_price_rub) * 100) : 0;
-        const badge = disc ? `<span class="badge-disc">−${disc}%</span>`
-          : `<span class="badge-hit">Хит</span>`;
+        const badge = disc ? `<span class="tag2 sale">−${disc}%</span>`
+          : (p.hit ? `<span class="tag2">Хит</span>` : "");
         const oldP = disc
-          ? `<span class="old-price">${p.old_price_rub.toLocaleString("ru-RU")} ₽</span>` : "";
+          ? `<span class="old2">${p.old_price_rub.toLocaleString("ru-RU")} ₽</span>` : "";
         return `
-        <a class="pcard" href="/shop" style="text-decoration:none;color:inherit">
-          <div class="ptile${p.image ? " has-img" : ""}">${badge}${
-            p.image ? `<img class="pimg" src="${p.image}" alt="" loading="lazy">`
-                    : (stickers[p.category]
-                        ? `<img class="sticker" src="/static/icons/${stickers[p.category]}.png" alt="" style="width:84px;height:84px" loading="lazy">`
-                        : "🌿")}</div>
-          <span class="cat">${escHtml(p.brand)}</span>
-          <h3>${escHtml(p.name)}</h3>
-          <div class="price">${p.price_rub.toLocaleString("ru-RU")} ₽${oldP}</div>
+        <a class="pmin" href="/shop">
+          <div class="shotwrap">${badge}<img src="${p.image}" alt="" loading="lazy"></div>
+          <div class="brand2">${escHtml(p.brand)}</div>
+          <div class="name2">${escHtml(p.name)}</div>
+          <div class="price2">${p.price_rub.toLocaleString("ru-RU")} ₽${oldP}</div>
         </a>`;
       }).join("");
-      document.getElementById("hitsCard").style.display = "";
+      document.getElementById("featured").style.display = "";
     }).catch(() => {});
+
+    // Если пользователь уже вошёл — прячем «Создать аккаунт».
+    if (localStorage.getItem("aura_token")) {
+      const c = document.getElementById("ctaAuth");
+      c.textContent = "В личный кабинет"; c.href = "/account";
+    }
   </script>
 </body>
 </html>
