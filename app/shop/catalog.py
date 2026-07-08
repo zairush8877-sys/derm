@@ -554,16 +554,25 @@ def get_product(product_id: str) -> Product | None:
     return _BY_ID.get(product_id)
 
 
+# Приоритетные (профессиональные) бренды в рекомендациях после скана.
+PRO_BRANDS = {"Jan Marini"}
+
+
 def recommend_for_concerns(concern_keys: list[str], limit: int = 6) -> list[Product]:
-    """Подобрать товары под проблемы кожи (для связки с анализом)."""
+    """Подобрать товары под проблемы кожи (для связки с анализом).
+
+    Ранжирование: сначала по числу совпавших проблем, затем профессиональные
+    бренды (Jan Marini) и хиты — чтобы скан продвигал реальный товар с маржой.
+    """
     wanted = set(concern_keys)
-    scored = [
-        (len(wanted & set(p.for_concerns)), p)
-        for p in _CATALOG
-        if wanted & set(p.for_concerns)
-    ]
-    scored.sort(key=lambda x: x[0], reverse=True)
-    return [p for _, p in scored[:limit]]
+
+    def score(p: Product) -> tuple:
+        matches = len(wanted & set(p.for_concerns))
+        return (matches, p.brand in PRO_BRANDS, p.hit, -p.price_rub)
+
+    candidates = [p for p in _CATALOG if wanted & set(p.for_concerns)]
+    candidates.sort(key=score, reverse=True)
+    return candidates[:limit]
 
 
 def categories() -> list[str]:

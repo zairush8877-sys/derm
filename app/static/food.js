@@ -27,17 +27,50 @@ function renderResult(a) {
         </div>`).join("") +
       `<p class="summary" style="font-size:12px">% от примерной дневной нормы взрослого</p>`
     : "";
-  el("items").innerHTML = demoNote + a.items.map((it) => `
+  // Запоминаем оценку «на грамм» — чтобы пересчитывать при правке порции.
+  lastItems = a.items.map((it) => ({
+    name: it.name, grams: it.grams,
+    perG: it.grams > 0 ? {
+      cal: it.calories / it.grams, p: it.protein / it.grams,
+      f: it.fat / it.grams, c: it.carbs / it.grams,
+    } : { cal: 0, p: 0, f: 0, c: 0 },
+  }));
+  el("items").innerHTML = demoNote + a.items.map((it, i) => `
     <div class="trend">
-      <span class="name">${it.name} · <span style="color:var(--muted)">${it.grams} г</span></span>
-      <span class="score">${it.calories} ккал</span>
+      <span class="name">${it.name} ·
+        <input class="gram-input" type="number" min="0" step="10" value="${it.grams}"
+               data-i="${i}" aria-label="граммы"> г</span>
+      <span class="score" id="cal-${i}">${it.calories} ккал</span>
     </div>
-    <div style="margin:2px 0 8px">
+    <div style="margin:2px 0 8px" id="macro-${i}">
       ${macroRow("Б", it.protein, "г")}${macroRow("Ж", it.fat, "г")}${macroRow("У", it.carbs, "г")}
     </div>`).join("") +
-    `<p style="text-align:right;font-weight:700">Всего: ${a.total_calories} ккал</p>` +
+    `<p style="text-align:right;font-weight:700" id="foodTotal">Всего: ${a.total_calories} ккал</p>` +
+    `<p class="summary" style="font-size:12px;text-align:right">Не точно? Поправьте граммы — пересчитаю.</p>` +
     micros;
+  el("items").querySelectorAll(".gram-input").forEach((inp) =>
+    inp.addEventListener("input", () => recalcFood()));
   el("result").classList.remove("hidden");
+}
+
+let lastItems = [];
+
+// Пересчёт калорий/БЖУ и итога при ручной правке граммов.
+function recalcFood() {
+  let totalCal = 0;
+  el("items").querySelectorAll(".gram-input").forEach((inp) => {
+    const i = +inp.dataset.i;
+    const g = Math.max(0, parseFloat(inp.value) || 0);
+    const pg = lastItems[i].perG;
+    const cal = Math.round(pg.cal * g);
+    totalCal += cal;
+    el("cal-" + i).textContent = cal + " ккал";
+    el("macro-" + i).innerHTML =
+      macroRow("Б", +(pg.p * g).toFixed(1), "г") +
+      macroRow("Ж", +(pg.f * g).toFixed(1), "г") +
+      macroRow("У", +(pg.c * g).toFixed(1), "г");
+  });
+  el("foodTotal").textContent = "Всего: " + totalCal + " ккал";
 }
 
 async function analyze() {
