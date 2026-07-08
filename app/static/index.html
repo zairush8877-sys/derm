@@ -73,42 +73,42 @@
 
     <div class="pgrid features">
       <div class="pcard fcard">
-        <div class="emoji">🔬</div>
+        <img class="icon3d" src="/static/icons/skin.png" alt="" />
         <h3>AI-анализ кожи</h3>
         <p class="summary" style="font-size:14px">Загрузите фото — получите разбор по 9 параметрам,
           персональный протокол ухода и PDF-отчёт. Первый скан бесплатно.</p>
         <a href="/skin">Попробовать →</a>
       </div>
       <div class="pcard fcard">
-        <div class="emoji">🍎</div>
+        <img class="icon3d" src="/static/icons/food.png" alt="" />
         <h3>Трекер питания</h3>
         <p class="summary" style="font-size:14px">Сфотографируйте блюдо — AI оценит калории и БЖУ.
           Дневник питания и суточный калораж автоматически.</p>
         <a href="/food">Попробовать →</a>
       </div>
       <div class="pcard fcard">
-        <div class="emoji">🛍</div>
+        <img class="icon3d" src="/static/icons/shop.png" alt="" />
         <h3>Магазин wellness</h3>
         <p class="summary" style="font-size:14px">Косметика, витамины, пептиды, biohacking, спортпит и
           healthy food. Рекомендации под ваш анализ кожи. Кешбэк баллами до 12%.</p>
         <a href="/shop">В каталог →</a>
       </div>
       <div class="pcard fcard">
-        <div class="emoji">📋</div>
+        <img class="icon3d" src="/static/icons/protocol.png" alt="" />
         <h3>«Живой» протокол ухода</h3>
         <p class="summary" style="font-size:14px">Персональный уход утро/вечер, который обновляется
           каждые 30 дней под сезон, возраст и гормональную фазу.</p>
         <a href="/subscription">Оформить →</a>
       </div>
       <div class="pcard fcard">
-        <div class="emoji">💬</div>
+        <img class="icon3d" src="/static/icons/assistant.png" alt="" />
         <h3>Wellness-ассистент</h3>
         <p class="summary" style="font-size:14px">Вопросы про уход, питание, сон, добавки и
           восстановление — практичные ответы 24/7.</p>
         <a href="/assistant">Спросить →</a>
       </div>
       <div class="pcard fcard">
-        <div class="emoji">📈</div>
+        <img class="icon3d" src="/static/icons/trend.png" alt="" />
         <h3>Динамика кожи</h3>
         <p class="summary" style="font-size:14px">Каждый скан сохраняется — следите, что улучшилось,
           а что требует внимания.</p>
@@ -212,9 +212,10 @@
     const escHtml = (s) => String(s).replace(/[&<>"']/g, (c) =>
       ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
     fetch("/api/shop/products").then((r) => r.json()).then((d) => {
-      const icons = { "уходовая косметика": "🧴", "гаджеты": "📱", "спортпит": "💪",
-        "витамины и БАДы": "💊", "пептиды": "🧬", "biohacking": "🔬",
-        "функциональные напитки": "🍵", "healthy food": "🥗" };
+      const stickers = { "уходовая косметика": "cat-skincare", "декоративная косметика": "cat-makeup",
+        "гаджеты": "cat-gadgets", "спортпит": "cat-sport", "витамины и БАДы": "cat-vitamins",
+        "пептиды": "cat-peptides", "biohacking": "cat-biohack", "функциональные напитки": "cat-drinks",
+        "healthy food": "cat-food", "лабораторная диагностика": "cat-lab", "wellness check-up": "cat-checkup" };
       const hits = d.products
         .filter((p) => p.hit || (p.old_price_rub && p.old_price_rub > p.price_rub))
         .slice(0, 4);
@@ -230,7 +231,9 @@
         <a class="pcard" href="/shop" style="text-decoration:none;color:inherit">
           <div class="ptile${p.image ? " has-img" : ""}">${badge}${
             p.image ? `<img class="pimg" src="${p.image}" alt="" loading="lazy">`
-                    : (icons[p.category] || "🌿")}</div>
+                    : (stickers[p.category]
+                        ? `<img class="sticker" src="/static/icons/${stickers[p.category]}.png" alt="" style="width:84px;height:84px" loading="lazy">`
+                        : "🌿")}</div>
           <span class="cat">${escHtml(p.brand)}</span>
           <h3>${escHtml(p.name)}</h3>
           <div class="price">${p.price_rub.toLocaleString("ru-RU")} ₽${oldP}</div>

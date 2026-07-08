@@ -474,3 +474,13 @@ button.primary:active, button.ghost:active, .addbtn:active { transform: scale(.9
 }
 .pcard:hover .ptile.has-img { background: #fff; }
 :root[data-theme="dark"] .pcard .ptile.has-img { background: #f4f4f2; }
+
+
+/* 3D-стикеры (Fluent 3D) вместо эмодзи */
+.fcard .icon3d { width: 52px; height: 52px; display: inline-block;
+  animation: bob 4.5s ease-in-out infinite; filter: drop-shadow(0 6px 10px rgba(58,51,43,.18)); }
+.fcard:nth-child(2n) .icon3d { animation-delay: -1.6s; }
+.fcard:nth-child(3n) .icon3d { animation-delay: -3s; }
+.pcard .ptile .sticker { filter: drop-shadow(0 8px 14px rgba(58,51,43,.22)); }
+nav .sticker, #cats .sticker { vertical-align: -4px; margin-right: 2px; }
+@media (prefers-reduced-motion: reduce) { .fcard .icon3d { animation: none; } }
