@@ -85,7 +85,9 @@ function renderGrid(products) {
       ? `<span class="old-price">${p.old_price_rub.toLocaleString("ru-RU")} ₽</span>` : "";
     return `
     <div class="pcard">
-      <div class="ptile">${cornerBadge}${freeShip}${catIcon[p.category] || "🌿"}
+      <div class="ptile${p.image ? " has-img" : ""}">${cornerBadge}${freeShip}${
+        p.image ? `<img class="pimg" src="${p.image}" alt="${p.name}" loading="lazy">`
+                : (catIcon[p.category] || "🌿")}
         <button class="addbtn" data-add="${p.id}" title="${p.is_service ? "Записаться" : "В корзину"}">+</button>
       </div>
       <span class="cat">${p.brand}</span>

@@ -8,7 +8,7 @@
   <link rel="stylesheet" href="/static/styles.css" />
   <link rel="manifest" href="/static/manifest.webmanifest" />
   <link rel="icon" href="/static/icon.svg" type="image/svg+xml" />
-  <meta name="theme-color" content="#101010" />
+  <meta name="theme-color" content="#232a4b" />
   <meta property="og:title" content="Aura — premium wellness пространство" />
   <meta property="og:description" content="AI-анализ кожи, трекер питания, персональный уход и магазин wellness-товаров." />
   <meta property="og:type" content="website" />
@@ -228,7 +228,9 @@
           ? `<span class="old-price">${p.old_price_rub.toLocaleString("ru-RU")} ₽</span>` : "";
         return `
         <a class="pcard" href="/shop" style="text-decoration:none;color:inherit">
-          <div class="ptile">${badge}${icons[p.category] || "🌿"}</div>
+          <div class="ptile${p.image ? " has-img" : ""}">${badge}${
+            p.image ? `<img class="pimg" src="${p.image}" alt="" loading="lazy">`
+                    : (icons[p.category] || "🌿")}</div>
           <span class="cat">${escHtml(p.brand)}</span>
           <h3>${escHtml(p.name)}</h3>
           <div class="price">${p.price_rub.toLocaleString("ru-RU")} ₽${oldP}</div>
