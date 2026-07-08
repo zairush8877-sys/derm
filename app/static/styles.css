@@ -20,12 +20,12 @@
   /* Палитра «Спа»: тёплый беж, пудровая роза, тёмно-синий, шампань */
   --bg: #faf7f1;              /* светло-бежевый тёплый */
   --card: #ffffff;            /* белый тюль */
-  --ink: #232a4b;             /* тёмно-синий (текст) */
+  --ink: #3a332b;             /* тёплый тёмно-коричневый (текст) */
   --muted: #8b8578;           /* тёплый серый */
   --line: #e7dfd2;
   --soft: #f1ebdf;            /* бежевые подложки/плитки */
-  --brand: #232a4b;
-  --brand-dark: #1d2a52;
+  --brand: #3a332b;
+  --brand-dark: #2b251f;   /* эспрессо: бегущая строка, кнопка чата */
   --accent: #c0705b;          /* пудрово-розовый акцент (читаемый тон) */
   --rose: #e2a091;            /* пудрово-розовый светлый (заливки) */
   --champagne: #b49a6a;       /* металл шампань (рейтинги, детали) */
@@ -33,7 +33,7 @@
   --orange: #c07a2c;
   --red: #b3402f;
   --radius: 16px;
-  --shadow: 0 2px 8px rgba(35,42,75,0.05);
+  --shadow: 0 2px 8px rgba(58,51,43,0.06);
   --on-ink: #ffffff;          /* текст на чернильном фоне */
   --hover-soft: #eae3d3;      /* ховеры подложек */
   --glass: rgba(255,255,255,.72);
@@ -275,7 +275,7 @@ button.ghost:hover { border-color: var(--ink); }
 .aurora .orb.o2 { width: 380px; height: 380px; right: -110px; top: -60px;
   background: radial-gradient(circle, #ead9b8 0%, transparent 70%); animation-delay: -6s; }
 .aurora .orb.o3 { width: 300px; height: 300px; left: 38%; bottom: -160px;
-  background: radial-gradient(circle, #c7d2f0 0%, transparent 70%); animation-delay: -12s; }
+  background: radial-gradient(circle, #e6d3ae 0%, transparent 70%); animation-delay: -12s; }
 @keyframes orbFloat {
   0%, 100% { transform: translate(0, 0) scale(1); }
   33% { transform: translate(40px, 26px) scale(1.08); }
@@ -285,7 +285,7 @@ button.ghost:hover { border-color: var(--ink); }
 
 /* Живой градиент в заголовке */
 .grad-text {
-  background: linear-gradient(90deg, #c0705b, #232a4b, #b49a6a, #c0705b);
+  background: linear-gradient(90deg, #c0705b, #b49a6a, #d8a08e, #c0705b);
   background-size: 280% 100%;
   -webkit-background-clip: text; background-clip: text; color: transparent;
   animation: gradSlide 7s ease-in-out infinite;
@@ -383,17 +383,17 @@ html { scroll-behavior: smooth; }
 
 /* ===== Тёмная тема (переключатель 🌙 в шапке) ===== */
 :root[data-theme="dark"] {
-  --bg: #10141f;              /* глубокий синий вечер */
-  --brand: #f0ede6;
-  --brand-dark: #0b0e18;
-  --card: #181d2c;
-  --ink: #f0ede6;
-  --muted: #9a97a8;
-  --line: #2a3044;
-  --soft: #1e2434;
-  --hover-soft: #252c40;
-  --on-ink: #10141f;
-  --glass: rgba(24,29,44,.72);
+  --bg: #17130f;              /* тёплый шоколадный вечер */
+  --brand: #f0e9df;
+  --brand-dark: #0f0c09;
+  --card: #201b15;
+  --ink: #f0e9df;
+  --muted: #a39a8c;
+  --line: #322b22;
+  --soft: #261f18;
+  --hover-soft: #2d261d;
+  --on-ink: #17130f;
+  --glass: rgba(32,27,21,.72);
   --shadow: 0 1px 3px rgba(0,0,0,.5);
 }
 :root[data-theme="dark"] .aurora .orb { opacity: .28; }
