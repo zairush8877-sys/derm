@@ -12,6 +12,17 @@ const catIcon = {
   "функциональные напитки": "🍵", "healthy food": "🥗", "лабораторная диагностика": "🧪",
   "wellness check-up": "🩺",
 };
+// 3D-стикеры категорий (Fluent 3D, MIT) — для плиток без фото и чипов.
+const catSticker = {
+  "уходовая косметика": "cat-skincare", "декоративная косметика": "cat-makeup",
+  "гаджеты": "cat-gadgets", "спортпит": "cat-sport", "витамины и БАДы": "cat-vitamins",
+  "пептиды": "cat-peptides", "biohacking": "cat-biohack",
+  "функциональные напитки": "cat-drinks", "healthy food": "cat-food",
+  "лабораторная диагностика": "cat-lab", "wellness check-up": "cat-checkup",
+};
+const stickerImg = (cat, size) => catSticker[cat]
+  ? `<img class="sticker" src="/static/icons/${catSticker[cat]}.png" alt="" style="width:${size}px;height:${size}px" loading="lazy">`
+  : (catIcon[cat] || "🌿");
 
 function sortProducts(products) {
   const mode = el("sort") ? el("sort").value : "popular";
@@ -53,7 +64,7 @@ async function loadProducts() {
 function renderCats(categories) {
   const box = el("cats");
   const all = [{ v: null, label: "Все" }].concat(
-    categories.map((c) => ({ v: c, label: (catIcon[c] || "") + " " + c })));
+    categories.map((c) => ({ v: c, label: stickerImg(c, 18) + " " + c })));
   box.innerHTML = all.map((c) =>
     `<button class="ghost" data-cat="${c.v ?? ""}"
       style="${c.v === activeCat ? "background:var(--ink);color:var(--on-ink)" : ""}">${c.label}</button>`
@@ -87,7 +98,7 @@ function renderGrid(products) {
     <div class="pcard">
       <div class="ptile${p.image ? " has-img" : ""}">${cornerBadge}${freeShip}${
         p.image ? `<img class="pimg" src="${p.image}" alt="${p.name}" loading="lazy">`
-                : (catIcon[p.category] || "🌿")}
+                : stickerImg(p.category, 84)}
         <button class="addbtn" data-add="${p.id}" title="${p.is_service ? "Записаться" : "В корзину"}">+</button>
       </div>
       <span class="cat">${p.brand}</span>
