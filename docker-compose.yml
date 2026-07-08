@@ -26,7 +26,7 @@ services:
       DOMAIN: ${DOMAIN:-localhost}
       # Бамп, чтобы docker compose пересоздал Caddy и перечитал Caddyfile
       # (выпуск сертификата для aura-wellness.ru). Меняем число при правках Caddyfile.
-      CADDY_CONFIG_REV: "2"
+      CADDY_CONFIG_REV: "3"
     volumes:
       - ./Caddyfile:/etc/caddy/Caddyfile:ro
       - caddy-data:/data
