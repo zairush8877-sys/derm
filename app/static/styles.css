@@ -17,27 +17,27 @@
   unicode-range: U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116; }
 
 :root {
-  /* Палитра «Спа»: тёплый беж, пудровая роза, тёмно-синий, шампань */
-  --bg: #faf7f1;              /* светло-бежевый тёплый */
-  --card: #ffffff;            /* белый тюль */
-  --ink: #3a332b;             /* тёплый тёмно-коричневый (текст) */
-  --muted: #8b8578;           /* тёплый серый */
-  --line: #e7dfd2;
-  --soft: #f1ebdf;            /* бежевые подложки/плитки */
-  --brand: #3a332b;
-  --brand-dark: #2b251f;   /* эспрессо: бегущая строка, кнопка чата */
-  --accent: #c0705b;          /* пудрово-розовый акцент (читаемый тон) */
-  --rose: #e2a091;            /* пудрово-розовый светлый (заливки) */
-  --champagne: #b49a6a;       /* металл шампань (рейтинги, детали) */
-  --green: #4a7d63;
-  --orange: #c07a2c;
+  /* Нейтральная палитра (стиль Thorne): бело-чёрный интерфейс, цвет — только на фото */
+  --bg: #ffffff;              /* белый фон */
+  --card: #ffffff;            /* карточки — белые, отделяются рамкой */
+  --ink: #171717;             /* почти чёрный текст */
+  --muted: #8a8a8a;           /* нейтральный серый */
+  --line: #ececec;            /* светлые линии/рамки */
+  --soft: #f4f4f4;            /* нейтральные подложки/плитки */
+  --brand: #171717;
+  --brand-dark: #171717;      /* промо-полоса, кнопка чата — чёрные */
+  --accent: #c0705b;          /* единственный акцент (пудрово-роза), очень дозированно */
+  --rose: #e2a091;
+  --champagne: #9a9a9a;       /* нейтральный серый вместо шампани */
+  --green: #3f7d5f;
+  --orange: #b9762a;
   --red: #b3402f;
-  --radius: 16px;
-  --shadow: 0 2px 8px rgba(58,51,43,0.06);
-  --on-ink: #ffffff;          /* текст на чернильном фоне */
-  --hover-soft: #eae3d3;      /* ховеры подложек */
-  --glass: rgba(255,255,255,.72);
-  --maxw: 1240px;            /* шире контейнер: как у крупных брендов, не «коробка» */
+  --radius: 14px;
+  --shadow: 0 1px 3px rgba(0,0,0,0.05);
+  --on-ink: #ffffff;          /* текст на чёрном */
+  --hover-soft: #efefef;      /* ховеры подложек */
+  --glass: rgba(255,255,255,.8);
+  --maxw: 1240px;
 }
 
 * { box-sizing: border-box; }
@@ -94,12 +94,15 @@ nav.tabs {
 }
 nav.tabs::-webkit-scrollbar { display: none; }
 nav.tabs a {
-  text-decoration: none; color: var(--ink); background: var(--soft);
-  padding: 8px 16px; border-radius: 999px; font-size: 13.5px; white-space: nowrap;
-  border: 1px solid transparent; transition: background .15s;
+  text-decoration: none; color: var(--ink); background: transparent;
+  padding: 8px 12px; border-radius: 0; font-size: 12px; letter-spacing: .14em; text-transform: uppercase;
+  white-space: nowrap; border: none; position: relative; opacity: .78; transition: opacity .15s;
 }
-nav.tabs a:hover { background: var(--hover-soft); }
-nav.tabs a.active { background: var(--ink); color: var(--on-ink); font-weight: 600; }
+nav.tabs a::after { content: ""; position: absolute; left: 12px; right: 12px; bottom: 4px; height: 1.5px;
+  background: var(--ink); transform: scaleX(0); transform-origin: left; transition: transform .25s; }
+nav.tabs a:hover { background: transparent; opacity: 1; }
+nav.tabs a:hover::after, nav.tabs a.active::after { transform: scaleX(1); }
+nav.tabs a.active { background: transparent; color: var(--ink); font-weight: 600; opacity: 1; }
 
 main { max-width: var(--maxw); margin: 0 auto; padding: 22px 20px 90px; }
 
@@ -383,17 +386,17 @@ html { scroll-behavior: smooth; }
 
 /* ===== Тёмная тема (переключатель 🌙 в шапке) ===== */
 :root[data-theme="dark"] {
-  --bg: #17130f;              /* тёплый шоколадный вечер */
-  --brand: #f0e9df;
-  --brand-dark: #0f0c09;
-  --card: #201b15;
-  --ink: #f0e9df;
-  --muted: #a39a8c;
-  --line: #322b22;
-  --soft: #261f18;
-  --hover-soft: #2d261d;
-  --on-ink: #17130f;
-  --glass: rgba(32,27,21,.72);
+  --bg: #0e0e0e;              /* нейтральный тёмный */
+  --brand: #f2f2f2;
+  --brand-dark: #000000;
+  --card: #161616;
+  --ink: #f2f2f2;
+  --muted: #9a9a9a;
+  --line: #262626;
+  --soft: #1c1c1c;
+  --hover-soft: #222222;
+  --on-ink: #0e0e0e;
+  --glass: rgba(22,22,22,.75);
   --shadow: 0 1px 3px rgba(0,0,0,.5);
 }
 :root[data-theme="dark"] .aurora .orb { opacity: .28; }
