@@ -1,209 +1,256 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Aura — premium wellness пространство</title>
-  <meta name="description" content="AI-анализ кожи, трекер питания, персональный уход и магазин косметики, БАДов и biohacking-продуктов. Всё в одном пространстве." />
-  <link rel="stylesheet" href="/static/styles.css" />
-  <link rel="manifest" href="/static/manifest.webmanifest" />
-  <link rel="icon" href="/static/icon.svg" type="image/svg+xml" />
-  <meta name="theme-color" content="#17130f" />
-  <meta property="og:title" content="Aura — premium wellness пространство" />
-  <meta property="og:description" content="AI-анализ кожи, трекер питания, персональный уход и магазин wellness-товаров." />
-  <meta property="og:type" content="website" />
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Aura — premium wellness пространство</title>
+<meta name="description" content="AI-анализ кожи по фото, трекер питания, персональный протокол ухода и магазин premium-косметики, БАДов и biohacking-продуктов." />
+<link rel="manifest" href="/static/manifest.webmanifest" />
+<link rel="icon" href="/static/icon.svg" type="image/svg+xml" />
+<meta name="theme-color" content="#ffffff" />
+<meta property="og:title" content="Aura — premium wellness пространство" />
+<meta property="og:description" content="AI-анализ кожи, трекер питания, персональный уход и магазин wellness-товаров." />
+<meta property="og:type" content="website" />
+<style>
+@font-face { font-family: 'Manrope'; font-style: normal; font-weight: 400 800; font-display: swap;
+  src: url('/static/fonts/manrope-lat-bcbadc.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+2000-206F, U+20AC, U+2212; }
+@font-face { font-family: 'Manrope'; font-style: normal; font-weight: 400 800; font-display: swap;
+  src: url('/static/fonts/manrope-cyr-d0354d.woff2') format('woff2');
+  unicode-range: U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116; }
+@font-face { font-family: 'Unbounded'; font-style: normal; font-weight: 400 900; font-display: swap;
+  src: url('/static/fonts/unbounded-lat-f2b2b2.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+2000-206F, U+20AC, U+2212; }
+@font-face { font-family: 'Unbounded'; font-style: normal; font-weight: 400 900; font-display: swap;
+  src: url('/static/fonts/unbounded-cyr-92a538.woff2') format('woff2');
+  unicode-range: U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116; }
+
+*{box-sizing:border-box;margin:0;padding:0;}
+:root{--bg:#ffffff;--ink:#171717;--muted:#8a8a8a;--line:#ececec;--accent:#c0705b;--gold:#9a9a9a;--soft:#f4f4f4;}
+body{font-family:'Manrope',system-ui,sans-serif;background:var(--bg);color:var(--ink);-webkit-font-smoothing:antialiased;}
+.disp{font-family:'Unbounded',sans-serif;}
+a{color:inherit;text-decoration:none;}
+/* промо-полоса */
+.promo{background:#171717;color:#fff;text-align:center;font-size:12.5px;letter-spacing:.02em;padding:9px 16px;}
+.promo b{color:#fff;}
+/* шапка */
+.nav{position:sticky;top:0;z-index:50;display:flex;align-items:center;justify-content:space-between;
+  gap:20px;padding:16px clamp(18px,4vw,56px);background:rgba(255,255,255,.86);backdrop-filter:blur(12px);
+  border-bottom:1px solid var(--line);}
+.nav .logo{font-family:'Unbounded',sans-serif;font-weight:700;font-size:23px;letter-spacing:-.5px;}
+.nav .logo i{color:var(--accent);font-style:normal;}
+.nav .links{display:flex;gap:26px;font-size:13px;letter-spacing:.06em;}
+.nav .links a{color:var(--ink);opacity:.8;transition:.2s;position:relative;padding:4px 0;}
+.nav .links a:hover{opacity:1;}
+.nav .links a::after{content:"";position:absolute;left:0;right:0;bottom:-2px;height:1.5px;background:var(--ink);transform:scaleX(0);transition:.25s;transform-origin:left;}
+.nav .links a:hover::after{transform:scaleX(1);}
+.nav .right{display:flex;align-items:center;gap:16px;font-size:14px;}
+.nav .search{display:flex;align-items:center;gap:8px;border:1px solid var(--line);border-radius:100px;padding:8px 14px;color:var(--muted);font-size:13px;}
+.nav .btn-login{border:1.5px solid var(--ink);border-radius:100px;padding:9px 20px;font-weight:600;font-size:13px;transition:.2s;}
+.nav .btn-login:hover{background:var(--ink);color:#fff;}
+.nav .cart{font-size:20px;}
+/* HERO */
+.hero{position:relative;height:min(88vh,860px);min-height:520px;overflow:hidden;display:flex;align-items:flex-end;}
+.hero .bg{position:absolute;inset:0;z-index:0;
+  background:
+    radial-gradient(60% 55% at 72% 30%, rgba(214,217,220,.9), transparent 60%),
+    radial-gradient(55% 60% at 30% 20%, rgba(228,230,232,.8), transparent 55%),
+    radial-gradient(70% 70% at 85% 85%, rgba(205,209,212,.85), transparent 60%),
+    linear-gradient(120deg,#eef0f2 0%,#e7eaec 45%,#dfe2e5 100%);
+  animation:drift 18s ease-in-out infinite;}
+.hero .bg::before,.hero .bg::after{content:"";position:absolute;border-radius:50%;filter:blur(60px);opacity:.5;}
+.hero .bg::before{width:52vw;height:52vw;left:-8vw;top:-10vw;background:radial-gradient(circle,#dcdfe2,transparent 65%);animation:float1 15s ease-in-out infinite;}
+.hero .bg::after{width:46vw;height:46vw;right:-6vw;bottom:-14vw;background:radial-gradient(circle,#cfd4d7,transparent 65%);animation:float2 19s ease-in-out infinite;}
+@keyframes drift{0%,100%{filter:brightness(1)}50%{filter:brightness(1.04)}}
+@keyframes float1{0%,100%{transform:translate(0,0)}50%{transform:translate(40px,30px)}}
+@keyframes float2{0%,100%{transform:translate(0,0)}50%{transform:translate(-36px,-26px)}}
+.hero .veil{position:absolute;inset:0;z-index:1;background:linear-gradient(90deg,rgba(22,18,14,.52),rgba(22,18,14,.12) 55%,transparent 72%),linear-gradient(0deg,rgba(22,18,14,.5),transparent 46%);}
+.hero .inner{position:relative;z-index:2;padding:clamp(28px,6vw,80px);max-width:760px;}
+.hero .kick{color:#fff;opacity:.9;font-size:12px;letter-spacing:.34em;text-transform:uppercase;margin-bottom:18px;}
+.hero h1{font-family:'Unbounded',sans-serif;font-weight:600;color:#fff;font-size:clamp(40px,7vw,88px);
+  line-height:1.0;letter-spacing:-.02em;margin-bottom:20px;text-shadow:0 2px 30px rgba(0,0,0,.25);text-wrap:balance;}
+.hero p{color:#fff;opacity:.92;font-size:clamp(15px,1.8vw,20px);line-height:1.55;max-width:42ch;margin-bottom:30px;text-shadow:0 1px 16px rgba(0,0,0,.3);}
+.hero .cta{display:flex;gap:14px;flex-wrap:wrap;}
+.btn{font-weight:600;font-size:13px;letter-spacing:.12em;text-transform:uppercase;padding:16px 32px;border-radius:100px;border:1.5px solid;transition:.25s;cursor:pointer;}
+.btn-fill{background:#fff;color:#171717;border-color:#fff;}.btn-fill:hover{transform:translateY(-3px);box-shadow:0 14px 34px rgba(0,0,0,.25);}
+.btn-ghost{background:transparent;color:#fff;border-color:rgba(255,255,255,.7);}.btn-ghost:hover{background:#fff;color:#171717;transform:translateY(-3px);}
+.photo-note{position:absolute;top:16px;right:18px;z-index:3;font-size:11px;letter-spacing:.12em;text-transform:uppercase;
+  color:#fff;background:rgba(0,0,0,.28);backdrop-filter:blur(6px);padding:7px 14px;border-radius:100px;}
+.hero .inner>*{animation:rise .9s cubic-bezier(.2,.8,.2,1) both;}
+.hero .kick{animation-delay:.05s}.hero h1{animation-delay:.15s}.hero p{animation-delay:.28s}.hero .cta{animation-delay:.4s}
+@keyframes rise{from{opacity:0;transform:translateY(22px)}}
+/* бестселлеры */
+.best{padding:clamp(56px,8vw,110px) clamp(18px,5vw,64px);}
+.best .head{text-align:center;margin-bottom:46px;}
+.best h2{font-family:'Unbounded',sans-serif;font-weight:600;font-size:clamp(26px,4vw,48px);letter-spacing:-.02em;}
+.best .head p{color:var(--muted);margin-top:10px;}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:clamp(16px,2vw,32px);max-width:1200px;margin:0 auto;}
+.pcard .pimg{position:relative;aspect-ratio:3/4;background:#f4f4f4;border-radius:10px;overflow:hidden;display:flex;align-items:center;justify-content:center;}
+.pcard .pimg img{width:82%;height:82%;object-fit:contain;transition:transform .6s cubic-bezier(.2,.8,.2,1);}
+.pcard:hover .pimg img{transform:scale(1.06);}
+.pb{position:absolute;top:12px;left:12px;font-size:10px;letter-spacing:.12em;text-transform:uppercase;font-weight:700;background:var(--ink);color:#fff;padding:5px 10px;border-radius:100px;}
+.pb.sale{background:var(--accent);}
+.pbrand{margin:14px 0 2px;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);}
+.pname{font-size:14.5px;line-height:1.35;min-height:2.6em;}
+.pprice{font-size:15px;font-weight:700;margin-top:4px;}.po{color:var(--muted);text-decoration:line-through;font-weight:500;margin-left:8px;font-size:13px;}
+.best .more{text-align:center;margin-top:48px;}
+.reveal{opacity:0;transform:translateY(24px);transition:.7s cubic-bezier(.2,.8,.2,1);}
+.reveal.in{opacity:1;transform:none;}
+.grid .reveal:nth-child(2){transition-delay:.06s}.grid .reveal:nth-child(3){transition-delay:.12s}
+.grid .reveal:nth-child(4){transition-delay:.18s}.grid .reveal:nth-child(5){transition-delay:.24s}.grid .reveal:nth-child(6){transition-delay:.3s}
+/* блок функций с фото (в середине) */
+.features{padding:clamp(56px,8vw,110px) clamp(18px,5vw,64px);border-top:1px solid var(--line);}
+.features .htitle{text-align:center;margin-bottom:48px;}
+.features h2{font-family:'Unbounded',sans-serif;font-weight:600;font-size:clamp(26px,4vw,48px);letter-spacing:-.02em;}
+.features .htitle p{color:var(--muted);margin-top:10px;}
+.fgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:clamp(20px,2.6vw,38px);max-width:1200px;margin:0 auto;}
+.fcard .fph{aspect-ratio:4/3;border-radius:12px;overflow:hidden;position:relative;display:flex;align-items:flex-end;
+  padding:12px;margin-bottom:18px;background:linear-gradient(150deg,#eaecee,#dfe2e5);}
+.fcard:nth-child(2) .fph{background:linear-gradient(150deg,#e7e9eb,#d8dbde);}
+.fcard:nth-child(3) .fph{background:linear-gradient(150deg,#eeeeee,#dddfe1);}
+.fcard:nth-child(4) .fph{background:linear-gradient(150deg,#e5e7e9,#d6d9dc);}
+.fcard:nth-child(5) .fph{background:linear-gradient(150deg,#ececef,#dcdee1);}
+.fcard:nth-child(6) .fph{background:linear-gradient(150deg,#e8eaec,#d9dcdf);}
+.fcard .fph span{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:#9a9a9a;background:rgba(255,255,255,.72);padding:5px 10px;border-radius:100px;}
+.fcard h3{font-family:'Unbounded',sans-serif;font-weight:600;font-size:19px;margin-bottom:10px;}
+.fcard p{color:var(--muted);font-size:14.5px;line-height:1.6;margin-bottom:16px;}
+.fcard a.flink{font-size:13px;letter-spacing:.1em;text-transform:uppercase;font-weight:600;color:var(--ink);border-bottom:1.5px solid var(--ink);padding-bottom:4px;transition:.2s;}
+.fcard a.flink:hover{opacity:.6;}
+footer{border-top:1px solid var(--line);padding:40px 20px;text-align:center;color:var(--muted);font-size:12px;line-height:1.7;}
+@media(max-width:820px){.nav .links{display:none;}.grid{grid-template-columns:repeat(2,1fr);}.fgrid{grid-template-columns:repeat(1,1fr);}.hero .veil{background:linear-gradient(0deg,rgba(30,24,18,.4),transparent 45%);}}
+@media (prefers-reduced-motion:reduce){.hero .bg,.hero .bg::before,.hero .bg::after,.hero .inner>*{animation:none!important;}.reveal{opacity:1;transform:none;}}
+
+
+.hero .heroimg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:0;}
+.fph img.fimg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:0;}
+.search input{border:none;background:transparent;outline:none;font:inherit;font-size:13px;color:var(--ink);width:120px;}
+.fab{position:fixed;right:18px;bottom:18px;width:52px;height:52px;border-radius:50%;background:#171717;color:#fff;
+  display:flex;align-items:center;justify-content:center;font-size:22px;text-decoration:none;box-shadow:0 6px 20px rgba(0,0,0,.25);z-index:60;}
+.band{max-width:1100px;margin:0 auto;padding:clamp(44px,6vw,76px) clamp(18px,5vw,64px) 0;}
+.bigsearch{display:flex;gap:12px;align-items:center;flex-wrap:wrap;}
+.bigsearch form{flex:1;min-width:240px;display:flex;align-items:center;gap:10px;border:1.5px solid var(--ink);border-radius:100px;padding:14px 20px;}
+.bigsearch input{flex:1;border:none;outline:none;font:inherit;font-size:15px;background:transparent;color:var(--ink);}
+.bigsearch .ask{display:inline-flex;align-items:center;gap:8px;border:1.5px solid var(--line);border-radius:100px;padding:14px 22px;font-weight:600;font-size:14px;text-decoration:none;color:var(--ink);white-space:nowrap;transition:.2s;}
+.bigsearch .ask:hover{border-color:var(--ink);}
+.stats{max-width:1100px;margin:0 auto;padding:clamp(26px,3.4vw,40px) clamp(18px,5vw,64px) 0;display:grid;grid-template-columns:repeat(4,1fr);gap:clamp(12px,1.6vw,20px);}
+.stat{border:1px solid var(--line);border-radius:14px;padding:22px 16px;text-align:center;}
+.stat b{display:block;font-family:'Unbounded',sans-serif;font-weight:700;font-size:clamp(22px,2.4vw,30px);letter-spacing:-.5px;margin-bottom:6px;}
+.stat span{color:var(--muted);font-size:12.5px;}
+@media(max-width:820px){.stats{grid-template-columns:repeat(2,1fr);}}
+
+</style>
 </head>
-<body class="home">
+<body>
 
-  <!-- ===== Заставка-открытие (один раз за сессию) ===== -->
-  <div class="splash" id="splash" aria-hidden="true">
-    <div class="splash-inner">
-      <div class="splash-word">
-        <span>A</span><span>U</span><span>R</span><span>A<i class="dot">.</i></span>
-      </div>
-      <div class="splash-line"></div>
-      <div class="splash-tag">wellness пространство</div>
-    </div>
-    <div class="splash-skip">нажмите, чтобы войти</div>
+<div class="promo">Первый AI-скан кожи — <b>бесплатно</b> · Доставка по России от 3&nbsp;500&nbsp;₽</div>
+
+<header class="nav">
+  <div style="display:flex;align-items:center;gap:30px">
+    <a class="logo" href="/">aura<i>.</i></a>
+    <nav class="links">
+      <a href="/shop">Магазин</a><a href="/skin">Кожа</a><a href="/food">Еда</a><a href="/assistant">Ассистент</a><a href="/subscription">Подписка</a>
+    </nav>
   </div>
-  <script>
-    (function () {
-      var s = document.getElementById("splash");
-      if (!s) return;
-      if (sessionStorage.getItem("aura_splash_seen")) { s.remove(); return; }
-      document.body.classList.add("splash-on");
-      var lift = function () {
-        s.classList.add("lift");
-        document.body.classList.remove("splash-on");
-        sessionStorage.setItem("aura_splash_seen", "1");
-        setTimeout(function () { if (s.parentNode) s.remove(); }, 1100);
-      };
-      var t = setTimeout(lift, 2700);
-      s.addEventListener("click", function () { clearTimeout(t); lift(); });
-    })();
-  </script>
+  <div class="right">
+    <form class="search" action="/shop" method="get">🔍 <input name="q" placeholder="Поиск" aria-label="Поиск по каталогу"></form>
+    <a class="btn-login" id="loginLink" href="/auth">Войти</a>
+    <a class="cart" href="/shop#cartCard" title="Корзина">🛍</a>
+  </div>
+</header>
 
-  <!-- (шапка: бегущая строка + логотип-бар вставляются auth-helper.js) -->
-
-  <nav class="tabs">
-    <a href="/" class="active">Главная</a>
-    <a href="/shop">Магазин</a>
-    <a href="/skin">Кожа</a>
-    <a href="/food">Еда</a>
-    <a href="/assistant">Ассистент</a>
-    <a href="/tracker">Трекер</a>
-    <a href="/subscription">Подписка</a>
-  </nav>
-
-  <!-- ===== HERO во всю ширину ===== -->
-  <section class="hero-e">
-    <p class="eyebrow">AI-Wellness · Россия</p>
-    <h1>Красота и здоровье, подтверждённые интеллектом</h1>
-    <p class="lead">Анализ кожи по фото, подсчёт калорий и микронутриентов,
-      персональный протокол ухода и магазин premium-wellness — в одном пространстве.</p>
+<section class="hero">
+  <div class="bg"></div>
+  <img class="heroimg" src="/static/hero/hero.jpg" alt="" onerror="this.remove()">
+  <div class="veil"></div>
+  <div class="inner">
+    <div class="kick">AI-Wellness · Россия</div>
+    <h1>Загляните<br/>под кожу</h1>
+    <p>AI-анализ кожи по фото за 30 секунд, персональный протокол ухода
+      и магазин premium-косметики — в одном пространстве.</p>
     <div class="cta">
-      <a class="btn-fill" href="/skin">Анализ кожи</a>
-      <a class="btn-line" href="/shop">В магазин</a>
-      <a class="btn-line hidden" id="installBtn">Установить приложение</a>
-    </div>
-    <a class="scroll-cue" href="#explore" aria-label="ниже">↓</a>
-  </section>
-
-  <!-- ===== Тонкая строка поиска ===== -->
-  <div class="featured" id="explore" style="padding-top:clamp(48px,7vw,90px);padding-bottom:0">
-    <div class="search-row" style="max-width:720px;margin:0 auto">
-      <input type="search" id="homeSearch" placeholder="Поиск по каталогу: сыворотка, витамин D, пептиды…" />
-      <a class="ai-pill" href="/assistant">✦ Спросить Aura</a>
+      <a class="btn btn-fill" href="/skin">Проанализировать кожу</a>
+      <a class="btn btn-ghost" href="/shop">В магазин</a>
     </div>
   </div>
+</section>
 
-  <!-- ===== Editorial split-блоки ===== -->
-  <section class="split">
-    <div class="media p1"><span class="idx">01</span><span class="kw">Разбор кожи<br/>по 9 параметрам</span></div>
-    <div class="body">
-      <p class="tag">AI-анализ кожи</p>
-      <h2>Загрузите фото — получите протокол</h2>
-      <p>Тон, увлажнённость, поры, морщины, пигментация и ещё 4 параметра.
-        Персональный уход утро/вечер и PDF-отчёт. Первый скан — бесплатно.</p>
-      <a class="more" href="/skin">Проанализировать →</a>
-    </div>
-  </section>
+<div class="band reveal">
+  <div class="bigsearch">
+    <form action="/shop" method="get">🔍 <input name="q" placeholder="Поиск по товарам: протеин, витамин D, матча…" aria-label="Поиск"></form>
+    <a class="ask" href="/assistant">✦ Спросить Aura</a>
+  </div>
+</div>
 
-  <section class="split reverse">
-    <div class="media p2"><span class="idx">02</span><span class="kw">Косметика · БАДы<br/>Biohacking</span></div>
-    <div class="body">
-      <p class="tag">Магазин</p>
-      <h2>Premium-уход и добавки с доставкой по России</h2>
-      <p>Профессиональная косметика Jan Marini, витамины, пептиды, спортпит и
-        healthy food. Рекомендации под ваш анализ кожи. Кешбэк баллами до 12%.</p>
-      <a class="more" href="/shop">В каталог →</a>
-    </div>
-  </section>
+<div class="stats">
+  <div class="stat reveal"><b>9</b><span>параметров анализа кожи</span></div>
+  <div class="stat reveal"><b>110+</b><span>wellness-товаров</span></div>
+  <div class="stat reveal"><b>24/7</b><span>AI-ассистент на связи</span></div>
+  <div class="stat reveal"><b>199 ₽</b><span>за AI-скан по фото</span></div>
+</div>
 
-  <section class="split">
-    <div class="media p3"><span class="idx">03</span><span class="kw">Калории · БЖУ<br/>Витамины</span></div>
-    <div class="body">
-      <p class="tag">Трекер питания</p>
-      <h2>Сфотографируйте блюдо — посчитаем всё</h2>
-      <p>AI оценивает калории, белки-жиры-углеводы и ключевые витамины с минералами.
-        Порции легко поправить вручную — пересчёт мгновенный.</p>
-      <a class="more" href="/food">Открыть трекер →</a>
-    </div>
-  </section>
+<section class="features">
+  <div class="htitle reveal">
+    <h2>Что умеет Aura</h2>
+    <p>Всё для кожи, питания и ухода — в одном пространстве</p>
+  </div>
+  <div class="fgrid"><a class="fcard reveal" href="/skin" style="text-decoration:none;color:inherit">
+      <div class="fph"><img class="fimg" src="/static/hero/feat-skin.jpg" alt="" onerror="this.remove()"><span>фото · кожа</span></div>
+      <h3>AI-анализ кожи</h3><p>Загрузите фото — получите разбор по 9 параметрам, персональный протокол ухода и PDF-отчёт. Первый скан бесплатно.</p><span class="flink">Попробовать →</span></a><a class="fcard reveal" href="/food" style="text-decoration:none;color:inherit">
+      <div class="fph"><img class="fimg" src="/static/hero/feat-food.jpg" alt="" onerror="this.remove()"><span>фото · еда</span></div>
+      <h3>Трекер питания</h3><p>Сфотографируйте блюдо — AI оценит калории, БЖУ и витамины. Дневник питания и суточный калораж автоматически.</p><span class="flink">Попробовать →</span></a><a class="fcard reveal" href="/shop" style="text-decoration:none;color:inherit">
+      <div class="fph"><img class="fimg" src="/static/hero/feat-shop.jpg" alt="" onerror="this.remove()"><span>фото · товары</span></div>
+      <h3>Магазин wellness</h3><p>Косметика, витамины, пептиды, biohacking, спортпит и healthy food. Рекомендации под ваш анализ кожи. Кешбэк баллами до 12%.</p><span class="flink">В каталог →</span></a><a class="fcard reveal" href="/subscription" style="text-decoration:none;color:inherit">
+      <div class="fph"><img class="fimg" src="/static/hero/feat-protocol.jpg" alt="" onerror="this.remove()"><span>фото · уход</span></div>
+      <h3>«Живой» протокол ухода</h3><p>Персональный уход утро/вечер, который обновляется каждые 30 дней под сезон, возраст и гормональную фазу.</p><span class="flink">Оформить →</span></a><a class="fcard reveal" href="/assistant" style="text-decoration:none;color:inherit">
+      <div class="fph"><img class="fimg" src="/static/hero/feat-assistant.jpg" alt="" onerror="this.remove()"><span>фото · ассистент</span></div>
+      <h3>Wellness-ассистент</h3><p>Вопросы про уход, питание, сон, добавки и восстановление — практичные ответы 24/7.</p><span class="flink">Спросить →</span></a><a class="fcard reveal" href="/tracker" style="text-decoration:none;color:inherit">
+      <div class="fph"><img class="fimg" src="/static/hero/feat-progress.jpg" alt="" onerror="this.remove()"><span>фото · динамика</span></div>
+      <h3>Динамика кожи</h3><p>Каждый скан сохраняется — следите, что улучшилось, а что требует внимания.</p><span class="flink">Открыть →</span></a></div>
+</section>
 
-  <section class="split reverse">
-    <div class="media p4"><span class="idx">04</span><span class="kw">«Живой»<br/>протокол ухода</span></div>
-    <div class="body">
-      <p class="tag">Подписка</p>
-      <h2>Уход, который обновляется под вас</h2>
-      <p>Персональная программа утро/вечер меняется каждые 30 дней под сезон,
-        возраст и гормональную фазу. Плюс wellness-ассистент 24/7.</p>
-      <a class="more" href="/subscription">Оформить →</a>
-    </div>
-  </section>
+<section class="best">
+  <div class="head">
+    <h2>Наши бестселлеры</h2>
+    <p>Профессиональный уход Jan Marini и wellness-эссенциалы</p>
+  </div>
+  <div class="grid" id="bestGrid"></div>
+  <div class="more"><a class="btn btn-fill" style="background:#171717;color:#fff;border-color:#171717" href="/shop">Весь каталог →</a></div>
+</section>
 
-  <!-- ===== Избранное ===== -->
-  <section class="featured" id="featured" style="display:none">
-    <div class="head">
-      <h2>Избранное</h2>
-      <a href="/shop">Весь каталог →</a>
-    </div>
-    <div class="prow" id="hitsGrid"></div>
-  </section>
+<footer>
+  Aura Wellness Space · Косметический анализ кожи и ориентировочная оценка питания — не медицинский диагноз и не заменяют консультацию врача.<br/>
+  <a href="/legal">Оферта и политика конфиденциальности</a> · <a href="/docs">B2B API для брендов</a>
+</footer>
 
-  <!-- ===== CTA-полоса ===== -->
-  <section class="cta-strip">
-    <h2>Ваш ритуал красоты<br/>начинается здесь</h2>
-    <p>Первый AI-скан бесплатно. Протокол ухода, трекер и ассистент — тоже.
-      Платите только за последующие сканы по фото.</p>
-    <a class="btn-line" href="/auth" id="ctaAuth">Создать аккаунт</a>
-  </section>
+<a class="fab" href="/assistant" title="Спросить Aura">💬</a>
 
-  <footer>
-    Aura Wellness Space · Косметический анализ кожи и ориентировочная оценка питания —
-    не медицинский диагноз и не заменяют консультацию врача.<br/>
-    <a href="/legal" style="color:var(--muted)">Оферта и политика конфиденциальности</a> ·
-    <a href="/docs" style="color:var(--muted)">B2B API для брендов</a>
-  </footer>
-
-  <script src="/static/auth-helper.js"></script>
-  <script>
-    // «Установить приложение» (PWA).
-    let deferredPrompt = null;
-    window.addEventListener("beforeinstallprompt", (e) => {
-      e.preventDefault();
-      deferredPrompt = e;
-      document.getElementById("installBtn").classList.remove("hidden");
-    });
-    document.getElementById("installBtn").addEventListener("click", async () => {
-      if (!deferredPrompt) return;
-      deferredPrompt.prompt();
-      deferredPrompt = null;
-      document.getElementById("installBtn").classList.add("hidden");
-    });
-
-    document.getElementById("homeSearch").addEventListener("keydown", (e) => {
-      if (e.key === "Enter" && e.target.value.trim())
-        window.location = "/shop?q=" + encodeURIComponent(e.target.value.trim());
-    });
-
-    if ("serviceWorker" in navigator) {
-      window.addEventListener("load", () => navigator.serviceWorker.register("/static/sw.js"));
-    }
-
-    // Избранное: живые карточки из каталога (хиты и скидки), минималистично.
-    const escHtml = (s) => String(s).replace(/[&<>"']/g, (c) =>
-      ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
-    fetch("/api/shop/products").then((r) => r.json()).then((d) => {
-      const hits = d.products
-        .filter((p) => p.image && (p.hit || (p.old_price_rub && p.old_price_rub > p.price_rub)))
-        .slice(0, 8);
-      const pool = hits.length >= 4 ? hits
-        : d.products.filter((p) => p.image).slice(0, 8);
-      if (!pool.length) return;
-      document.getElementById("hitsGrid").innerHTML = pool.slice(0, 4).map((p) => {
-        const disc = p.old_price_rub && p.old_price_rub > p.price_rub
-          ? Math.round((1 - p.price_rub / p.old_price_rub) * 100) : 0;
-        const badge = disc ? `<span class="tag2 sale">−${disc}%</span>`
-          : (p.hit ? `<span class="tag2">Хит</span>` : "");
-        const oldP = disc
-          ? `<span class="old2">${p.old_price_rub.toLocaleString("ru-RU")} ₽</span>` : "";
-        return `
-        <a class="pmin" href="/shop">
-          <div class="shotwrap">${badge}<img src="${p.image}" alt="" loading="lazy"></div>
-          <div class="brand2">${escHtml(p.brand)}</div>
-          <div class="name2">${escHtml(p.name)}</div>
-          <div class="price2">${p.price_rub.toLocaleString("ru-RU")} ₽${oldP}</div>
-        </a>`;
-      }).join("");
-      document.getElementById("featured").style.display = "";
-    }).catch(() => {});
-
-    // Если пользователь уже вошёл — прячем «Создать аккаунт».
-    if (localStorage.getItem("aura_token")) {
-      const c = document.getElementById("ctaAuth");
-      c.textContent = "В личный кабинет"; c.href = "/account";
-    }
-  </script>
+<script>
+// Вход/кабинет
+if (localStorage.getItem("aura_token")) {
+  var l=document.getElementById("loginLink"); l.textContent="Кабинет"; l.href="/account";
+}
+// Появление блоков
+(function(){
+  var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){e.target.classList.add("in");io.unobserve(e.target);}});},{threshold:.12});
+  document.querySelectorAll(".reveal").forEach(function(n){io.observe(n);});
+})();
+// Бестселлеры из каталога
+var esc=function(s){return String(s).replace(/[&<>"']/g,function(c){return ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"})[c];});};
+fetch("/api/shop/products").then(function(r){return r.json();}).then(function(d){
+  var withImg=d.products.filter(function(p){return p.image;});
+  var hits=withImg.filter(function(p){return p.hit||(p.old_price_rub&&p.old_price_rub>p.price_rub);});
+  var pool=(hits.length>=6?hits:withImg).slice(0,6);
+  document.getElementById("bestGrid").innerHTML=pool.map(function(p){
+    var disc=p.old_price_rub&&p.old_price_rub>p.price_rub?Math.round((1-p.price_rub/p.old_price_rub)*100):0;
+    var badge=disc?'<span class="pb sale">−'+disc+'%</span>':(p.hit?'<span class="pb">Хит</span>':'');
+    var oldp=disc?'<span class="po">'+p.old_price_rub.toLocaleString("ru-RU")+' ₽</span>':'';
+    return '<a class="pcard" href="/shop"><div class="pimg">'+badge+'<img src="'+p.image+'" alt="" loading="lazy"></div>'+
+      '<div class="pbrand">'+esc(p.brand)+'</div><div class="pname">'+esc(p.name)+'</div>'+
+      '<div class="pprice">'+p.price_rub.toLocaleString("ru-RU")+' ₽'+oldp+'</div></a>';
+  }).join("");
+}).catch(function(){});
+// PWA
+if("serviceWorker" in navigator){window.addEventListener("load",function(){navigator.serviceWorker.register("/static/sw.js");});}
+</script>
 </body>
 </html>
