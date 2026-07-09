@@ -17,16 +17,22 @@ services:
       - "8000"
 
   caddy:
-    image: caddy:2-alpine
+    # Собственная сборка: Caddy + DNS-плагин Timeweb (см. Dockerfile.caddy).
+    # Сертификат выпускается через API Timeweb (DNS-01), нужен TIMEWEB_TOKEN в .env.
+    build:
+      context: .
+      dockerfile: Dockerfile.caddy
     restart: unless-stopped
     ports:
       - "80:80"
       - "443:443"
     environment:
       DOMAIN: ${DOMAIN:-localhost}
+      TIMEWEB_TOKEN: ${TIMEWEB_TOKEN:-}
+      TIMEWEB_API_URL: ${TIMEWEB_API_URL:-https://api.timeweb.cloud}
       # Бамп, чтобы docker compose пересоздал Caddy и перечитал Caddyfile
       # (выпуск сертификата для aura-wellness.ru). Меняем число при правках Caddyfile.
-      CADDY_CONFIG_REV: "3"
+      CADDY_CONFIG_REV: "4"
     volumes:
       - ./Caddyfile:/etc/caddy/Caddyfile:ro
       - caddy-data:/data

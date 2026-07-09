@@ -41,7 +41,6 @@
     const profileIcon = "👤";
     const isDark = () => document.documentElement.dataset.theme === "dark";
     bar.innerHTML =
-      `<span style="width:70px"></span>` +
       `<a class="logo" href="/">aura</a>` +
       `<span class="icons">` +
       `<a class="theme-toggle" id="themeToggle" title="Тема: день/ночь">${isDark() ? "☀️" : "🌙"}</a>` +

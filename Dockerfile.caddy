@@ -1,0 +1,9 @@
+# Caddy с DNS-плагином Timeweb (dmtr636/caddy-dns-timeweb).
+# Нужен для выпуска HTTPS-сертификата через DNS-проверку (ACME DNS-01):
+# проверка «извне по HTTP» из-за границы до российского сервера не доходит
+# (таймауты), а DNS-проверка делается через API Timeweb без входящего трафика.
+FROM caddy:2-builder AS builder
+RUN xcaddy build --with github.com/dmtr636/caddy-dns-timeweb
+
+FROM caddy:2-alpine
+COPY --from=builder /usr/bin/caddy /usr/bin/caddy
