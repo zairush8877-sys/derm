@@ -34,15 +34,47 @@ services:
       TIMEWEB_API_URL: ${TIMEWEB_API_URL:-https://api.timeweb.cloud/api/v1}
       # Бамп, чтобы docker compose пересоздал Caddy и перечитал Caddyfile
       # (выпуск сертификата для aura-wellness.ru). Меняем число при правках Caddyfile.
-      CADDY_CONFIG_REV: "5"
+      CADDY_CONFIG_REV: "6"
+    entrypoint: ["/bin/sh", "/caddy-entrypoint.sh"]
     volumes:
       - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - ./Caddyfile.files:/etc/caddy/Caddyfile.files:ro
+      - ./scripts/caddy-entrypoint.sh:/caddy-entrypoint.sh:ro
+      - lego-certs:/certs:ro
       - caddy-data:/data
       - caddy-config:/config
     depends_on:
       - app
 
+  # Выпуск HTTPS-сертификата: официальный ACME-клиент lego со встроенной
+  # поддержкой Timeweb Cloud (DNS-01, без входящего трафика). Кладёт файлы
+  # в общий том lego-certs; Caddy подхватывает их сам (caddy-entrypoint.sh).
+  lego:
+    image: goacme/lego:latest
+    restart: unless-stopped
+    environment:
+      TIMEWEBCLOUD_AUTH_TOKEN: ${TIMEWEB_TOKEN:-}
+    volumes:
+      - lego-certs:/certs
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - |
+        while :; do
+          if [ -f /certs/certificates/aura-wellness.ru.crt ]; then
+            lego --path /certs -m zairush8877@gmail.com --accept-tos --dns timewebcloud \
+              -d aura-wellness.ru -d www.aura-wellness.ru renew --days 30 \
+            && sleep 43200 || sleep 600
+          else
+            lego --path /certs -m zairush8877@gmail.com --accept-tos --dns timewebcloud \
+              -d aura-wellness.ru -d www.aura-wellness.ru run \
+            || lego --path /certs -m zairush8877@gmail.com --accept-tos --dns timewebcloud \
+              --dns.disable-cp -d aura-wellness.ru -d www.aura-wellness.ru run \
+            || sleep 300
+          fi
+        done
+
 volumes:
   aura-data:
   caddy-data:
   caddy-config:
+  lego-certs:
