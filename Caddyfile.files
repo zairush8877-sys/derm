@@ -1,0 +1,17 @@
+# Конфиг Caddy для готовых файлов сертификата (выпускает контейнер lego).
+# Включается автоматически (scripts/caddy-entrypoint.sh), когда файлы появились.
+aura-wellness.ru {
+	encode gzip
+	reverse_proxy app:8000
+	tls /certs/certificates/aura-wellness.ru.crt /certs/certificates/aura-wellness.ru.key
+}
+
+www.aura-wellness.ru {
+	redir https://aura-wellness.ru{uri} permanent
+	tls /certs/certificates/aura-wellness.ru.crt /certs/certificates/aura-wellness.ru.key
+}
+
+:80 {
+	encode gzip
+	reverse_proxy app:8000
+}
