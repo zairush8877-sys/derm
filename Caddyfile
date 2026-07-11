@@ -3,6 +3,12 @@
 # по HTTP» до российского сервера из-за границы не доходит (таймауты),
 # поэтому используем ACME DNS-01 — без входящего трафика.
 # Требуется TIMEWEB_TOKEN в .env (панель Timeweb → «API и Terraform»).
+#
+# propagation_timeout -1: отключаем самопроверку Caddy «разошёлся ли DNS» —
+# из контейнера она не проходит и до Let's Encrypt дело не доходило
+# (записи копились в зоне, cleanup падал с «no memory of presenting»).
+# LE проверяет напрямую у авторитетных NS Timeweb, где запись появляется
+# сразу; propagation_delay даёт запас на публикацию записи через их API.
 aura-wellness.ru {
 	encode gzip
 	reverse_proxy app:8000
@@ -11,6 +17,8 @@ aura-wellness.ru {
 			ApiURL {env.TIMEWEB_API_URL}
 			ApiToken {env.TIMEWEB_TOKEN}
 		}
+		propagation_delay 30s
+		propagation_timeout -1
 	}
 }
 
@@ -22,6 +30,8 @@ www.aura-wellness.ru {
 			ApiURL {env.TIMEWEB_API_URL}
 			ApiToken {env.TIMEWEB_TOKEN}
 		}
+		propagation_delay 30s
+		propagation_timeout -1
 	}
 }
 

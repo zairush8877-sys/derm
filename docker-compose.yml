@@ -34,7 +34,7 @@ services:
       TIMEWEB_API_URL: ${TIMEWEB_API_URL:-https://api.timeweb.cloud/api/v1}
       # Бамп, чтобы docker compose пересоздал Caddy и перечитал Caddyfile
       # (выпуск сертификата для aura-wellness.ru). Меняем число при правках Caddyfile.
-      CADDY_CONFIG_REV: "4"
+      CADDY_CONFIG_REV: "5"
     volumes:
       - ./Caddyfile:/etc/caddy/Caddyfile:ro
       - caddy-data:/data
