@@ -29,7 +29,9 @@ services:
     environment:
       DOMAIN: ${DOMAIN:-localhost}
       TIMEWEB_TOKEN: ${TIMEWEB_TOKEN:-}
-      TIMEWEB_API_URL: ${TIMEWEB_API_URL:-https://api.timeweb.cloud}
+      # ВАЖНО: с /api/v1 — плагин dmtr636 не добавляет версию сам
+      # (без неё API отвечает 404 page not found на dns-records).
+      TIMEWEB_API_URL: ${TIMEWEB_API_URL:-https://api.timeweb.cloud/api/v1}
       # Бамп, чтобы docker compose пересоздал Caddy и перечитал Caddyfile
       # (выпуск сертификата для aura-wellness.ru). Меняем число при правках Caddyfile.
       CADDY_CONFIG_REV: "4"
