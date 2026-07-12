@@ -1,5 +1,17 @@
 # Конфиг Caddy для готовых файлов сертификата (выпускает контейнер lego).
 # Включается автоматически (scripts/caddy-entrypoint.sh), когда файлы появились.
+#
+# HTTP/3 (QUIC, по UDP) отключён намеренно: у части российских
+# провайдеров DPI-оборудование режет именно QUIC, даже когда обычный
+# HTTPS по TCP работает без проблем. Браузер видит анонс "alt-svc: h3"
+# от Caddy, пытается перейти на QUIC — и соединение рвётся
+# (ERR_CONNECTION_CLOSED). Оставляем только h1/h2 — надёжный TCP.
+{
+	servers {
+		protocols h1 h2
+	}
+}
+
 aura-wellness.ru {
 	encode gzip
 	reverse_proxy app:8000
