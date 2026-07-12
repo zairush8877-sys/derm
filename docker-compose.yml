@@ -61,13 +61,13 @@ services:
       - |
         while :; do
           if [ -f /certs/certificates/aura-wellness.ru.crt ]; then
-            lego --path /certs -m zairush8877@gmail.com --accept-tos --dns timewebcloud \
+            /lego --path /certs -m zairush8877@gmail.com --accept-tos --dns timewebcloud \
               -d aura-wellness.ru -d www.aura-wellness.ru renew --days 30 \
             && sleep 43200 || sleep 600
           else
-            lego --path /certs -m zairush8877@gmail.com --accept-tos --dns timewebcloud \
+            /lego --path /certs -m zairush8877@gmail.com --accept-tos --dns timewebcloud \
               -d aura-wellness.ru -d www.aura-wellness.ru run \
-            || lego --path /certs -m zairush8877@gmail.com --accept-tos --dns timewebcloud \
+            || /lego --path /certs -m zairush8877@gmail.com --accept-tos --dns timewebcloud \
               --dns.disable-cp -d aura-wellness.ru -d www.aura-wellness.ru run \
             || sleep 300
           fi
