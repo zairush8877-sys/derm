@@ -5,8 +5,8 @@
 # Caddy закреплён на 2.8: плагин (v1.0.3, окт 2024) написан под старый
 # интерфейс libdns и с новыми версиями Caddy не собирается
 # (record.ID undefined — ломается на libdns v1).
-FROM caddy:2.8-builder AS builder
+FROM caddy:2.11-builder AS builder
 RUN xcaddy build --with github.com/dmtr636/caddy-dns-timeweb@v1.0.3
 
-FROM caddy:2.8-alpine
+FROM caddy:2.11-alpine
 COPY --from=builder /usr/bin/caddy /usr/bin/caddy
