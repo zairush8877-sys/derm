@@ -1,41 +1,12 @@
-# Aura: реверс-прокси с автоматическим HTTPS (Let's Encrypt).
-# Сертификат выпускается через DNS-проверку (API Timeweb): проверка «извне
-# по HTTP» до российского сервера из-за границы не доходит (таймауты),
-# поэтому используем ACME DNS-01 — без входящего трафика.
-# Требуется TIMEWEB_TOKEN в .env (панель Timeweb → «API и Terraform»).
+# Aura: базовый конфиг Caddy — ТОЛЬКО HTTP (:80), без попыток выпуска
+# сертификата. Выпуском занимается исключительно контейнер lego (DNS-01
+# через API Timeweb с ожиданием публикации записи на NS). Когда файлы
+# сертификата появляются, scripts/caddy-entrypoint.sh переключает Caddy
+# на Caddyfile.files (полноценный HTTPS) через caddy reload.
 #
-# propagation_timeout -1: отключаем самопроверку Caddy «разошёлся ли DNS» —
-# из контейнера она не проходит и до Let's Encrypt дело не доходило
-# (записи копились в зоне, cleanup падал с «no memory of presenting»).
-# LE проверяет напрямую у авторитетных NS Timeweb, где запись появляется
-# сразу; propagation_delay даёт запас на публикацию записи через их API.
-aura-wellness.ru {
-	encode gzip
-	reverse_proxy app:8000
-	tls {
-		dns timeweb {
-			ApiURL {env.TIMEWEB_API_URL}
-			ApiToken {env.TIMEWEB_TOKEN}
-		}
-		propagation_delay 30s
-		propagation_timeout -1
-	}
-}
-
-# www → без www (постоянный редирект)
-www.aura-wellness.ru {
-	redir https://aura-wellness.ru{uri} permanent
-	tls {
-		dns timeweb {
-			ApiURL {env.TIMEWEB_API_URL}
-			ApiToken {env.TIMEWEB_TOKEN}
-		}
-		propagation_delay 30s
-		propagation_timeout -1
-	}
-}
-
-# Запасной доступ по IP/туннелю на 80-м порту (работает и пока DNS расходится)
+# Почему так: NS Timeweb публикуют новые записи с задержкой в минуты,
+# и попытки Caddy валидироваться сразу после создания записи вечно
+# промахивались, замусоривая зону и сжигая лимиты Let's Encrypt.
 :80 {
 	encode gzip
 	reverse_proxy app:8000
