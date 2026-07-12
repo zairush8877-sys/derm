@@ -34,7 +34,7 @@ services:
       TIMEWEB_API_URL: ${TIMEWEB_API_URL:-https://api.timeweb.cloud/api/v1}
       # Бамп, чтобы docker compose пересоздал Caddy и перечитал Caddyfile
       # (выпуск сертификата для aura-wellness.ru). Меняем число при правках Caddyfile.
-      CADDY_CONFIG_REV: "6"
+      CADDY_CONFIG_REV: "7"
     entrypoint: ["/bin/sh", "/caddy-entrypoint.sh"]
     volumes:
       - ./Caddyfile:/etc/caddy/Caddyfile:ro
@@ -54,6 +54,10 @@ services:
     restart: unless-stopped
     environment:
       TIMEWEBCLOUD_AUTH_TOKEN: ${TIMEWEB_TOKEN:-}
+      # NS Timeweb публикуют записи с задержкой — ждём до 15 минут,
+      # проверяя каждые 10 секунд (иначе валидация промахивается).
+      TIMEWEBCLOUD_PROPAGATION_TIMEOUT: "900"
+      TIMEWEBCLOUD_POLLING_INTERVAL: "10"
     volumes:
       - lego-certs:/certs
     entrypoint: ["/bin/sh", "-c"]
