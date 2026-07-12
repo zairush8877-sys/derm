@@ -118,11 +118,21 @@ a{color:inherit;text-decoration:none;}
 .fcard a.flink:hover{opacity:.6;}
 footer{border-top:1px solid var(--line);padding:40px 20px;text-align:center;color:var(--muted);font-size:12px;line-height:1.7;}
 @media(max-width:820px){.nav .links{display:none;}.grid{grid-template-columns:repeat(2,1fr);}.fgrid{grid-template-columns:repeat(1,1fr);}.hero .veil{background:linear-gradient(0deg,rgba(30,24,18,.4),transparent 45%);}}
-@media (prefers-reduced-motion:reduce){.hero .bg,.hero .bg::before,.hero .bg::after,.hero .inner>*{animation:none!important;}.reveal{opacity:1;transform:none;}}
+@media (prefers-reduced-motion:reduce){.hero .bg,.hero .bg::before,.hero .bg::after,.hero .inner>*,.hero .heroimg,.fph img.fimg{animation:none!important;}.reveal{opacity:1;transform:none;}}
 
 
-.hero .heroimg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:0;}
-.fph img.fimg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:0;}
+.hero .heroimg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:0;
+  animation:kenburns 26s ease-in-out infinite alternate;will-change:transform;}
+.fph img.fimg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:0;
+  animation:kbcard 22s ease-in-out infinite alternate;will-change:transform;}
+/* Карточки «дышат» вразнобой — отрицательные задержки сдвигают фазу */
+.fcard:nth-child(2) .fimg{animation-delay:-6s;}
+.fcard:nth-child(3) .fimg{animation-delay:-12s;}
+.fcard:nth-child(4) .fimg{animation-delay:-3s;}
+.fcard:nth-child(5) .fimg{animation-delay:-9s;}
+.fcard:nth-child(6) .fimg{animation-delay:-15s;}
+@keyframes kenburns{from{transform:scale(1) translateY(0);}to{transform:scale(1.09) translateY(-1.2%);}}
+@keyframes kbcard{from{transform:scale(1.02);}to{transform:scale(1.1);}}
 .search input{border:none;background:transparent;outline:none;font:inherit;font-size:13px;color:var(--ink);width:120px;}
 .fab{position:fixed;right:18px;bottom:18px;width:52px;height:52px;border-radius:50%;background:#171717;color:#fff;
   display:flex;align-items:center;justify-content:center;font-size:22px;text-decoration:none;box-shadow:0 6px 20px rgba(0,0,0,.25);z-index:60;}
