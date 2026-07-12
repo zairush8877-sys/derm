@@ -34,13 +34,13 @@ services:
       TIMEWEB_API_URL: ${TIMEWEB_API_URL:-https://api.timeweb.cloud/api/v1}
       # Бамп, чтобы docker compose пересоздал Caddy и перечитал Caddyfile
       # (выпуск сертификата для aura-wellness.ru). Меняем число при правках Caddyfile.
-      CADDY_CONFIG_REV: "7"
+      CADDY_CONFIG_REV: "8"
     entrypoint: ["/bin/sh", "/caddy-entrypoint.sh"]
     volumes:
       - ./Caddyfile:/etc/caddy/Caddyfile:ro
       - ./Caddyfile.files:/etc/caddy/Caddyfile.files:ro
       - ./scripts/caddy-entrypoint.sh:/caddy-entrypoint.sh:ro
-      - lego-certs:/certs:ro
+      - lego-certs-v2:/certs:ro
       - caddy-data:/data
       - caddy-config:/config
     depends_on:
@@ -59,7 +59,13 @@ services:
       TIMEWEBCLOUD_PROPAGATION_TIMEOUT: "900"
       TIMEWEBCLOUD_POLLING_INTERVAL: "10"
     volumes:
-      - lego-certs:/certs
+      # v2: свежий том — у старого аккаунта lego (в lego-certs) накопилось
+      # много неудачных попыток ЕЩЁ ДО фиксов пути/задержки; Let's Encrypt
+      # ограничивает 5 неудачных попыток/час на аккаунт+домен, а цикл ниже
+      # ретраил каждые 5 минут — сам продлевал себе бан новой неудачей
+      # раньше, чем истекал час. Новый том = новый ACME-аккаунт с чистого
+      # листа (ручной выпуск с чистым аккаунтом сработал с первого раза).
+      - lego-certs-v2:/certs
     entrypoint: ["/bin/sh", "-c"]
     command:
       - |
@@ -67,13 +73,11 @@ services:
           if [ -f /certs/certificates/aura-wellness.ru.crt ]; then
             /lego --path /certs -m zairush8877@gmail.com --accept-tos --dns timewebcloud \
               -d aura-wellness.ru -d www.aura-wellness.ru renew --days 30 \
-            && sleep 43200 || sleep 600
+            && sleep 43200 || sleep 1800
           else
             /lego --path /certs -m zairush8877@gmail.com --accept-tos --dns timewebcloud \
               -d aura-wellness.ru -d www.aura-wellness.ru run \
-            || /lego --path /certs -m zairush8877@gmail.com --accept-tos --dns timewebcloud \
-              --dns.disable-cp -d aura-wellness.ru -d www.aura-wellness.ru run \
-            || sleep 300
+            || sleep 1800
           fi
         done
 
@@ -81,4 +85,4 @@ volumes:
   aura-data:
   caddy-data:
   caddy-config:
-  lego-certs:
+  lego-certs-v2:
