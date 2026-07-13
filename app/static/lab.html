@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Aura — Лаборатория</title>
+  <meta name="description" content="Панели анализов и wellness check-up: подбор по цели, запись в партнёрскую лабораторию рядом с вами." />
+  <link rel="stylesheet" href="/static/styles.css" />
+  <link rel="manifest" href="/static/manifest.webmanifest" />
+  <link rel="icon" href="/static/icon.svg" type="image/svg+xml" />
+  <meta name="theme-color" content="#ffffff" />
+</head>
+<body>
+  <header class="top">
+    <div class="wrap">
+      <h1>Лаборатория</h1>
+      <p>Панели биомаркеров под вашу цель: сдаёте в партнёрской лаборатории рядом с домом, результаты — в приложении.</p>
+      <nav class="tabs">
+        <a href="/">Главная</a>
+        <a href="/shop">Магазин</a>
+        <a href="/skin">Кожа</a>
+        <a href="/food">Еда</a>
+        <a href="/lab" class="active">Лаборатория</a>
+        <a href="/assistant">Ассистент</a>
+        <a href="/subscription">Подписка</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <div class="card">
+      <h2>Как это работает</h2>
+      <ol class="steps">
+        <li>Выберите панель под вашу цель — состав и цена сразу видны.</li>
+        <li>Оставьте заявку: город, телефон и удобная дата.</li>
+        <li>Менеджер подтвердит запись в ближайшую лабораторию-партнёра.</li>
+        <li>Результаты обсудите с Aura-ассистентом и учтите в протоколе ухода.</li>
+      </ol>
+      <p class="muted small" id="disclaimer"></p>
+    </div>
+
+    <div id="panels" class="cards-grid"></div>
+
+    <div id="bookform" class="card hidden">
+      <h2>Запись: <span id="bf-panel"></span> <span class="badge" id="bf-price"></span></h2>
+      <div class="quiz">
+        <div><label>Город</label><input id="bf-city" placeholder="Москва" /></div>
+        <div><label>Телефон</label><input id="bf-phone" placeholder="+7 900 000-00-00" /></div>
+        <div><label>Удобная дата</label><input id="bf-date" type="date" /></div>
+        <div class="full"><label>Комментарий</label><input id="bf-comment" placeholder="Например: утро буднего дня" /></div>
+      </div>
+      <button class="primary" id="bf-submit">Отправить заявку</button>
+      <button class="ghost" id="bf-close">Отмена</button>
+      <p class="muted small">Оплата — на месте в лаборатории. Заявка ни к чему не обязывает.</p>
+    </div>
+
+    <div id="mybookings" class="card hidden">
+      <h2>Мои заявки</h2>
+      <div id="bookings-list"></div>
+    </div>
+  </main>
+
+  <script src="/static/auth-helper.js"></script>
+  <script src="/static/lab.js"></script>
+</body>
+</html>

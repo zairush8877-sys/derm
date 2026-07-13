@@ -136,6 +136,20 @@ CREATE TABLE IF NOT EXISTS notifications (
     created_at TEXT NOT NULL
 );
 CREATE INDEX IF NOT EXISTS idx_notif_user ON notifications(user_id, created_at);
+
+-- Лаборатория: заявки на чек-апы и панели анализов (партнёрские лаборатории).
+CREATE TABLE IF NOT EXISTS lab_bookings (
+    id TEXT PRIMARY KEY,
+    user_id TEXT NOT NULL,
+    panel_id TEXT NOT NULL,
+    city TEXT NOT NULL,
+    phone TEXT NOT NULL,
+    preferred_date TEXT,
+    comment TEXT,
+    status TEXT NOT NULL DEFAULT 'new',
+    created_at TEXT NOT NULL
+);
+CREATE INDEX IF NOT EXISTS idx_lab_user ON lab_bookings(user_id, created_at);
 """
 
 
