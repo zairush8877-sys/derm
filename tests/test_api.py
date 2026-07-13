@@ -75,8 +75,10 @@ def test_demo_analyze_and_pdf():
 
 
 def test_analyze_requires_credit_when_empty():
-    # Новый пользователь получает 1 пробный скан; после него — 402.
-    for _ in range(2):
+    # Новый пользователь получает free_trial_scans пробных сканов; дальше — 402.
+    from app.config import get_settings
+
+    for _ in range(get_settings().free_trial_scans + 1):
         res = client.post(
             "/api/analyze",
             files={"image": ("face.png", _img(6), "image/png")},
