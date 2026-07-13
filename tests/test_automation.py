@@ -171,8 +171,12 @@ def test_welcome_on_first_otp_login_only():
 def test_zero_balance_notification_after_scan():
     r = client.post("/api/auth/register", data={"phone": "+79008880004", "password": "secret1"})
     headers = {"Authorization": "Bearer " + r.json()["token"]}
-    res = client.post("/api/analyze", files={"image": ("f.png", _img(3), "image/png")},
-                      headers=headers)
+    # Сжигаем все пробные сканы до нуля — на последнем баланс становится 0.
+    from app.config import get_settings
+
+    for i in range(get_settings().free_trial_scans):
+        res = client.post("/api/analyze", files={"image": ("f.png", _img(3 + i), "image/png")},
+                          headers=headers)
     assert res.status_code == 200 and res.json()["balance"] == 0
     uid = r.json()["user"]["id"]
     assert any("Сканы закончились" in t for t in _titles(uid))
