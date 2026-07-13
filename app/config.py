@@ -48,8 +48,8 @@ class Settings:
 
         # Биллинг: платный AI-скан по фото (кожа/еда).
         self.scan_price_rub: int = int(os.getenv("DERM_SCAN_PRICE_RUB", "199"))
-        # На время теста — 5 пробных сканов новому аккаунту (кожа+еда, общий баланс).
-        self.free_trial_scans: int = int(os.getenv("DERM_FREE_TRIAL_SCANS", "5"))
+        # 3 пробных скана новому аккаунту (кожа+еда, общий баланс).
+        self.free_trial_scans: int = int(os.getenv("DERM_FREE_TRIAL_SCANS", "3"))
         # Провайдер оплаты: demo (по умолчанию) | yookassa (подключается ключами).
         self.payment_provider: str = os.getenv("DERM_PAYMENT_PROVIDER", "demo").strip()
 
