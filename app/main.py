@@ -34,6 +34,7 @@ from app.billing.api import router as billing_router
 from app.config import get_settings
 from app.db import store
 from app.food.api import router as food_router
+from app.lab.api import router as lab_router
 from app.notifications.api import router as notifications_router
 from app.protocol.engine import build_protocol
 from app.protocol.quiz import QUIZ_QUESTIONS, QuizAnswers
@@ -91,6 +92,7 @@ app.include_router(api_v1)
 app.include_router(billing_router)
 app.include_router(shop_router)
 app.include_router(food_router)
+app.include_router(lab_router)
 app.include_router(subscription_router)
 app.include_router(assistant_router)
 app.include_router(notifications_router)
@@ -271,6 +273,11 @@ def shop_page() -> FileResponse:
 @app.get("/food", include_in_schema=False)
 def food_page() -> FileResponse:
     return FileResponse(_STATIC / "food.html")
+
+
+@app.get("/lab", include_in_schema=False)
+def lab_page() -> FileResponse:
+    return FileResponse(_STATIC / "lab.html")
 
 
 @app.get("/assistant", include_in_schema=False)

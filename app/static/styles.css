@@ -727,3 +727,19 @@ body.home footer { max-width: none; padding: 46px 20px 60px; }
   .splash-line { width: min(320px,62vw) !important; }
   .splash { transition: none; }
 }
+
+/* ===== Лаборатория ===== */
+.muted { color: var(--muted); }
+.small { font-size: 12px; }
+.cards-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; align-items: start; }
+.lab-card { position: relative; display: flex; flex-direction: column; gap: 8px; }
+.lab-card .badge { position: absolute; top: 14px; right: 14px; }
+.lab-popular { border: 1px solid var(--accent); }
+.lab-marks { font-size: 13px; }
+.lab-marks li { padding: 6px 0; }
+.lab-meta { color: var(--muted); font-size: 12px; margin: 0; }
+.lab-price { font-size: 18px; margin: 4px 0 8px; }
+.lab-price s { color: var(--muted); font-weight: 400; font-size: 14px; }
+.lab-booking { padding: 12px 0; border-bottom: 1px solid var(--line); }
+.lab-booking:last-child { border-bottom: none; }
+.lab-booking button { margin-top: 6px; }
