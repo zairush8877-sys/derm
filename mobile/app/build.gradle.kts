@@ -15,10 +15,26 @@ android {
         versionName = "1.0"
     }
 
+    // Подпись релиза: путь/пароли берутся из переменных окружения,
+    // чтобы ключ и секреты не попадали в git. Без переменных сборка
+    // остаётся debug-подписуемой (для локальных проверок).
+    val ksPath = System.getenv("AURA_KEYSTORE")
+    if (ksPath != null) {
+        signingConfigs {
+            create("release") {
+                storeFile = file(ksPath)
+                storePassword = System.getenv("AURA_KEYSTORE_PASS")
+                keyAlias = System.getenv("AURA_KEY_ALIAS") ?: "aura"
+                keyPassword = System.getenv("AURA_KEYSTORE_PASS")
+            }
+        }
+    }
+
     buildTypes {
         release {
             isMinifyEnabled = false
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
+            if (ksPath != null) signingConfig = signingConfigs.getByName("release")
         }
     }
     compileOptions {
