@@ -150,6 +150,12 @@ CREATE TABLE IF NOT EXISTS lab_bookings (
     created_at TEXT NOT NULL
 );
 CREATE INDEX IF NOT EXISTS idx_lab_user ON lab_bookings(user_id, created_at);
+
+-- Использованные nonce капчи (одноразовость картинок-кодов).
+CREATE TABLE IF NOT EXISTS captcha_used (
+    nonce TEXT PRIMARY KEY,
+    created_at INTEGER NOT NULL
+);
 """
 
 
@@ -185,6 +191,15 @@ def init_db() -> None:
             "ALTER TABLE otp_codes ADD COLUMN last_sent TEXT",
             "ALTER TABLE otp_codes ADD COLUMN sent_count INTEGER NOT NULL DEFAULT 0",
             "ALTER TABLE otp_codes ADD COLUMN window_start TEXT",
+            # Профиль пользователя (как у крупных ритейлеров): ФИО, пол,
+            # дата рождения, город + флаг выданного бонуса за заполнение.
+            "ALTER TABLE users ADD COLUMN last_name TEXT NOT NULL DEFAULT ''",
+            "ALTER TABLE users ADD COLUMN first_name TEXT NOT NULL DEFAULT ''",
+            "ALTER TABLE users ADD COLUMN middle_name TEXT NOT NULL DEFAULT ''",
+            "ALTER TABLE users ADD COLUMN gender TEXT NOT NULL DEFAULT ''",
+            "ALTER TABLE users ADD COLUMN birth_date TEXT NOT NULL DEFAULT ''",
+            "ALTER TABLE users ADD COLUMN city TEXT NOT NULL DEFAULT ''",
+            "ALTER TABLE users ADD COLUMN profile_bonus INTEGER NOT NULL DEFAULT 0",
         ):
             try:
                 conn.execute(ddl)

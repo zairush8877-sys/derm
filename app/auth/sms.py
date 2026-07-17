@@ -69,6 +69,24 @@ def _send_smsc(phone: str, text: str) -> None:
         raise SmsError(f"SMSC.ru отклонил запрос: {data.get('error')} (код {data.get('error_code')})")
 
 
+def call_code_supported() -> bool:
+    """Доступен ли вход по звонку (реализован для SMS.ru)."""
+    s = get_settings()
+    return s.sms_provider != "smsc" and bool(s.sms_api_key)
+
+
+def send_call_code(phone: str) -> str:
+    """SMS.ru «авторизация по звонку»: робот звонит с уникального номера,
+    кодом служат последние 4 цифры этого номера. Возвращает код,
+    который нужно сверить с вводом пользователя."""
+    s = get_settings()
+    params = {"api_id": s.sms_api_key, "phone": phone.lstrip("+"), "json": 1}
+    data = _http_get_json("https://sms.ru/code/call", params)
+    if data.get("status") != "OK" or not data.get("code"):
+        raise SmsError(f"SMS.ru не смог позвонить: {data.get('status_text', data)}")
+    return str(data["code"])
+
+
 def send_sms(phone: str, text: str) -> None:
     """Отправить SMS через настроенного провайдера. Бросает SmsError при сбое."""
     provider = get_settings().sms_provider

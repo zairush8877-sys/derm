@@ -110,3 +110,54 @@ loadScans();
 loadOrders();
 loadSub();
 loadNotifs();
+
+// ===== Мой профиль (ФИО, пол, дата рождения, город) =====
+async function loadMyProfile() {
+  const res = await j("/api/auth/profile");
+  const p = await res.json();
+  el("prLast").value = p.last_name || "";
+  el("prFirst").value = p.first_name || "";
+  el("prMiddle").value = p.middle_name || "";
+  el("prCity").value = p.city || "";
+  el("prGender").value = p.gender || "";
+  el("prBirth").value = p.birth_date || "";
+  renderProfileState(p);
+  if (location.hash === "#profile") {
+    document.getElementById("profile").scrollIntoView({ behavior: "smooth" });
+  }
+}
+
+function renderProfileState(p) {
+  if (p.complete) {
+    el("profMissing").textContent = "заполнен";
+    el("profBonus").textContent = "";
+  } else {
+    el("profMissing").textContent = "осталось: " + p.missing_required.join(", ");
+    el("profBonus").textContent =
+      "Заполните профиль полностью — начислим " + p.bonus_points + " баллов (1 балл = 1 ₽).";
+  }
+}
+
+async function saveMyProfile() {
+  const fd = new FormData();
+  fd.append("last_name", el("prLast").value);
+  fd.append("first_name", el("prFirst").value);
+  fd.append("middle_name", el("prMiddle").value);
+  fd.append("gender", el("prGender").value);
+  fd.append("birth_date", el("prBirth").value);
+  fd.append("city", el("prCity").value);
+  const res = await j("/api/auth/profile", { method: "POST", body: fd });
+  const p = await res.json();
+  if (!res.ok) { alert(p.detail || "Не получилось сохранить"); return; }
+  renderProfileState(p);
+  if (p.bonus_granted_now) {
+    alert("Спасибо! Профиль заполнен — начислили " + p.bonus_points + " баллов 🎉");
+    loadStats();
+  } else {
+    el("profBonus").textContent = "Сохранено ✓";
+  }
+  localStorage.setItem("aura_name", el("prFirst").value || localStorage.getItem("aura_name"));
+}
+
+el("profSave").addEventListener("click", saveMyProfile);
+loadMyProfile();

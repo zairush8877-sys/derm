@@ -166,11 +166,13 @@ def _check_sms_throttle(row, now: datetime) -> tuple[int, str]:
     return 1, now.isoformat()
 
 
-def request_otp(phone: str) -> dict:
-    """Сгенерировать код входа и отправить SMS через провайдера.
+def request_otp(phone: str, channel: str = "call") -> dict:
+    """Код входа: звонок (последние 4 цифры номера) или SMS.
 
-    Без настроенного провайдера — демо-режим: SMS не отправляется и не стоит
-    денег, код возвращается в ответе и показывается в интерфейсе.
+    channel="call" — робот звонит, кодом служат последние 4 цифры входящего
+    номера (в разы дешевле SMS); channel="sms" — классическое сообщение.
+    Без настроенного провайдера — демо-режим: код возвращается в ответе
+    и показывается в интерфейсе, деньги не тратятся.
     """
     import secrets
     from datetime import timedelta
@@ -180,17 +182,33 @@ def request_otp(phone: str) -> dict:
     phone = _normalize_phone(phone)
     now = datetime.now(timezone.utc)
     real = sms.provider_configured()
+    use_call = real and channel != "sms" and sms.call_code_supported()
 
     with store.connect() as conn:
         sent_count, window_start = 0, None
-        if real:  # троттлинг только для реальных SMS — в демо коды бесплатны
+        if real:  # троттлинг только для реальных отправок — в демо коды бесплатны
             row = conn.execute(
                 "SELECT last_sent, sent_count, window_start FROM otp_codes WHERE phone = ?",
                 (phone,),
             ).fetchone()
             sent_count, window_start = _check_sms_throttle(row, now)
 
+    # Код: при звонке его выдаёт провайдер (последние 4 цифры номера),
+    # для SMS и демо генерируем сами.
+    if use_call:
+        try:
+            code = sms.send_call_code(phone)
+        except sms.SmsError as exc:
+            import logging
+
+            logging.getLogger("derm.auth").warning("Сбой звонка с кодом: %s", exc)
+            raise AuthError(
+                "Не получилось позвонить — попробуйте ещё раз или запросите SMS."
+            )
+    else:
         code = f"{secrets.randbelow(10000):04d}"
+
+    with store.connect() as conn:
         expires = (now + timedelta(seconds=OTP_TTL_SECONDS)).isoformat()
         conn.execute(
             "INSERT INTO otp_codes (phone, code, expires, attempts, last_sent, sent_count, window_start) "
@@ -202,6 +220,9 @@ def request_otp(phone: str) -> dict:
              sent_count, window_start),
         )
 
+    if use_call:
+        return {"sent": True, "phone": phone, "channel": "call"}
+
     if real:
         try:
             sms.send_sms(phone, f"Aura: код входа {code}. Никому не сообщайте его.")
@@ -210,9 +231,9 @@ def request_otp(phone: str) -> dict:
 
             logging.getLogger("derm.auth").warning("Сбой отправки SMS: %s", exc)
             raise AuthError("Не удалось отправить SMS — попробуйте ещё раз через минуту.")
-        return {"sent": True, "phone": phone}
+        return {"sent": True, "phone": phone, "channel": "sms"}
 
-    return {"sent": True, "phone": phone, "demo_code": code}
+    return {"sent": True, "phone": phone, "channel": "demo", "demo_code": code}
 
 
 def verify_otp(phone: str, code: str) -> dict:
@@ -255,3 +276,100 @@ def verify_otp(phone: str, code: str) -> dict:
     if is_new:
         _welcome(user_dict["id"])
     return {"user": user_dict, "token": create_token(user_dict["id"])}
+
+
+# ===== Профиль пользователя =====
+
+PROFILE_BONUS_POINTS = 50
+_PROFILE_REQUIRED = {
+    "last_name": "фамилия",
+    "first_name": "имя",
+    "gender": "пол",
+    "birth_date": "дата рождения",
+}
+
+
+def get_profile(user_id: str) -> dict | None:
+    """Профиль + список незаполненных обязательных полей."""
+    with store.connect() as conn:
+        row = conn.execute(
+            "SELECT id, phone, name, last_name, first_name, middle_name, "
+            "gender, birth_date, city, profile_bonus FROM users WHERE id = ?",
+            (user_id,),
+        ).fetchone()
+    if row is None:
+        return None
+    data = dict(row)
+    missing = [label for f, label in _PROFILE_REQUIRED.items() if not data.get(f)]
+    data["missing_required"] = missing
+    data["complete"] = not missing
+    data["bonus_points"] = PROFILE_BONUS_POINTS
+    return data
+
+
+def update_profile(
+    user_id: str,
+    last_name: str = "",
+    first_name: str = "",
+    middle_name: str = "",
+    gender: str = "",
+    birth_date: str = "",
+    city: str = "",
+) -> dict:
+    """Сохранить профиль; за первое полное заполнение — баллы лояльности."""
+    gender = gender.strip().lower()
+    if gender and gender not in {"женщина", "мужчина"}:
+        raise AuthError("Пол: выберите «женщина» или «мужчина»")
+    birth_date = birth_date.strip()
+    if birth_date:
+        try:
+            born = datetime.strptime(birth_date, "%Y-%m-%d")
+        except ValueError:
+            raise AuthError("Дата рождения — в формате ГГГГ-ММ-ДД")
+        age = (datetime.now() - born).days // 365
+        if not 10 <= age <= 110:
+            raise AuthError("Проверьте дату рождения")
+
+    fields = {
+        "last_name": last_name.strip()[:80],
+        "first_name": first_name.strip()[:80],
+        "middle_name": middle_name.strip()[:80],
+        "gender": gender,
+        "birth_date": birth_date,
+        "city": city.strip()[:80],
+    }
+    bonus_granted = False
+    with store.connect() as conn:
+        row = conn.execute(
+            "SELECT id, profile_bonus FROM users WHERE id = ?", (user_id,)
+        ).fetchone()
+        if row is None:
+            raise AuthError("Пользователь не найден")
+        conn.execute(
+            "UPDATE users SET last_name=?, first_name=?, middle_name=?, "
+            "gender=?, birth_date=?, city=?, "
+            "name = CASE WHEN ? != '' THEN ? ELSE name END "
+            "WHERE id = ?",
+            (*fields.values(), fields["first_name"], fields["first_name"], user_id),
+        )
+        complete = all(fields[f] for f in _PROFILE_REQUIRED)
+        if complete and not row["profile_bonus"]:
+            conn.execute("INSERT OR IGNORE INTO loyalty (user_id) VALUES (?)", (user_id,))
+            conn.execute(
+                "UPDATE loyalty SET points = points + ? WHERE user_id = ?",
+                (PROFILE_BONUS_POINTS, user_id),
+            )
+            conn.execute("UPDATE users SET profile_bonus = 1 WHERE id = ?", (user_id,))
+            bonus_granted = True
+
+    if bonus_granted:
+        from app.notifications import service as notifications
+
+        notifications.push(
+            user_id,
+            "Спасибо за заполнение профиля!",
+            f"Начислили {PROFILE_BONUS_POINTS} баллов — 1 балл = 1 ₽ при оплате в магазине.",
+        )
+    profile = get_profile(user_id)
+    profile["bonus_granted_now"] = bonus_granted
+    return profile

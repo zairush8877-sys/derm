@@ -48,6 +48,21 @@
       <div class="stat"><div class="num" id="stTier">—</div><div class="lbl">уровень</div></div>
     </div>
 
+    <div class="card" id="profile">
+      <h2>Мой профиль <span class="badge" id="profMissing" style="float:right"></span></h2>
+      <div class="quiz" style="grid-template-columns:1fr 1fr">
+        <div><label>Фамилия *</label><input id="prLast" autocomplete="family-name" /></div>
+        <div><label>Имя *</label><input id="prFirst" autocomplete="given-name" /></div>
+        <div><label>Отчество</label><input id="prMiddle" autocomplete="additional-name" /></div>
+        <div><label>Город</label><input id="prCity" placeholder="Москва" /></div>
+        <div><label>Пол *</label>
+          <select id="prGender"><option value="">—</option><option>женщина</option><option>мужчина</option></select></div>
+        <div><label>Дата рождения *</label><input id="prBirth" type="date" /></div>
+      </div>
+      <p class="summary" id="profBonus" style="margin-top:8px"></p>
+      <button class="ghost" id="profSave" style="margin-top:10px">Сохранить профиль</button>
+    </div>
+
     <div class="card">
       <h2>Сканы <a class="sec-link" href="/skin" style="float:right">новый скан →</a></h2>
       <div id="packs" class="hidden" style="margin-bottom:8px"></div>

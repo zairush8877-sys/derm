@@ -65,6 +65,18 @@
         <input id="phone" inputmode="numeric" autocomplete="tel" placeholder="___-___-__-__" />
       </div>
 
+      <div id="captchaBox" class="hidden" style="margin:0 0 18px">
+        <div style="display:flex;align-items:center;gap:12px">
+          <img id="captchaImg" alt="код с картинки" style="border-radius:10px;height:56px" />
+          <button type="button" id="captchaRefresh" title="Другая картинка"
+            style="background:none;border:none;font-size:22px;cursor:pointer">↻</button>
+        </div>
+        <div class="phone-row" style="margin:6px 0 0">
+          <input id="captchaAnswer" placeholder="код с картинки" autocomplete="off"
+            style="letter-spacing:4px;text-transform:uppercase" maxlength="5" />
+        </div>
+      </div>
+
       <button class="cta" id="getCode">Получить код</button>
 
       <p class="consent">При входе и регистрации я даю <a href="/legal#consent" target="_blank">согласие</a>
@@ -87,13 +99,14 @@
     <div id="stepCode" class="hidden">
       <button class="back" id="backToPhone">←</button>
       <h1 class="auth-title">введите код</h1>
-      <p class="summary" style="font-size:14.5px">Отправили код на <strong id="sentTo"></strong>.</p>
+      <p class="summary" style="font-size:14.5px" id="codeHint">Отправили код на <strong id="sentTo"></strong>.</p>
       <div class="demo-code hidden" id="demoCode"></div>
       <div class="code-row" style="margin:18px 0 26px">
         <input id="code" inputmode="numeric" maxlength="4" placeholder="····" />
       </div>
       <button class="cta" id="verify">Войти</button>
-      <button class="alt-link" id="resend">Отправить код ещё раз</button>
+      <button class="alt-link" id="resend">Позвонить ещё раз</button>
+      <button class="alt-link" id="resendSms">Не получается принять звонок — пришлите SMS</button>
     </div>
 
     <!-- Запасной вход по паролю (для тех, кто регистрировался раньше) -->
@@ -130,7 +143,21 @@
 
     const fullPhone = () => "+7" + el("phone").value.replace(/\D/g, "");
 
-    async function getCode() {
+    // Капча: подгружается, если сервер требует (на проде).
+    let captchaToken = "";
+    async function loadCaptcha() {
+      try {
+        const res = await fetch("/api/captcha/new");
+        const data = await res.json();
+        if (!data.required) { el("captchaBox").classList.add("hidden"); captchaToken = ""; return; }
+        captchaToken = data.token;
+        el("captchaImg").src = data.image;
+        el("captchaAnswer").value = "";
+        el("captchaBox").classList.remove("hidden");
+      } catch { /* нет сети — покажем ошибку при отправке */ }
+    }
+
+    async function getCode(channel) {
       err("");
       const digits = el("phone").value.replace(/\D/g, "");
       if (digits.length !== 10) { err("Введите 10 цифр номера"); return; }
@@ -138,12 +165,27 @@
       try {
         const fd = new FormData();
         fd.append("phone", fullPhone());
+        fd.append("channel", channel === "sms" ? "sms" : "call");
+        if (captchaToken) {
+          fd.append("captcha_token", captchaToken);
+          fd.append("captcha_answer", el("captchaAnswer").value.trim());
+        }
         const res = await fetch("/api/auth/otp/request", { method: "POST", body: fd });
         const data = await res.json();
-        if (!res.ok) { err(data.detail || "Не удалось отправить код"); return; }
+        if (!res.ok) {
+          err(data.detail || "Не удалось отправить код");
+          loadCaptcha(); // картинка одноразовая — показываем новую
+          return;
+        }
         el("sentTo").textContent = "+7 " + el("phone").value;
+        if (data.channel === "call") {
+          el("codeHint").innerHTML = "Звоним на <strong>+7 " + el("phone").value +
+            "</strong>. Отвечать не нужно — введите <strong>последние 4 цифры номера</strong>, с которого поступил звонок.";
+        } else {
+          el("codeHint").innerHTML = "Отправили код на <strong>+7 " + el("phone").value + "</strong>.";
+        }
         if (data.demo_code) {
-          el("demoCode").textContent = "Демо-режим (SMS ещё не подключены) — ваш код: " + data.demo_code;
+          el("demoCode").textContent = "Демо-режим (звонки и SMS ещё не подключены) — ваш код: " + data.demo_code;
           el("demoCode").classList.remove("hidden");
         } else {
           el("demoCode").classList.add("hidden");
@@ -151,6 +193,7 @@
         el("code").value = "";
         show("stepCode");
         el("code").focus();
+        loadCaptcha(); // на случай возврата к шагу телефона
       } catch { err("Сеть недоступна"); }
       finally { el("getCode").disabled = false; }
     }
@@ -181,9 +224,14 @@
       finish(data);
     }
 
-    function finish(data) {
+    async function finish(data) {
       localStorage.setItem("aura_token", data.token);
       localStorage.setItem("aura_name", data.user.name || data.user.phone);
+      try {
+        const res = await fetch("/api/auth/profile", { headers: { Authorization: "Bearer " + data.token } });
+        const p = await res.json();
+        if (res.ok && !p.complete) { window.location = "/account#profile"; return; }
+      } catch { /* не критично */ }
       window.location = "/";
     }
 
@@ -199,14 +247,17 @@
         .catch(() => { localStorage.removeItem("aura_token"); localStorage.removeItem("aura_name"); });
     }
 
-    el("getCode").addEventListener("click", getCode);
+    el("getCode").addEventListener("click", () => getCode("call"));
     el("verify").addEventListener("click", verify);
-    el("resend").addEventListener("click", getCode);
+    el("resend").addEventListener("click", () => getCode("call"));
+    el("resendSms").addEventListener("click", () => getCode("sms"));
+    el("captchaRefresh").addEventListener("click", loadCaptcha);
+    loadCaptcha();
     el("backToPhone").addEventListener("click", () => { err(""); show("stepPhone"); });
     el("toPassword").addEventListener("click", () => { err(""); show("stepPassword"); });
     el("backFromPassword").addEventListener("click", () => { err(""); show("stepPhone"); });
     el("pLogin").addEventListener("click", passwordLogin);
-    el("phone").addEventListener("keydown", (e) => { if (e.key === "Enter") getCode(); });
+    el("phone").addEventListener("keydown", (e) => { if (e.key === "Enter") getCode("call"); });
     el("code").addEventListener("keydown", (e) => { if (e.key === "Enter") verify(); });
     el("logout").addEventListener("click", () => {
       localStorage.removeItem("aura_token");
