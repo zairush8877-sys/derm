@@ -21,6 +21,9 @@ def real_provider(monkeypatch):
     get_settings.cache_clear()
     sent: list[tuple[str, str]] = []
     monkeypatch.setattr(sms, "send_sms", lambda phone, text: sent.append((phone, text)))
+    # Канал по умолчанию — звонок; в этих тестах проверяем SMS-путь и троттлинг,
+    # поэтому звонок тоже перехватываем (код 1234, как «последние 4 цифры»).
+    monkeypatch.setattr(sms, "send_call_code", lambda phone: "1234")
     yield sent
     get_settings.cache_clear()
 
@@ -33,7 +36,7 @@ def _row(phone: str):
 # --- Реальная отправка ---
 
 def test_real_provider_sends_sms_and_hides_code(real_provider):
-    res = client.post("/api/auth/otp/request", data={"phone": PHONE})
+    res = client.post("/api/auth/otp/request", data={"phone": PHONE, "channel": "sms"})
     assert res.status_code == 200
     body = res.json()
     assert body["sent"] is True and "demo_code" not in body
@@ -50,7 +53,9 @@ def test_sms_failure_returns_clear_error(monkeypatch):
         raise sms.SmsError("нет денег на балансе")
 
     monkeypatch.setattr(sms, "send_sms", boom)
-    res = client.post("/api/auth/otp/request", data={"phone": "+79115550002"})
+    res = client.post(
+        "/api/auth/otp/request", data={"phone": "+79115550002", "channel": "sms"}
+    )
     assert res.status_code == 400
     assert "SMS" in res.json()["detail"]
 
@@ -64,18 +69,20 @@ def test_demo_mode_still_returns_code():
 # --- Троттлинг (только при реальном провайдере) ---
 
 def test_resend_cooldown_60s(real_provider):
-    assert client.post("/api/auth/otp/request", data={"phone": PHONE}).status_code == 200
-    res = client.post("/api/auth/otp/request", data={"phone": PHONE})
+    data = {"phone": PHONE, "channel": "sms"}
+    assert client.post("/api/auth/otp/request", data=data).status_code == 200
+    res = client.post("/api/auth/otp/request", data=data)
     assert res.status_code == 400 and "сек" in res.json()["detail"]
     assert len(real_provider) == 1  # вторая SMS не ушла
 
 
 def test_resend_allowed_after_cooldown(real_provider):
-    client.post("/api/auth/otp/request", data={"phone": PHONE})
+    data = {"phone": PHONE, "channel": "sms"}
+    client.post("/api/auth/otp/request", data=data)
     past = (datetime.now(timezone.utc) - timedelta(seconds=90)).isoformat()
     with store.connect() as conn:
         conn.execute("UPDATE otp_codes SET last_sent = ? WHERE phone = ?", (past, PHONE))
-    assert client.post("/api/auth/otp/request", data={"phone": PHONE}).status_code == 200
+    assert client.post("/api/auth/otp/request", data=data).status_code == 200
     assert len(real_provider) == 2
 
 

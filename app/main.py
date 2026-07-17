@@ -31,6 +31,7 @@ from app.auth.deps import token_user_id
 from app.automation.scheduler import start_background_scheduler
 from app.billing import service as credits
 from app.billing.api import router as billing_router
+from app.captcha.api import router as captcha_router
 from app.config import get_settings
 from app.db import store
 from app.food.api import router as food_router
@@ -90,6 +91,7 @@ app.add_middleware(
 app.include_router(auth_router)
 app.include_router(api_v1)
 app.include_router(billing_router)
+app.include_router(captcha_router)
 app.include_router(shop_router)
 app.include_router(food_router)
 app.include_router(lab_router)
