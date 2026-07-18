@@ -743,3 +743,26 @@ body.home footer { max-width: none; padding: 46px 20px 60px; }
 .lab-booking { padding: 12px 0; border-bottom: 1px solid var(--line); }
 .lab-booking:last-child { border-bottom: none; }
 .lab-booking button { margin-top: 6px; }
+
+/* ===== Линейные иконки шапки и полировка формы профиля ===== */
+.logobar .icons { align-items: center; }
+.logobar .icons a { display: inline-flex; opacity: .85; transition: opacity .2s; }
+.logobar .icons a:hover { opacity: 1; }
+.logobar .icons svg { width: 21px; height: 21px; display: block; }
+.fab svg { width: 24px; height: 24px; display: block; }
+
+#profile h2 { display: flex; align-items: center; justify-content: space-between;
+  flex-wrap: wrap; gap: 6px 12px; }
+#profile h2 .badge { float: none; font-weight: 500; letter-spacing: .02em; }
+#profile .quiz { grid-template-columns: 1fr 1fr; gap: 20px 26px; margin-top: 18px; }
+#profile .quiz input, #profile .quiz select {
+  border: none; border-bottom: 1.5px solid var(--line); border-radius: 0;
+  background: transparent; padding: 10px 2px; font-size: 15px; width: 100%;
+  transition: border-color .2s; }
+#profile .quiz input:focus, #profile .quiz select:focus {
+  outline: none; border-color: var(--ink); }
+#profile .quiz label { margin-bottom: 2px; }
+#profile #profBonus { font-size: 13px; }
+#profile #profSave { width: 100%; margin-top: 16px; padding: 14px;
+  letter-spacing: .08em; text-transform: uppercase; font-size: 13px; }
+@media (max-width: 640px) { #profile .quiz { grid-template-columns: 1fr; gap: 16px; } }
