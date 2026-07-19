@@ -83,14 +83,27 @@ async def telegram_webhook(secret: str, request: Request) -> JSONResponse:
     if secret != service.webhook_secret():
         raise HTTPException(status_code=403, detail="Неверный секрет")
 
+    # Fail-closed: без заданного ID владельца никого не пускаем к каталогу.
+    if not settings.telegram_chat_id:
+        logger.warning("TELEGRAM_CHAT_ID не задан — все апдейты отклоняются.")
+        return JSONResponse({"ok": True})
+
     update = await request.json()
-    msg = update.get("message") or update.get("edited_message") or {}
+
+    # Идемпотентность: Telegram может переслать один апдейт повторно, а правки
+    # приходят как edited_message — не даём задвоить товары. Обрабатываем
+    # каждый update_id один раз и только новые сообщения (не редактирования).
+    update_id = update.get("update_id")
+    if update_id is not None and service.already_seen(update_id):
+        return JSONResponse({"ok": True})
+
+    msg = update.get("message") or {}
     chat_id = str(msg.get("chat", {}).get("id", ""))
     if not chat_id:
         return JSONResponse({"ok": True})
 
     # Только владелец: чужим отвечаем отказом и ничего не делаем.
-    if settings.telegram_chat_id and chat_id != str(settings.telegram_chat_id):
+    if chat_id != str(settings.telegram_chat_id):
         send_reply(chat_id, "Это служебный бот Aura — доступ только у владельца.")
         return JSONResponse({"ok": True})
 

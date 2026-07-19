@@ -18,6 +18,7 @@ PHONE = "+79115550001"
 def real_provider(monkeypatch):
     """Включить «настоящий» SMS.ru и перехватывать отправки в список."""
     monkeypatch.setenv("SMS_API_KEY", "test-api-id")
+    monkeypatch.setenv("DERM_CAPTCHA", "0")  # тестируем троттлинг, не капчу
     get_settings.cache_clear()
     sent: list[tuple[str, str]] = []
     monkeypatch.setattr(sms, "send_sms", lambda phone, text: sent.append((phone, text)))
@@ -47,6 +48,7 @@ def test_real_provider_sends_sms_and_hides_code(real_provider):
 
 def test_sms_failure_returns_clear_error(monkeypatch):
     monkeypatch.setenv("SMS_API_KEY", "test-api-id")
+    monkeypatch.setenv("DERM_CAPTCHA", "0")
     get_settings.cache_clear()
 
     def boom(phone, text):

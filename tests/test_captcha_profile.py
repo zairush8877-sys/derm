@@ -53,6 +53,7 @@ def test_otp_requires_captcha_when_enabled(monkeypatch):
 
 
 def test_otp_call_channel(monkeypatch):
+    monkeypatch.setenv("DERM_CAPTCHA", "0")
     # Реальный режим со звонком: провайдер отдаёт код = последние 4 цифры номера.
     from app.auth import sms
 
@@ -70,6 +71,7 @@ def test_otp_call_channel(monkeypatch):
 
 
 def test_otp_sms_fallback(monkeypatch):
+    monkeypatch.setenv("DERM_CAPTCHA", "0")
     from app.auth import sms
 
     sent: dict = {}
@@ -118,3 +120,12 @@ def test_profile_validation():
     assert res.status_code == 422
     res = client.post("/api/auth/profile", headers=headers, data={"gender": "другое"})
     assert res.status_code == 422
+
+
+def test_captcha_required_with_real_sms(monkeypatch):
+    # Реальный SMS настроен, ключа AI нет (mock) — капча всё равно нужна,
+    # иначе боты жгли бы платные звонки/SMS.
+    from app.auth import sms
+
+    monkeypatch.setattr(sms, "provider_configured", lambda: True)
+    assert captcha.required() is True

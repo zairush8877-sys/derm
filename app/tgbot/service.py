@@ -114,6 +114,28 @@ def add_products(items: list[dict]) -> list[dict]:
     return added
 
 
+def already_seen(update_id: int) -> bool:
+    """Идемпотентность вебхука: True, если этот апдейт уже обработан."""
+    from datetime import datetime, timezone
+
+    with store.connect() as conn:
+        row = conn.execute(
+            "SELECT 1 FROM tg_seen WHERE update_id = ?", (update_id,)
+        ).fetchone()
+        if row is not None:
+            return True
+        conn.execute(
+            "INSERT INTO tg_seen (update_id, created_at) VALUES (?, ?)",
+            (update_id, datetime.now(timezone.utc).isoformat()),
+        )
+        # Уборка старых записей (храним последние ~1000).
+        conn.execute(
+            "DELETE FROM tg_seen WHERE update_id NOT IN "
+            "(SELECT update_id FROM tg_seen ORDER BY update_id DESC LIMIT 1000)"
+        )
+    return False
+
+
 def remove_product(product_id: str) -> bool:
     """Удалить «живой» товар (только добавленные ботом/админкой, id tg-*)."""
     with store.connect() as conn:

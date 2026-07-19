@@ -38,7 +38,14 @@ def required() -> bool:
         return True
     if flag in {"0", "false", "no"}:
         return False
-    return not get_settings().mock_mode
+    # auto: включаем на проде (реальный AI) ИЛИ когда настроен реальный
+    # SMS-провайдер — иначе бот мог бы жечь платные звонки/SMS, обходя капчу
+    # (мок-режим AI к стоимости входов отношения не имеет).
+    if not get_settings().mock_mode:
+        return True
+    from app.auth import sms
+
+    return sms.provider_configured()
 
 
 def _sign(nonce: str, ts: int, code: str) -> str:

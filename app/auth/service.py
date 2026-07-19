@@ -184,6 +184,14 @@ def request_otp(phone: str, channel: str = "call") -> dict:
     real = sms.provider_configured()
     use_call = real and channel != "sms" and sms.call_code_supported()
 
+    # Свой код нужен заранее для SMS/демо и как временный для звонка —
+    # чтобы зарезервировать слот троттлинга ДО внешнего вызова.
+    code = f"{secrets.randbelow(10000):04d}"
+    expires = (now + timedelta(seconds=OTP_TTL_SECONDS)).isoformat()
+
+    # Атомарно: проверяем лимиты и сразу записываем резерв (last_sent/счётчики)
+    # в одной транзакции. Конкурентный запрос по тому же номеру уже увидит
+    # свежий last_sent и попадёт в кулдаун — без двойных платных отправок.
     with store.connect() as conn:
         sent_count, window_start = 0, None
         if real:  # троттлинг только для реальных отправок — в демо коды бесплатны
@@ -192,24 +200,6 @@ def request_otp(phone: str, channel: str = "call") -> dict:
                 (phone,),
             ).fetchone()
             sent_count, window_start = _check_sms_throttle(row, now)
-
-    # Код: при звонке его выдаёт провайдер (последние 4 цифры номера),
-    # для SMS и демо генерируем сами.
-    if use_call:
-        try:
-            code = sms.send_call_code(phone)
-        except sms.SmsError as exc:
-            import logging
-
-            logging.getLogger("derm.auth").warning("Сбой звонка с кодом: %s", exc)
-            raise AuthError(
-                "Не получилось позвонить — попробуйте ещё раз или запросите SMS."
-            )
-    else:
-        code = f"{secrets.randbelow(10000):04d}"
-
-    with store.connect() as conn:
-        expires = (now + timedelta(seconds=OTP_TTL_SECONDS)).isoformat()
         conn.execute(
             "INSERT INTO otp_codes (phone, code, expires, attempts, last_sent, sent_count, window_start) "
             "VALUES (?, ?, ?, 0, ?, ?, ?) "
@@ -221,6 +211,18 @@ def request_otp(phone: str, channel: str = "call") -> dict:
         )
 
     if use_call:
+        # Код звонка выдаёт провайдер (последние 4 цифры номера) — обновляем.
+        try:
+            code = sms.send_call_code(phone)
+        except sms.SmsError as exc:
+            import logging
+
+            logging.getLogger("derm.auth").warning("Сбой звонка с кодом: %s", exc)
+            raise AuthError(
+                "Не получилось позвонить — попробуйте ещё раз или запросите SMS."
+            )
+        with store.connect() as conn:
+            conn.execute("UPDATE otp_codes SET code = ? WHERE phone = ?", (code, phone))
         return {"sent": True, "phone": phone, "channel": "call"}
 
     if real:

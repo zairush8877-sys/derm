@@ -91,3 +91,38 @@ def test_shop_api_shows_custom_product(bot):
     data = res.json()
     items = data.get("items") or data.get("products") or []
     assert any("шейкер" in (i.get("name") or "").lower() for i in items)
+
+
+def test_fail_closed_without_owner_id(monkeypatch):
+    # Токен есть, ID владельца НЕ задан → никто не должен управлять каталогом.
+    monkeypatch.setenv("TELEGRAM_BOT_TOKEN", "test-bot-token")
+    monkeypatch.delenv("TELEGRAM_CHAT_ID", raising=False)
+    get_settings.cache_clear()
+    before = len(service.list_custom())
+    res = client.post(
+        f"/api/telegram/webhook/{service.webhook_secret()}",
+        json={"update_id": 1, "message": {"chat": {"id": 555}, "text": "X; Y; 100"}},
+    )
+    assert res.status_code == 200
+    assert len(service.list_custom()) == before  # ничего не добавлено
+    get_settings.cache_clear()
+
+
+def test_update_deduplicated(bot):
+    payload = {"update_id": 777, "message": {"chat": {"id": 111222333},
+               "text": "Aura; Дедуп-товар; 500; гаджеты"}}
+    _hook(payload)
+    _hook(payload)  # повтор того же update_id
+    found = [p for p in catalog.search("дедуп-товар")]
+    assert len(found) == 1  # не задвоился
+
+
+def test_edited_message_not_added(bot):
+    # Правка сообщения не должна добавлять новый товар.
+    before = len(service.list_custom())
+    client.post(
+        f"/api/telegram/webhook/{service.webhook_secret()}",
+        json={"update_id": 888, "edited_message": {"chat": {"id": 111222333},
+              "text": "Aura; Из правки; 900; гаджеты"}},
+    )
+    assert len(service.list_custom()) == before

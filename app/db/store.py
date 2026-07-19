@@ -157,6 +157,12 @@ CREATE TABLE IF NOT EXISTS captcha_used (
     created_at INTEGER NOT NULL
 );
 
+-- Обработанные апдейты Telegram (идемпотентность вебхука — без задвоений).
+CREATE TABLE IF NOT EXISTS tg_seen (
+    update_id INTEGER PRIMARY KEY,
+    created_at TEXT NOT NULL
+);
+
 -- История диалога владельца с Telegram-Клодом (контекст между сообщениями).
 CREATE TABLE IF NOT EXISTS tg_history (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
