@@ -43,6 +43,7 @@ from app.report.pdf import render_report
 from app.shop import catalog
 from app.shop.api import router as shop_router
 from app.subscription.api import router as subscription_router
+from app.tgbot.api import router as tgbot_router
 from app.tracker import service as tracker
 
 _STATIC = Path(__file__).parent / "static"
@@ -99,6 +100,7 @@ app.include_router(subscription_router)
 app.include_router(assistant_router)
 app.include_router(notifications_router)
 app.include_router(admin_router)
+app.include_router(tgbot_router)
 
 
 @app.get("/health", tags=["служебное"])

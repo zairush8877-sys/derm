@@ -530,10 +530,40 @@ for _p in _CATALOG:
 _BY_ID: dict[str, Product] = {p.id: p for p in _CATALOG}
 
 
+def _custom_products() -> list[Product]:
+    """«Живые» товары из БД (добавлены владельцем через Telegram-бота/админку)."""
+    import json as _json
+
+    from app.db import store
+
+    try:
+        with store.connect() as conn:
+            rows = conn.execute(
+                "SELECT * FROM products ORDER BY created_at DESC"
+            ).fetchall()
+    except Exception:  # таблицы ещё нет (старая БД до init) — каталог из кода
+        return []
+    items: list[Product] = []
+    for r in rows:
+        try:
+            items.append(Product(
+                id=r["id"], name=r["name"], brand=r["brand"],
+                category=Category(r["category"]), price_rub=r["price_rub"],
+                old_price_rub=r["old_price_rub"], description=r["description"],
+                tags=_json.loads(r["tags_json"] or "[]"),
+                in_stock=bool(r["in_stock"]), is_service=bool(r["is_service"]),
+                hit=bool(r["hit"]), image=r["image"],
+            ))
+        except Exception:
+            continue  # битую строку пропускаем, каталог не падает
+    return items
+
+
 def all_products(category: Category | None = None) -> list[Product]:
+    merged = _custom_products() + list(_CATALOG)
     if category is None:
-        return list(_CATALOG)
-    return [p for p in _CATALOG if p.category == category]
+        return merged
+    return [p for p in merged if p.category == category]
 
 
 def search(query: str, category: Category | None = None) -> list[Product]:
@@ -551,7 +581,10 @@ def search(query: str, category: Category | None = None) -> list[Product]:
 
 
 def get_product(product_id: str) -> Product | None:
-    return _BY_ID.get(product_id)
+    found = _BY_ID.get(product_id)
+    if found is not None:
+        return found
+    return next((p for p in _custom_products() if p.id == product_id), None)
 
 
 # Приоритетные (профессиональные) бренды в рекомендациях после скана.
