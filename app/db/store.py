@@ -156,6 +156,34 @@ CREATE TABLE IF NOT EXISTS captcha_used (
     nonce TEXT PRIMARY KEY,
     created_at INTEGER NOT NULL
 );
+
+-- История диалога владельца с Telegram-Клодом (контекст между сообщениями).
+CREATE TABLE IF NOT EXISTS tg_history (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    chat_id TEXT NOT NULL,
+    role TEXT NOT NULL,
+    content TEXT NOT NULL,
+    created_at TEXT NOT NULL
+);
+CREATE INDEX IF NOT EXISTS idx_tg_history ON tg_history(chat_id, id);
+
+-- «Живые» товары, добавленные владельцем (Telegram-бот/админка) —
+-- показываются в каталоге вместе с базовыми из кода.
+CREATE TABLE IF NOT EXISTS products (
+    id TEXT PRIMARY KEY,
+    name TEXT NOT NULL,
+    brand TEXT NOT NULL DEFAULT 'Aura',
+    category TEXT NOT NULL,
+    price_rub INTEGER NOT NULL,
+    old_price_rub INTEGER,
+    description TEXT NOT NULL DEFAULT '',
+    tags_json TEXT NOT NULL DEFAULT '[]',
+    in_stock INTEGER NOT NULL DEFAULT 1,
+    is_service INTEGER NOT NULL DEFAULT 0,
+    hit INTEGER NOT NULL DEFAULT 0,
+    image TEXT,
+    created_at TEXT NOT NULL
+);
 """
 
 
